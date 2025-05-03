@@ -1,17 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const Users = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const [users, setUsers] = useState(
-    Array.from({ length: 20 }, (_, i) => ({
-      id: i + 1,
-      username: `user${i + 1}`,
-      status: i % 2 === 0, // true = Active, false = Inactive
-    }))
-  );
+  const [users, setUsers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
@@ -20,6 +18,8 @@ const Users = () => {
     mobile: "",
     role: "",
   });
+
+  const token = localStorage.getItem("token");
 
   const filtered = users.filter((user) => user.username.toLowerCase().includes(search.toLowerCase()));
 
@@ -34,7 +34,32 @@ const Users = () => {
     setUsers((prev) => prev.map((user) => (user.id === id ? { ...user, status: !user.status } : user)));
   };
 
-  const handleModalOpen = () => setIsModalOpen(true);
+  const handleModalOpen = (user?: any) => {
+    if (user) {
+      setNewUser({
+        name: user.username,
+        email: user.email || "",
+        password: user.password || "",
+        designation: user.designation ?? "",
+        mobile: user.mobile ?? "",
+        role: user.role ?? "",
+      });
+      setIsEditing(true);
+      setEditingId(user.id);
+    } else {
+      setNewUser({
+        name: "",
+        email: "",
+        password: "",
+        designation: "",
+        mobile: "",
+        role: "",
+      });
+      setIsEditing(false);
+      setEditingId(null);
+    }
+    setIsModalOpen(true);
+  };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
@@ -46,30 +71,85 @@ const Users = () => {
       mobile: "",
       role: "",
     });
+    setIsEditing(false);
+    setEditingId(null);
   };
 
-  const handleCreateUser = () => {
-    // Ensure that all fields are filled
+  const handleCreateOrUpdateUser = () => {
     if (Object.values(newUser).some((field) => !field.trim())) {
       alert("Please fill in all fields.");
       return;
     }
 
-    // Add new user to the list (make sure to include the username and status)
-    const newUserWithDefaults = {
-      ...newUser,
-      id: users.length + 1, // Assign an id
-      username: newUser.name, // Use name as the username (or create a separate username field)
-      status: true, // Set status to true by default (you can adjust this as needed)
+    if (isEditing && editingId !== null) {
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === editingId
+            ? {
+                ...user,
+                username: newUser.name,
+                email: newUser.email,
+                designation: newUser.designation,
+                mobile: newUser.mobile,
+                role: newUser.role,
+              }
+            : user
+        )
+      );
+    } else {
+      const newUserWithDefaults = {
+        ...newUser,
+        id: users.length + 1,
+        username: newUser.name,
+        status: true,
+      };
+      setUsers([...users, newUserWithDefaults]);
+    }
+
+    handleModalClose();
+  };
+
+  const handleDeleteUser = (id: number) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      setUsers((prev) => prev.filter((user) => user.id !== id));
+    }
+  };
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get(`https://nicoindustrial.com/api/user/list`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const userList = res.data?.data?.list || [];
+
+        const formattedUsers = userList.map((user: any, index: number) => ({
+          id: index + 1,
+          username: user.name,
+          email: user.email,
+          designation: user.department,
+          mobile: user.phone,
+          role: user.role,
+          password: user.password || "",
+          status: user.status,
+        }));
+
+        setUsers(formattedUsers);
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      }
     };
 
-    setUsers([...users, newUserWithDefaults]); // Add the new user to the users list
-    handleModalClose(); // Close the modal after creating the user
-  };
+    if (token) {
+      fetchUsers();
+    }
+  }, [token]);
 
   return (
     <div className="p-4">
-      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <input
           type="text"
@@ -81,15 +161,14 @@ const Users = () => {
           }}
           className="border p-2 rounded w-full max-w-xs"
         />
-        <button onClick={handleModalOpen} className="ml-4 bg-gray-100 text-black border-1 border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400">
+        <button onClick={() => handleModalOpen()} className="ml-4 bg-gray-100 text-black border-1 border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400">
           Create User
         </button>
       </div>
 
-      {/* Table */}
       <table className="min-w-full border border-gray-200 text-left">
         <thead className="bg-gray-300">
-          <tr>
+          <tr className="text-center">
             <th className="border p-2">Sr No</th>
             <th className="border p-2">Username</th>
             <th className="border p-2">Status</th>
@@ -99,19 +178,23 @@ const Users = () => {
         <tbody>
           {paginated.length ? (
             paginated.map((user, index) => (
-              <tr key={user.id}>
+              <tr className="text-center" key={user.id}>
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{user.username}</td>
-                <td className="p-2">
+                <td className="p-2 text-center">
                   <button
                     onClick={() => toggleStatus(user.id)}
-                    className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out ${user.status ? "bg-green-500" : "bg-gray-300 border-1 border-gray-400"}`}>
+                    className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out mx-auto ${user.status ? "bg-green-500" : "bg-gray-300 border-1 border-gray-400"}`}>
                     <div className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out ${user.status ? "translate-x-7" : "translate-x-0"}`}></div>
                   </button>
                 </td>
                 <td className="border p-2">
-                  <button className="text-blue-600 hover:underline mr-2">Edit</button>
-                  <button className="text-red-600 hover:underline">Delete</button>
+                  <button onClick={() => handleModalOpen(user)} className="text-blue-600 hover:underline mr-2">
+                    Edit
+                  </button>
+                  <button onClick={() => handleDeleteUser(user.id)} className="text-red-600 hover:underline">
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))
@@ -153,51 +236,38 @@ const Users = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-[#00000071] flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-md w-1/3">
-            <h2 className="text-lg font-bold mb-4">Create User</h2>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Name</label>
-              <input type="text" value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} className="border p-2 rounded w-full mt-2" placeholder="Enter name" />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input type="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} className="border p-2 rounded w-full mt-2" placeholder="Enter email" />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <input
-                type="password"
-                value={newUser.password}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                className="border p-2 rounded w-full mt-2"
-                placeholder="Enter password"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Designation</label>
-              <input
-                type="text"
-                value={newUser.designation}
-                onChange={(e) => setNewUser({ ...newUser, designation: e.target.value })}
-                className="border p-2 rounded w-full mt-2"
-                placeholder="Enter designation"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Mobile No</label>
-              <input type="text" value={newUser.mobile} onChange={(e) => setNewUser({ ...newUser, mobile: e.target.value })} className="border p-2 rounded w-full mt-2" placeholder="Enter mobile no" />
-            </div>
+            <h2 className="text-lg font-bold mb-4">{isEditing ? "Edit User" : "Create User"}</h2>
+            {["name", "email", "password", "designation", "mobile"].map((field) => (
+              <div key={field} className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 capitalize">{field}</label>
+                <input
+                  type={field === "password" ? "password" : "text"}
+                  value={(newUser as any)[field]}
+                  onChange={(e) => setNewUser({ ...newUser, [field]: e.target.value })}
+                  className="border p-2 rounded w-full mt-2"
+                  placeholder={`Enter ${field}`}
+                />
+              </div>
+            ))}
+            {/* Role Dropdown */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Role</label>
-              <input type="text" value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })} className="border p-2 rounded w-full mt-2" placeholder="Enter role" />
+              <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })} className="border p-2 rounded w-full mt-2">
+                <option value="">Select Role</option>
+                <option value="user">User</option>
+                <option value="sales">Sales</option>
+                <option value="admin">Admin</option>
+                <option value="accounts">Accounts</option>
+              </select>
             </div>
             <div className="flex justify-end gap-4">
               <button onClick={handleModalClose} className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400">
                 Cancel
               </button>
-              <button onClick={handleCreateUser} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                Create
+              <button onClick={handleCreateOrUpdateUser} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                {isEditing ? "Update" : "Create"}
               </button>
             </div>
           </div>

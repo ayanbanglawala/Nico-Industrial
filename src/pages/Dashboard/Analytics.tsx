@@ -38,14 +38,15 @@ const Analytics = () => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCategory(e.target.value);
   };
 
   return (
     <div className="p-6">
       {/* Back Arrow Button */}
-      <button onClick={()=> navigate('/')} className="flex items-center text-xl text-[#2E073F] mb-6 hover:text-[gray]">
+      <button onClick={() => navigate("/")} className="flex items-center text-xl text-[#2E073F] mb-6 hover:text-[gray]">
         <FaArrowLeft size={20} /> <span className="ml-2">Back</span>
       </button>
 
