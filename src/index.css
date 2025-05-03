@@ -3,6 +3,15 @@ layer(base);
 
 @import "tailwindcss";
 
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {

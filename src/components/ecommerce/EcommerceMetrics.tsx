@@ -8,6 +8,7 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 import { LuAlarmClock } from "react-icons/lu";
 import { MdOutlineDonutSmall } from "react-icons/md";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 export default function EcommerceMetrics() {
   const dummyFollowUps = Array.from({ length: 22 }, (_, i) => ({
@@ -29,13 +30,16 @@ export default function EcommerceMetrics() {
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
-  
+
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 md:gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 md:gap-4">
         {/* <!-- Metric Item Start --> */}
-        <div className="flex flex-row items-center justify-between transform duration-150 cursor-pointer group rounded-2xl border border-gray-600 bg-[#bae7d6] p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
+        <div
+          onClick={() => navigate("/inquiry")}
+          className="flex flex-row items-center justify-between cursor-pointer rounded-2xl hover:scale-105 transform duration-200 border border-gray-600 bg-green-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
           {/* Left Icon */}
           <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
             <LuMessageSquareText className="text-white size-6 dark:text-white/90" />
@@ -47,7 +51,9 @@ export default function EcommerceMetrics() {
             <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">100</h4>
           </div>
         </div>
-        <div className="flex flex-row items-center justify-between transform duration-150 cursor-pointer group rounded-2xl border border-gray-600 bg-[#DEB5DA] p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
+        <div
+          onClick={() => navigate("/inquiry")}
+          className="flex flex-row items-center justify-between cursor-pointer rounded-2xl hover:scale-105 transform duration-200 border border-gray-600 bg-pink-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
           {/* Left Icon */}
           <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
             <IoIosMail className="text-white size-6 dark:text-white/90" />
@@ -59,7 +65,9 @@ export default function EcommerceMetrics() {
             <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
           </div>
         </div>
-        <div className="flex flex-row items-center justify-between transform duration-150 cursor-pointer group rounded-2xl border border-gray-600 bg-[#9FEF9F] p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
+        <div
+          onClick={() => navigate("/inquiry")}
+          className="flex flex-row items-center justify-between cursor-pointer rounded-2xl hover:scale-105 transform duration-200 border border-gray-600 bg-emerald-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
           {/* Left Icon */}
           <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
             <FaRegCheckCircle className="text-white size-6 dark:text-white/90" />
@@ -71,7 +79,9 @@ export default function EcommerceMetrics() {
             <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
           </div>
         </div>
-        <div className="flex flex-row items-center justify-between transform duration-150 cursor-pointer group rounded-2xl border border-gray-600 bg-[#E1B3A8] p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
+        <div
+          onClick={() => navigate("/inquiry")}
+          className="flex flex-row items-center justify-between cursor-pointer rounded-2xl hover:scale-105 transform duration-200 border border-gray-600 bg-rose-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
           {/* Left Icon */}
           <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
             <IoMdPeople className="text-white size-6 dark:text-white/90" />
@@ -83,7 +93,9 @@ export default function EcommerceMetrics() {
             <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
           </div>
         </div>
-        <div className="flex flex-row items-center justify-between transform duration-150 cursor-pointer group rounded-2xl border border-gray-600 bg-[#F7E2A1] p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
+        <div
+          onClick={() => navigate("/inquiry")}
+          className="flex flex-row items-center justify-between transform duration-200 cursor-pointer group rounded-2xl border border-gray-600 hover:scale-105 bg-yellow-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
           {/* Left Icon */}
           <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
             <IoCloseCircleOutline className="text-white size-6 dark:text-white/90" />
@@ -95,7 +107,9 @@ export default function EcommerceMetrics() {
             <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
           </div>
         </div>
-        <div className="flex flex-row items-center justify-between transform duration-150 cursor-pointer group rounded-2xl border border-gray-600 bg-[#BFABFC] p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
+        <div
+          onClick={() => navigate("/inquiry")}
+          className="flex flex-row items-center justify-between transform duration-200 cursor-pointer group rounded-2xl border border-gray-600 hover:scale-105 bg-purple-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
           {/* Left Icon */}
           <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
             <LuAlarmClock className="text-white size-6 dark:text-white/90" />
@@ -107,7 +121,9 @@ export default function EcommerceMetrics() {
             <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
           </div>
         </div>
-        <div className="flex flex-row items-center justify-between transform duration-150 cursor-pointer group rounded-2xl border border-gray-600 bg-[#8CB7F3] p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
+        <div
+          onClick={() => navigate("/inquiry")}
+          className="flex flex-row items-center justify-between transform duration-200 cursor-pointer group rounded-2xl border border-gray-600 hover:scale-105 bg-blue-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
           {/* Left Icon */}
           <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
             <LuMessageSquareText className="text-white size-6 dark:text-white/90" />
@@ -119,7 +135,9 @@ export default function EcommerceMetrics() {
             <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
           </div>
         </div>
-        <div className="flex flex-row items-center justify-between transform duration-150 cursor-pointer group rounded-2xl border border-gray-600 bg-[#9FBCBA] p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
+        <div
+          onClick={() => navigate("/inquiry")}
+          className="flex flex-row items-center justify-between transform duration-200 cursor-pointer group rounded-2xl border border-gray-600 hover:scale-105 bg-cyan-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
           {/* Left Icon */}
           <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
             <LuMessageSquareText className="text-white size-6 dark:text-white/90" />
@@ -135,13 +153,15 @@ export default function EcommerceMetrics() {
           {/* Right Cards */}
           <div className="w-full md:max-w-sm flex flex-col gap-4">
             {/* Total Users */}
-            <div className="rounded-2xl border border-gray-600 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+            <div className="rounded-2xl border border-gray-600 hover:scale-105 transform duration-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Total Users</h2>
               <p className="text-3xl font-bold text-gray-800 dark:text-white">1,245</p>
             </div>
 
             {/* Analytics */}
-            <div className="rounded-2xl cursor-pointer border border-gray-600 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] flex items-center justify-between">
+            <div
+              onClick={() => navigate("/analytics")}
+              className="rounded-2xl cursor-pointer border border-gray-600 hover:scale-105 transform duration-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">Analytics</h2>
               </div>
@@ -153,7 +173,7 @@ export default function EcommerceMetrics() {
           <div className="w-full overflow-auto rounded-2xl border border-gray-600 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Follow Ups</h2>
             <table className="min-w-full text-sm text-left text-gray-800 dark:text-gray-200">
-              <thead className="text-xs uppercase text-gray-700 dark:text-gray-400 border-b dark:border-gray-700">
+              <thead className="text-xs uppercase text-gray-700 bg-gray-300 dark:text-gray-400 border-b dark:border-gray-700">
                 <tr>
                   <th className="px-4 py-2">SR</th>
                   <th className="px-4 py-2">Follow Up Name</th>
@@ -164,12 +184,12 @@ export default function EcommerceMetrics() {
               </thead>
               <tbody>
                 {currentItems.map((item) => (
-                  <tr key={item.id} className="border-b dark:border-gray-700">
+                  <tr key={item.id} className="dark:border-gray-700 hover:bg-gray-200 transform duration-150">
                     <td className="px-4 py-2">{item.id}</td>
                     <td className="px-4 py-2">{item.name}</td>
                     <td className="px-4 py-2">{item.description}</td>
                     <td className="px-4 py-2">{item.dueDate}</td>
-                    <td className="px-4 py-2 text-blue-600 dark:text-blue-400 cursor-pointer">View</td>
+                    <td className="px-4 py-2 text-blue-600 hover:scale-105 dark:text-blue-400 cursor-pointer">View</td>
                   </tr>
                 ))}
               </tbody>

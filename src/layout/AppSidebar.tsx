@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    path: "/dashboard",
+    path: "/",
   },
   {
     icon: <LuUsers />,
@@ -136,7 +136,7 @@ const AppSidebar: React.FC = () => {
           ) : (
             nav.path && (
               <Link to={nav.path} className={`menu-item hover:bg-gray-400 hover:text-white group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"}`}>
-                <span className={`menu-item-icon-size ${isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"} text-black`}>{nav.icon}</span>
+                <span className={`menu-item-icon-size ${isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"} text-gray-600`}>{nav.icon}</span>
                 {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
               </Link>
             )
@@ -172,19 +172,19 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-blue-100 dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 border-r-1 border-gray-600 dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50
         ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>
-      <div className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
+      <div className={`py-5 flex dark:text-white ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               {/* <img className="dark:hidden" src="/images/logo/logo.svg" alt="Logo" width={150} height={40} /> */}
               {/* <img className="hidden dark:block" src="/images/logo/logo-dark.svg" alt="Logo" width={150} height={40} /> */}
-              NICO INDUSTRIAL SOLUTION
+              <p>NICO INDUSTRIAL SOLUTION</p>
             </>
           ) : (
             // <img src="/images/logo/logo-icon.svg" alt="Logo" width={32} height={32} />
@@ -196,7 +196,7 @@ const AppSidebar: React.FC = () => {
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>
-              <h2 className={`mb-4 text-xs uppercase flex leading-[20px] text-black ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
+              <h2 className={`mb-4 text-xs dark:text-white uppercase flex leading-[20px] text-black ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
                 {isExpanded || isHovered || isMobileOpen ? "Menu" : <HorizontaLDots className="size-6" />}
               </h2>
               {renderMenuItems(navItems)}

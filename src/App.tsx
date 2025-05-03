@@ -18,16 +18,36 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
+import Inquiry from "./pages/Dashboard/Inquiry";
+import Product from "./pages/Dashboard/Product";
+import Consumer from "./pages/Dashboard/Consumer";
+import Consultant from "./pages/Dashboard/Consultant";
+import GeneralFollowUp from "./pages/Dashboard/GeneralFollowUp";
+import Brand from "./pages/Dashboard/Brand";
+import Users from "./pages/Dashboard/Users";
+import Role from "./pages/Dashboard/Role";
+import Analytics from "./pages/Dashboard/Analytics";
+import { ToastContainer } from "react-toastify";
 
 export default function App() {
   return (
     <>
+    <ToastContainer autoClose={3000} position="top-right" limit={1} hideProgressBar theme="colored" closeOnClick pauseOnHover draggable pauseOnFocusLoss draggablePercent={60} />
       <Router>
         <ScrollToTop />
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Home />} />
+            <Route index path="/inquiry" element={<Inquiry />} />
+            <Route index path="/product" element={<Product />} />
+            <Route index path="/consumer" element={<Consumer />} />
+            <Route index path="/consultant" element={<Consultant />} />
+            <Route index path="/general-follow-up" element={<GeneralFollowUp />} />
+            <Route index path="/brand" element={<Brand />} />
+            <Route index path="/role" element={<Role />} />
+            <Route index path="/users" element={<Users />} />
+            <Route index path="/analytics" element={<Analytics />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
