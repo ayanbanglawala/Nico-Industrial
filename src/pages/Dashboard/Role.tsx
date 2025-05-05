@@ -21,6 +21,8 @@ const RoleComponent = () => {
     handleDeleteRole,
     isSaving,
     itemsPerPage,
+    setItemsPerPage,
+    totalRecords,
   } = useRole();
 
   return (
@@ -87,21 +89,52 @@ const RoleComponent = () => {
       {/* Pagination */}
       <div className="flex justify-between items-center mt-6">
         <p className="text-sm text-gray-600">
-          Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, roles.length)} of {roles.length} results
+          Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalRecords)} of {totalRecords} results
         </p>
         <div className="flex gap-2">
           <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 border rounded hover:bg-gray-100">
             Previous
           </button>
-          {[...Array(totalPages).keys()].map((_, i) => (
-            <button key={i} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-indigo-600 text-white" : "hover:bg-gray-100"}`}>
-              {i + 1}
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            let pageNum;
+            if (totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (currentPage <= 3) {
+              pageNum = i + 1;
+            } else if (currentPage >= totalPages - 2) {
+              pageNum = totalPages - 4 + i;
+            } else {
+              pageNum = currentPage - 2 + i;
+            }
+
+            return (
+              <button key={pageNum} onClick={() => goToPage(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
+                {pageNum}
+              </button>
+            );
+          })}
+          {totalPages > 5 && currentPage < totalPages - 2 && <span className="px-2">...</span>}
+          {totalPages > 5 && currentPage < totalPages - 2 && (
+            <button onClick={() => goToPage(totalPages)} className="px-3 py-1 border rounded hover:bg-gray-100">
+              {totalPages}
             </button>
-          ))}
+          )}
           <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 border rounded hover:bg-gray-100">
             Next
           </button>
         </div>
+        <select
+          value={itemsPerPage}
+          onChange={(e) => {
+            setItemsPerPage(Number(e.target.value));
+            goToPage(1);
+          }}
+          className="border p-1 rounded">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
+        </select>
       </div>
 
       {/* Modal */}

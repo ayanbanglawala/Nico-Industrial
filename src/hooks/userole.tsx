@@ -15,23 +15,28 @@ export const useRole = () => {
   const [editingRole, setEditingRole] = useState<RoleType | null>(null);
   const [roles, setRoles] = useState<RoleType[]>([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const fetchData = async (query = "") => {
     try {
       setIsLoading(true);
-      const response = await fetch(`https://nicoindustrial.com/api/roles/list?search=${query}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `https://nicoindustrial.com/api/roles/list?search=${query}&page=${currentPage}&perPage=${itemsPerPage}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
         setRoles(data.data.roles || []);
         setTotalPages(data.data.totalPages || 1);
+        setTotalRecords(data.data.totalRecords || 0);
       } else {
         toast.error("Failed to fetch data.");
       }
@@ -45,7 +50,7 @@ export const useRole = () => {
 
   useEffect(() => {
     fetchData(search);
-  }, [currentPage, search]);
+  }, [currentPage, search, itemsPerPage]);
 
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
@@ -142,6 +147,7 @@ export const useRole = () => {
     currentPage,
     goToPage,
     totalPages,
+    totalRecords,
     isLoading,
     isModalOpen,
     roleName,
@@ -153,5 +159,6 @@ export const useRole = () => {
     handleDeleteRole,
     isSaving,
     itemsPerPage,
+    setItemsPerPage,
   };
 };
