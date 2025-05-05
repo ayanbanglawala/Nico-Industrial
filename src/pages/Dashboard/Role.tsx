@@ -1,96 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { useRole } from "../../hooks/userole";
+import React from "react";
 
-type RoleType = {
-  Id: number;
-  name: string;
-};
-
-const Role = () => {
-  const token = localStorage.getItem("token"); // or wherever you store it
-  const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [roleName, setRoleName] = useState("");
-  const [editingRole, setEditingRole] = useState<RoleType | null>(null);
-  const [roles, setRoles] = useState<RoleType[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const itemsPerPage = 10;
-
-  const fetchData = async (query = "") => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`https://nicoindustrial.com/api/roles/list?search=${query}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setRoles(data.data.roles || []);
-        setTotalPages(data.data.totalPages);
-      } else {
-        toast.error("Failed to fetch data.");
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      toast.error("Error fetching data.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData(search);
-  }, [currentPage, search]);
-
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-  };
-
-  const handleModalOpen = (role: RoleType | null = null) => {
-    setIsModalOpen(true);
-    if (role) {
-      setRoleName(role.name);
-      setEditingRole(role);
-    } else {
-      setRoleName("");
-      setEditingRole(null);
-    }
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setRoleName("");
-    setEditingRole(null);
-  };
-
-  const handleCreateOrUpdateRole = () => {
-    if (roleName.trim()) {
-      if (editingRole) {
-        // Update locally for now
-        setRoles((prev) => prev.map((r) => (r.Id === editingRole.Id ? { ...r, name: roleName } : r)));
-        console.log("Role Updated:", roleName);
-      } else {
-        const newRole = {
-          Id: roles.length ? roles[roles.length - 1].Id + 1 : 1,
-          name: roleName,
-        };
-        setRoles((prev) => [...prev, newRole]);
-        console.log("New Role Created:", roleName);
-      }
-      handleModalClose();
-    }
-  };
-
-  const handleDeleteRole = (id: number) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this role?");
-    if (confirmDelete) {
-      setRoles((prev) => prev.filter((role) => role.Id !== id));
-    }
-  };
+const RoleComponent = () => {
+  const {
+    roles,
+    search,
+    setSearch,
+    currentPage,
+    goToPage,
+    totalPages,
+    isLoading,
+    isModalOpen,
+    roleName,
+    setRoleName,
+    editingRole,
+    handleModalOpen,
+    handleModalClose,
+    handleCreateOrUpdateRole,
+    handleDeleteRole,
+    isSaving,
+    itemsPerPage,
+  } = useRole();
 
   return (
     <div className="p-4">
@@ -102,11 +32,14 @@ const Role = () => {
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
-            setCurrentPage(1);
+            goToPage(1); // this replaces setCurrentPage
           }}
           className="border p-2 rounded w-full max-w-xs"
         />
-        <button onClick={() => handleModalOpen()} className="ml-4 bg-gray-100 text-black border border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400">
+        <button
+          onClick={() => handleModalOpen()}
+          className="ml-4 bg-gray-100 text-black border border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400"
+        >
           Create Role
         </button>
       </div>
@@ -133,10 +66,16 @@ const Role = () => {
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{role.name}</td>
                 <td className="p-2 space-x-2">
-                  <button onClick={() => handleModalOpen(role)} className="bg-blue-500 text-white px-2 py-1 rounded">
+                  <button
+                    onClick={() => handleModalOpen(role)}
+                    className="bg-blue-500 text-white px-2 py-1 rounded"
+                  >
                     Edit
                   </button>
-                  <button onClick={() => handleDeleteRole(role.Id)} className="bg-red-600 text-white px-2 py-1 rounded">
+                  <button
+                    onClick={() => handleDeleteRole(role.Id)}
+                    className="bg-red-600 text-white px-2 py-1 rounded"
+                  >
                     Delete
                   </button>
                 </td>
@@ -158,15 +97,27 @@ const Role = () => {
           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, roles.length)} of {roles.length} results
         </p>
         <div className="flex gap-2">
-          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 border rounded hover:bg-gray-100">
+          <button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-1 border rounded hover:bg-gray-100"
+          >
             Previous
           </button>
           {[...Array(totalPages).keys()].map((_, i) => (
-            <button key={i} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-indigo-600 text-white" : "hover:bg-gray-100"}`}>
+            <button
+              key={i}
+              onClick={() => goToPage(i + 1)}
+              className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-indigo-600 text-white" : "hover:bg-gray-100"}`}
+            >
               {i + 1}
             </button>
           ))}
-          <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 border rounded hover:bg-gray-100">
+          <button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 border rounded hover:bg-gray-100"
+          >
             Next
           </button>
         </div>
@@ -181,14 +132,28 @@ const Role = () => {
               <label htmlFor="roleName" className="block text-sm font-medium text-gray-700">
                 Role Name
               </label>
-              <input type="text" id="roleName" placeholder="Enter Role Name" value={roleName} onChange={(e) => setRoleName(e.target.value)} className="border p-2 rounded w-full mt-2" />
+              <input
+                type="text"
+                id="roleName"
+                placeholder="Enter Role Name"
+                value={roleName}
+                onChange={(e) => setRoleName(e.target.value)}
+                className="border p-2 rounded w-full mt-2"
+              />
             </div>
             <div className="flex justify-end gap-4">
-              <button onClick={handleModalClose} className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400">
+              <button
+                onClick={handleModalClose}
+                className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+              >
                 Cancel
               </button>
-              <button onClick={handleCreateOrUpdateRole} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                {editingRole ? "Update" : "Create"}
+              <button
+                onClick={handleCreateOrUpdateRole}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                disabled={isSaving}
+              >
+                {isSaving ? "Saving..." : editingRole ? "Update" : "Create"}
               </button>
             </div>
           </div>
@@ -198,4 +163,4 @@ const Role = () => {
   );
 };
 
-export default Role;
+export default RoleComponent;
