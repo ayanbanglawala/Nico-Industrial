@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
 type Product = {
   id: number;
   name: string;
@@ -8,18 +10,9 @@ type Product = {
 };
 
 const Product = () => {
-  const [search, setSearch] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [products, setProducts] = useState(
-    Array.from({ length: 27 }, (_, i) => ({
-      id: i + 1,
-      name: `Product ${i + 1}`,
-      price: Math.floor(Math.random() * 1000) + 100,
-      createdBy: "Sahil",
-      createdAt: "2025-05-01",
-    }))
-  );
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -29,6 +22,40 @@ const Product = () => {
   });
 
   const productsPerPage = 10;
+
+  const [search, setSearch] = useState("");
+  const token = localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
+  useEffect(() => {
+    const fetchProducts = async (query = search) => {
+      try {
+        const res = await axios.get("https://nicoindustrial.com/api/product/list", {
+          params: {
+            search: query,
+            page: currentPage,
+            size: productsPerPage,
+            userId: userId,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const apiProducts = res.data.data.productList.map((p: any) => ({
+          id: p.productId,
+          name: p.productName,
+          price: p.price,
+          createdBy: p.createdBy?.name || "Unknown",
+          createdAt: new Date(p.createdAt).toLocaleDateString(),
+        }));
+        setProducts(apiProducts);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(search.toLowerCase()));
 
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
@@ -44,7 +71,7 @@ const Product = () => {
   };
 
   const handleCreateProduct = () => {
-    setEditingProduct(null); // Clear the editing state when adding a new product
+    setEditingProduct(null);
     setNewProduct({
       name: "",
       price: "",
@@ -58,7 +85,7 @@ const Product = () => {
     setEditingProduct(product);
     setNewProduct({
       name: product.name,
-      price: product.price.toString(), // Convert price to string for input
+      price: product.price.toString(),
       createdBy: product.createdBy,
       createdAt: product.createdAt,
     });
@@ -76,7 +103,7 @@ const Product = () => {
 
     const updatedProduct = {
       ...newProduct,
-      price: parseFloat(newProduct.price), // Convert price to a number
+      price: parseFloat(newProduct.price),
     };
 
     if (editingProduct) {
@@ -113,7 +140,7 @@ const Product = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
           <thead className="bg-gray-300">
-            <tr>
+            <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Product Name</th>
               <th className="border p-2">Price</th>
@@ -125,7 +152,7 @@ const Product = () => {
           <tbody>
             {currentProducts.length ? (
               currentProducts.map((product, index) => (
-                <tr key={product.id}>
+                <tr className="text-center" key={product.id}>
                   <td className="p-2">{startIndex + index + 1}</td>
                   <td className="p-2">{product.name}</td>
                   <td className="p-2">₹{product.price}</td>
@@ -185,44 +212,44 @@ const Product = () => {
                 <label htmlFor="productName" className="block text-sm font-medium text-gray-700">
                   Product Name
                 </label>
-                <input
-                  type="text"
-                  id="productName"
-                  value={newProduct.name}
-                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                  className="border border-gray-300 p-2 rounded-md w-full"
-                />
+                <input type="text" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} required className="mt-1 block w-full border p-2 rounded" />
               </div>
               <div className="mb-4">
                 <label htmlFor="price" className="block text-sm font-medium text-gray-700">
                   Price
                 </label>
-                <input
-                  type="number"
-                  id="price"
-                  value={newProduct.price}
-                  onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                  className="border border-gray-300 p-2 rounded-md w-full"
-                />
+                <input type="number" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} required className="mt-1 block w-full border p-2 rounded" />
               </div>
               <div className="mb-4">
-                <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
-                  Brand
+                <label htmlFor="createdBy" className="block text-sm font-medium text-gray-700">
+                  Created By
                 </label>
                 <input
                   type="text"
-                  id="brand"
                   value={newProduct.createdBy}
                   onChange={(e) => setNewProduct({ ...newProduct, createdBy: e.target.value })}
-                  className="border border-gray-300 p-2 rounded-md w-full"
+                  required
+                  className="mt-1 block w-full border p-2 rounded"
                 />
               </div>
-              <div className="flex justify-end gap-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">
+              <div className="mb-4">
+                <label htmlFor="createdAt" className="block text-sm font-medium text-gray-700">
+                  Created At
+                </label>
+                <input
+                  type="date"
+                  value={newProduct.createdAt}
+                  onChange={(e) => setNewProduct({ ...newProduct, createdAt: e.target.value })}
+                  required
+                  className="mt-1 block w-full border p-2 rounded"
+                />
+              </div>
+              <div className="flex justify-end">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="mr-4 px-4 py-2 border rounded">
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                  Save Product
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
+                  Save
                 </button>
               </div>
             </form>
