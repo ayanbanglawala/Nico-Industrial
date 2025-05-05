@@ -1,21 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const Consultant = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [consultants, setConsultants] = useState(() =>
-    Array.from({ length: 10 }, (_, i) => ({
-      id: i + 1,
-      consultantName: `Consultant ${i + 1}`,
-      contactNumber: `+91 9${Math.floor(Math.random() * 1000000000)}`,
-      contactPerson: `Person ${i + 1}`,
-      createdAt: "2025-05-01",
-      updatedAt: "2025-05-02",
-      createdBy: "Admin",
-    }))
-  );
-
+  const [consultants, setConsultants] = useState<any[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
   const consultantsPerPage = 5;
+
   const [showModal, setShowModal] = useState(false);
   const [newConsultant, setNewConsultant] = useState({
     consultantName: "",
@@ -25,11 +17,45 @@ const Consultant = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
-  const filteredConsultants = consultants.filter((consultant) => consultant.consultantName.toLowerCase().includes(search.toLowerCase()));
+  useEffect(() => {
+    fetchConsultants();
+  }, [currentPage, search]);
+  const token = localStorage.getItem("token");
 
-  const totalPages = Math.ceil(filteredConsultants.length / consultantsPerPage);
-  const startIndex = (currentPage - 1) * consultantsPerPage;
-  const currentConsultants = filteredConsultants.slice(startIndex, startIndex + consultantsPerPage);
+  const fetchConsultants = async () => {
+    try {
+      const response = await axios.get(`https://nicoindustrial.com/api/consultant/all`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          page: currentPage,
+          size: consultantsPerPage,
+          search: search,
+          filter1: "",
+          filter2: "",
+        },
+      });
+
+      const data = response.data.data;
+      const formattedData = data.Consultants.map((item: any) => ({
+        id: item.consultantId,
+        consultantName: item.consultantName,
+        contactNumber: item.contactNumber,
+        contactPerson: item.contactPerson,
+        createdAt: item.createdAt.split("T")[0],
+        updatedAt: item.updatedAt.split("T")[0],
+        createdBy: item.createdBy?.name || "N/A",
+      }));
+
+      setConsultants(formattedData);
+      setTotalRecords(data.totalRecords);
+    } catch (error) {
+      console.error("Error fetching consultants:", error);
+    }
+  };
+
+  const totalPages = Math.ceil(totalRecords / consultantsPerPage);
 
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -140,10 +166,10 @@ const Consultant = () => {
             </tr>
           </thead>
           <tbody>
-            {currentConsultants.length ? (
-              currentConsultants.map((consultant, index) => (
+            {consultants.length ? (
+              consultants.map((consultant, index) => (
                 <tr key={consultant.id}>
-                  <td className="p-2">{startIndex + index + 1}</td>
+                  <td className="p-2">{(currentPage - 1) * consultantsPerPage + index + 1}</td>
                   <td className="p-2">{consultant.consultantName}</td>
                   <td className="p-2">{consultant.contactNumber}</td>
                   <td className="p-2">{consultant.contactPerson}</td>
@@ -173,7 +199,7 @@ const Consultant = () => {
         {/* Pagination */}
         <div className="flex justify-between items-center mt-6">
           <p className="text-sm text-gray-600">
-            Showing {startIndex + 1} to {Math.min(startIndex + consultantsPerPage, filteredConsultants.length)} of {filteredConsultants.length} results
+            Showing {(currentPage - 1) * consultantsPerPage + 1} to {Math.min(currentPage * consultantsPerPage, totalRecords)} of {totalRecords} results
           </p>
           <div className="flex gap-2">
             <button onClick={handlePrev} disabled={currentPage === 1} className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50">

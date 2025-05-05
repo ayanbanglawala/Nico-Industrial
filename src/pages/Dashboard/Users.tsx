@@ -4,11 +4,13 @@ import axios from "axios";
 const Users = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [users, setUsers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [newUser, setNewUser] = useState({
     name: "",
@@ -21,17 +23,67 @@ const Users = () => {
 
   const token = localStorage.getItem("token");
 
-  const filtered = users.filter((user) => user.username.toLowerCase().includes(search.toLowerCase()));
+  const fetchUsers = async (page: number, size: number, searchQuery: string = "") => {
+    try {
+      const res = await axios.get(`https://nicoindustrial.com/api/user/list`, {
+        params: {
+          page: page,
+          size: size,
+          search: searchQuery,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+      const userList = res.data?.data?.list || [];
+      const totalRecords = res.data?.data?.totalRecords || 0;
+      const totalPages = res.data?.data?.totalPages || 1;
+
+      const formattedUsers = userList.map((user: any, index: number) => ({
+        id: user.Id || index + 1,
+        username: user.name,
+        email: user.email,
+        designation: user.designation || user.department || "",
+        mobile: user.mobileNo || user.phone || "",
+        role: user.role?.name || user.role || "",
+        password: user.password || "",
+        status: user.status,
+      }));
+
+      setUsers(formattedUsers);
+      setTotalRecords(totalRecords);
+      setTotalPages(totalPages);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      fetchUsers(currentPage, itemsPerPage, search);
+    }
+  }, [token, currentPage, itemsPerPage, search]);
 
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const toggleStatus = (id: number) => {
-    setUsers((prev) => prev.map((user) => (user.id === id ? { ...user, status: !user.status } : user)));
+  const toggleStatus = async (id: number, currentStatus: boolean) => {
+    try {
+      await axios.put(
+        `https://nicoindustrial.com/api/user/active/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      fetchUsers(currentPage, itemsPerPage, search);
+    } catch (error) {
+      console.error("Failed to toggle status:", error);
+    }
   };
 
   const handleModalOpen = (user?: any) => {
@@ -39,10 +91,10 @@ const Users = () => {
       setNewUser({
         name: user.username,
         email: user.email || "",
-        password: user.password || "",
-        designation: user.designation ?? "",
-        mobile: user.mobile ?? "",
-        role: user.role ?? "",
+        password: "",
+        designation: user.designation || "",
+        mobile: user.mobile || "",
+        role: user.role || "",
       });
       setIsEditing(true);
       setEditingId(user.id);
@@ -75,78 +127,71 @@ const Users = () => {
     setEditingId(null);
   };
 
-  const handleCreateOrUpdateUser = () => {
+  const handleCreateOrUpdateUser = async () => {
     if (Object.values(newUser).some((field) => !field.trim())) {
       alert("Please fill in all fields.");
       return;
     }
 
-    if (isEditing && editingId !== null) {
-      setUsers((prev) =>
-        prev.map((user) =>
-          user.id === editingId
-            ? {
-                ...user,
-                username: newUser.name,
-                email: newUser.email,
-                designation: newUser.designation,
-                mobile: newUser.mobile,
-                role: newUser.role,
-              }
-            : user
-        )
-      );
-    } else {
-      const newUserWithDefaults = {
-        ...newUser,
-        id: users.length + 1,
-        username: newUser.name,
-        status: true,
-      };
-      setUsers([...users, newUserWithDefaults]);
-    }
+    try {
+      if (isEditing && editingId !== null) {
+        await axios.put(
+          `https://nicoindustrial.com/api/user/editProfile`,
+          {
+            id: editingId,
+            name: newUser.name,
+            email: newUser.email,
+            password: newUser.password || undefined,
+            designation: newUser.designation,
+            mobileNo: newUser.mobile,
+            role: { name: newUser.role },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else {
+        await axios.post(
+          `https://nicoindustrial.com/api/user/signup`,
+          {
+            name: newUser.name,
+            email: newUser.email,
+            password: newUser.password,
+            designation: newUser.designation,
+            mobileNo: newUser.mobile,
+            role: { name: newUser.role },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
 
-    handleModalClose();
+      fetchUsers(currentPage, itemsPerPage, search);
+      handleModalClose();
+    } catch (error) {
+      console.error("Failed to save user:", error);
+    }
   };
 
-  const handleDeleteUser = (id: number) => {
+  const handleDeleteUser = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
-      setUsers((prev) => prev.filter((user) => user.id !== id));
-    }
-  };
-
-  useEffect(() => {
-    const fetchUsers = async () => {
       try {
-        const res = await axios.get(`https://nicoindustrial.com/api/user/list`, {
+        await axios.delete(`https://nicoindustrial.com/api/user/delete/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        const userList = res.data?.data?.list || [];
-
-        const formattedUsers = userList.map((user: any, index: number) => ({
-          id: index + 1,
-          username: user.name,
-          email: user.email,
-          designation: user.department,
-          mobile: user.phone,
-          role: user.role,
-          password: user.password || "",
-          status: user.status,
-        }));
-
-        setUsers(formattedUsers);
+        fetchUsers(currentPage, itemsPerPage, search);
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        console.error("Failed to delete user:", error);
       }
-    };
-
-    if (token) {
-      fetchUsers();
     }
-  }, [token]);
+  };
 
   return (
     <div className="p-4">
@@ -171,19 +216,23 @@ const Users = () => {
           <tr className="text-center">
             <th className="border p-2">Sr No</th>
             <th className="border p-2">Username</th>
+            {/* <th className="border p-2">Email</th> */}
+            {/* <th className="border p-2">Designation</th> */}
             <th className="border p-2">Status</th>
             <th className="border p-2">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {paginated.length ? (
-            paginated.map((user, index) => (
+          {users.length ? (
+            users.map((user, index) => (
               <tr className="text-center hover:bg-gray-200" key={user.id}>
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{user.username}</td>
+                {/* <td className="p-2">{user.email}</td> */}
+                {/* <td className="p-2">{user.designation}</td> */}
                 <td className="p-2 text-center">
                   <button
-                    onClick={() => toggleStatus(user.id)}
+                    onClick={() => toggleStatus(user.id, user.status)}
                     className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out mx-auto ${user.status ? "bg-green-500" : "bg-gray-300 border-1 border-gray-400"}`}>
                     <div className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out ${user.status ? "translate-x-7" : "translate-x-0"}`}></div>
                   </button>
@@ -200,7 +249,7 @@ const Users = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={4} className="text-center p-4">
+              <td colSpan={6} className="text-center p-4">
                 No users found.
               </td>
             </tr>
@@ -211,19 +260,32 @@ const Users = () => {
       {/* Pagination */}
       <div className="flex justify-between items-center mt-6">
         <p className="text-sm text-gray-600">
-          Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length} results
+          Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalRecords)} of {totalRecords} results
         </p>
         <div className="flex gap-2">
           <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 border rounded hover:bg-gray-100">
             Previous
           </button>
-          {[...Array(totalPages).keys()].slice(0, 3).map((_, i) => (
-            <button key={i + 1} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
-              {i + 1}
-            </button>
-          ))}
-          {totalPages > 4 && <span className="px-2">...</span>}
-          {totalPages > 3 && (
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            let pageNum;
+            if (totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (currentPage <= 3) {
+              pageNum = i + 1;
+            } else if (currentPage >= totalPages - 2) {
+              pageNum = totalPages - 4 + i;
+            } else {
+              pageNum = currentPage - 2 + i;
+            }
+
+            return (
+              <button key={pageNum} onClick={() => goToPage(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
+                {pageNum}
+              </button>
+            );
+          })}
+          {totalPages > 5 && currentPage < totalPages - 2 && <span className="px-2">...</span>}
+          {totalPages > 5 && currentPage < totalPages - 2 && (
             <button onClick={() => goToPage(totalPages)} className="px-3 py-1 border rounded hover:bg-gray-100">
               {totalPages}
             </button>
@@ -232,6 +294,18 @@ const Users = () => {
             Next
           </button>
         </div>
+        <select
+          value={itemsPerPage}
+          onChange={(e) => {
+            setItemsPerPage(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+          className="border p-1 rounded">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
+        </select>
       </div>
 
       {/* Modal */}
@@ -241,20 +315,23 @@ const Users = () => {
             <h2 className="text-lg font-bold mb-4">{isEditing ? "Edit User" : "Create User"}</h2>
             {["name", "email", "password", "designation", "mobile"].map((field) => (
               <div key={field} className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 capitalize">{field}</label>
+                <label className="block text-sm font-medium text-gray-700 capitalize">
+                  {field} {field !== "password" || !isEditing ? "*" : ""}
+                </label>
                 <input
                   type={field === "password" ? "password" : "text"}
                   value={(newUser as any)[field]}
                   onChange={(e) => setNewUser({ ...newUser, [field]: e.target.value })}
                   className="border p-2 rounded w-full mt-2"
                   placeholder={`Enter ${field}`}
+                  required={field !== "password" || !isEditing}
                 />
               </div>
             ))}
             {/* Role Dropdown */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Role</label>
-              <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })} className="border p-2 rounded w-full mt-2">
+              <label className="block text-sm font-medium text-gray-700">Role *</label>
+              <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })} className="border p-2 rounded w-full mt-2" required>
                 <option value="">Select Role</option>
                 <option value="user">User</option>
                 <option value="sales">Sales</option>
