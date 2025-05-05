@@ -154,7 +154,7 @@ const Consultant = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
           <thead className="bg-gray-300">
-            <tr>
+            <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Consultant Name</th>
               <th className="border p-2">Contact Number</th>
@@ -168,7 +168,7 @@ const Consultant = () => {
           <tbody>
             {consultants.length ? (
               consultants.map((consultant, index) => (
-                <tr key={consultant.id}>
+                <tr className="text-center" key={consultant.id}>
                   <td className="p-2">{(currentPage - 1) * consultantsPerPage + index + 1}</td>
                   <td className="p-2">{consultant.consultantName}</td>
                   <td className="p-2">{consultant.contactNumber}</td>
