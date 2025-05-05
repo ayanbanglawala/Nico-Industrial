@@ -189,7 +189,7 @@ const Inquiry = () => {
 
       {/* Table */}
       <div className="overflow-auto">
-        <table className="min-w-full bg-white border border-gray-300 rounded-lg">
+        <table className="min-w-full bg-white border-gray-300 rounded-lg">
           <thead className="bg-gray-300">
             <tr>
               <th className="px-4 py-2 border">Sr No</th>

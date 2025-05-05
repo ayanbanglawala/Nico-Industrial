@@ -129,14 +129,14 @@ const Role = () => {
             </tr>
           ) : roles.length ? (
             roles.map((role, index) => (
-              <tr className="text-center" key={role.Id}>
+              <tr className="text-center hover:bg-gray-200" key={role.Id}>
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{role.name}</td>
-                <td className="p-2">
-                  <button onClick={() => handleModalOpen(role)} className="text-blue-600 hover:underline mr-2">
+                <td className="p-2 space-x-2">
+                  <button onClick={() => handleModalOpen(role)} className="bg-blue-500 text-white px-2 py-1 rounded">
                     Edit
                   </button>
-                  <button onClick={() => handleDeleteRole(role.Id)} className="text-red-600 hover:underline">
+                  <button onClick={() => handleDeleteRole(role.Id)} className="bg-red-600 text-white px-2 py-1 rounded">
                     Delete
                   </button>
                 </td>

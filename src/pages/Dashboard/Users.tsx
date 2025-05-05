@@ -178,7 +178,7 @@ const Users = () => {
         <tbody>
           {paginated.length ? (
             paginated.map((user, index) => (
-              <tr className="text-center" key={user.id}>
+              <tr className="text-center hover:bg-gray-200" key={user.id}>
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{user.username}</td>
                 <td className="p-2 text-center">
@@ -188,11 +188,11 @@ const Users = () => {
                     <div className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out ${user.status ? "translate-x-7" : "translate-x-0"}`}></div>
                   </button>
                 </td>
-                <td className="border p-2">
-                  <button onClick={() => handleModalOpen(user)} className="text-blue-600 hover:underline mr-2">
+                <td className="border p-2 space-x-2">
+                  <button onClick={() => handleModalOpen(user)} className="bg-blue-500 text-white px-2 py-1 rounded">
                     Edit
                   </button>
-                  <button onClick={() => handleDeleteUser(user.id)} className="text-red-600 hover:underline">
+                  <button onClick={() => handleDeleteUser(user.id)} className="bg-red-600 text-white px-2 py-1 rounded">
                     Delete
                   </button>
                 </td>

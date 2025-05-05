@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 type BrandType = {
-  id: number;
-  name: string;
+  _id: string;
+  brandName: string;
 };
 
 const Brand = () => {
@@ -11,16 +12,36 @@ const Brand = () => {
   const itemsPerPage = 10;
 
   // Brand data state
-  const [brands, setBrands] = useState<BrandType[]>(Array.from({ length: 15 }, (_, i) => ({ id: i + 1, name: `Brand ${i + 1}` })));
+  const [brands, setBrands] = useState<BrandType[]>([]);
+  const token = localStorage.getItem("token");
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [brandName, setBrandName] = useState("");
   const [editingBrand, setEditingBrand] = useState<BrandType | null>(null);
 
-  // Search filter
-  const filtered = brands.filter((brand) => brand.name.toLowerCase().includes(search.toLowerCase()));
+  // Fetch brands from API
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const res = await axios.get("https://nicoindustrial.com/api/brand/list", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (res.data && Array.isArray(res.data.data)) {
+          setBrands(res.data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch brands:", error);
+      }
+    };
 
+    fetchBrands();
+  }, []);
+
+  // Search filter
+  const filtered = brands.filter((brand) => brand.brandName.toLowerCase().includes(search.toLowerCase()));
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -31,7 +52,7 @@ const Brand = () => {
   const handleModalOpen = (brand: BrandType | null = null) => {
     setIsModalOpen(true);
     if (brand) {
-      setBrandName(brand.name);
+      setBrandName(brand.brandName);
       setEditingBrand(brand);
     } else {
       setBrandName("");
@@ -41,13 +62,11 @@ const Brand = () => {
 
   const handleCreateOrUpdate = () => {
     if (editingBrand) {
-      // Update
-      setBrands((prev) => prev.map((b) => (b.id === editingBrand.id ? { ...b, name: brandName } : b)));
+      setBrands((prev) => prev.map((b) => (b._id === editingBrand._id ? { ...b, brandName } : b)));
     } else {
-      // Add
       const newBrand: BrandType = {
-        id: brands.length ? brands[brands.length - 1].id + 1 : 1,
-        name: brandName,
+        _id: `${brands.length + 1}`, // Temporary ID for local state only
+        brandName,
       };
       setBrands((prev) => [...prev, newBrand]);
     }
@@ -57,10 +76,10 @@ const Brand = () => {
     setEditingBrand(null);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this brand?");
     if (confirmDelete) {
-      setBrands((prev) => prev.filter((b) => b.id !== id));
+      setBrands((prev) => prev.filter((b) => b._id !== id));
     }
   };
 
@@ -87,7 +106,7 @@ const Brand = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
           <thead className="bg-gray-300">
-            <tr>
+            <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Brand Name</th>
               <th className="border p-2">Actions</th>
@@ -96,14 +115,14 @@ const Brand = () => {
           <tbody>
             {paginated.length ? (
               paginated.map((brand, index) => (
-                <tr key={brand.id}>
+                <tr className="text-center hover:bg-gray-200" key={brand._id}>
                   <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                  <td className="p-2">{brand.name}</td>
-                  <td className="p-2">
-                    <button className="text-blue-600 hover:underline mr-2" onClick={() => handleModalOpen(brand)}>
+                  <td className="p-2">{brand.brandName}</td>
+                  <td className="p-2 space-x-2">
+                    <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => handleModalOpen(brand)}>
                       Edit
                     </button>
-                    <button className="text-red-600 hover:underline" onClick={() => handleDelete(brand.id)}>
+                    <button className="bg-red-600 text-white px-2 py-1 rounded" onClick={() => handleDelete(brand._id)}>
                       Delete
                     </button>
                   </td>

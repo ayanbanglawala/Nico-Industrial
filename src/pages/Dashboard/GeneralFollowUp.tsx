@@ -1,11 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-const GeneralFollowUp = () => {
-  const [search, setSearch] = useState("");
+interface FollowUp {
+  generalFollowUpId: number;
+  generalFollowUpName: string;
+  description: string;
+  status: string;
+  statusNotes: string;
+  dueDate: string;
+  createdBy: { name: string };
+  updatedBy: { name: string } | null;
+}
+
+const FollowUpTable = () => {
+  const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
+  const [editingFollowUpId, setEditingFollowUpId] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     followUpName: "",
@@ -17,125 +31,58 @@ const GeneralFollowUp = () => {
     dueTime: "",
   });
 
-  const itemsPerPage = 10;
+  const fetchFollowUps = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+      const response = await axios.get(`https://nicoindustrial.com/api/generalFollowUp/getall?userId=${userId}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (response.data?.data?.list) {
+        setFollowUps(response.data.data.list);
+      }
+    } catch (error) {
+      console.error("Failed to fetch follow-ups", error);
+    }
+  };
 
-  const [followUps, setFollowUps] = useState(
-    Array.from({ length: 5 }, (_, i) => ({
-      id: i + 1,
-      name: `User ${i + 1}`,
-      mobile: `9876543${(100 + i).toString().slice(-3)}`,
-      remarks: `Remark for User ${i + 1}`,
-      createdAt: "2025-05-01",
-      createdBy: "Admin",
-    }))
-  );
+  useEffect(() => {
+    fetchFollowUps();
+  }, []);
 
-  const filtered = followUps.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()));
-
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const paginatedData = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(followUps.length / itemsPerPage);
+  const paginated = followUps.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (isEditing && editId !== null) {
-      setFollowUps((prev) =>
-        prev.map((item) =>
-          item.id === editId
-            ? {
-                ...item,
-                name: formData.followUpName,
-                mobile: "0000000000",
-                remarks: formData.description,
-                createdAt: formData.dueDate,
-                createdBy: formData.followUpPerson,
-              }
-            : item
-        )
-      );
+    if (isEditing) {
+      console.log("Update follow-up", editingFollowUpId, formData);
+      // Call update API here
     } else {
-      const newFollowUp = {
-        id: Date.now(),
-        name: formData.followUpName,
-        mobile: "0000000000",
-        remarks: formData.description,
-        createdAt: formData.dueDate,
-        createdBy: formData.followUpPerson,
-      };
-      setFollowUps((prev) => [newFollowUp, ...prev]);
+      console.log("Create follow-up", formData);
+      // Call create API here
     }
-
-    setFormData({
-      followUpName: "",
-      followUpPerson: "",
-      description: "",
-      status: "",
-      statusNotes: "",
-      dueDate: "",
-      dueTime: "",
-    });
-
     setIsModalOpen(false);
     setIsEditing(false);
-    setEditId(null);
-  };
-
-  const handleEdit = (id: number) => {
-    const selected = followUps.find((item) => item.id === id);
-    if (!selected) return;
-
-    setFormData({
-      followUpName: selected.name,
-      followUpPerson: selected.createdBy,
-      description: selected.remarks,
-      status: "",
-      statusNotes: "",
-      dueDate: selected.createdAt,
-      dueTime: "",
-    });
-
-    setIsEditing(true);
-    setEditId(id);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = (id: number) => {
-    if (window.confirm("Are you sure you want to delete this follow-up?")) {
-      setFollowUps((prev) => prev.filter((item) => item.id !== id));
-    }
+    setFormData({ followUpName: "", followUpPerson: "", description: "", status: "", statusNotes: "", dueDate: "", dueTime: "" });
   };
 
   return (
     <div className="p-4">
-      {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <input
-          type="text"
-          placeholder="Search name..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="border border-gray-300 p-2 rounded-md w-full max-w-xs"
-        />
+        <h2 className="text-xl font-semibold">General FollowUps</h2>
         <button
           onClick={() => {
             setFormData({
@@ -150,66 +97,65 @@ const GeneralFollowUp = () => {
             setIsEditing(false);
             setIsModalOpen(true);
           }}
-          className="ml-4 bg-gray-100 text-black border-1 border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400">
+          className="bg-gray-100 text-black border border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400">
           Create Follow-Up
         </button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-300">
-            <tr>
-              <th className="border p-2">Sr No</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Mobile</th>
-              <th className="border p-2">Remarks</th>
-              <th className="border p-2">Created At</th>
-              <th className="border p-2">Created By</th>
-              <th className="border p-2">Actions</th>
+      <table className="w-full border border-gray-300">
+        <thead className="bg-gray-300">
+          <tr className="text-center">
+            <th className="border px-3 py-2">Sr No</th>
+            <th className="border px-3 py-2">GeneralFollowUp Name</th>
+            <th className="border px-3 py-2">Created By</th>
+            <th className="border px-3 py-2">Description</th>
+            <th className="border px-3 py-2">Updated By</th>
+            <th className="border px-3 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paginated.map((item, index) => (
+            <tr className="text-center hover:bg-gray-200" key={item.generalFollowUpId}>
+              <td className="border px-3 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+              <td className="border px-3 py-2">{item.generalFollowUpName}</td>
+              <td className="border px-3 py-2">{item.createdBy?.name}</td>
+              <td className="border px-3 py-2">{item.description}</td>
+              <td className="border px-3 py-2">{item.updatedBy?.name || "—"}</td>
+              <td className="border px-3 py-2 space-x-2">
+                <button
+                  onClick={() => {
+                    setFormData({
+                      followUpName: item.generalFollowUpName,
+                      followUpPerson: item.createdBy?.name || "",
+                      description: item.description,
+                      status: item.status,
+                      statusNotes: item.statusNotes,
+                      dueDate: item.dueDate ? item.dueDate.split("T")[0] : "",
+                      dueTime: "",
+                    });
+                    setIsEditing(true);
+                    setEditingFollowUpId(item.generalFollowUpId);
+                    setIsModalOpen(true);
+                  }}
+                  className="bg-blue-500 text-white px-2 py-1 rounded">
+                  Edit
+                </button>
+                <button className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {paginatedData.length ? (
-              paginatedData.map((item, index) => (
-                <tr key={item.id}>
-                  <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                  <td className="p-2">{item.name}</td>
-                  <td className="p-2">{item.mobile}</td>
-                  <td className="p-2">{item.remarks}</td>
-                  <td className="p-2">{item.createdAt}</td>
-                  <td className="p-2">{item.createdBy}</td>
-                  <td className="p-2">
-                    <button className="text-blue-600 hover:underline mr-2" onClick={() => handleEdit(item.id)}>
-                      Edit
-                    </button>
-                    <button className="text-red-600 hover:underline" onClick={() => handleDelete(item.id)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={7} className="text-center p-4">
-                  No records found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
 
       {/* Pagination */}
       <div className="flex justify-between items-center mt-6">
         <p className="text-sm text-gray-600">
-          Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length} results
+          Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, followUps.length)} of {followUps.length} results
         </p>
         <div className="flex gap-2">
           <button onClick={() => goToPage(currentPage - 1)} className="px-3 py-1 border rounded hover:bg-gray-100" disabled={currentPage === 1}>
             Previous
           </button>
-
           {[...Array(totalPages).keys()].slice(0, 3).map((_, i) => (
             <button key={i + 1} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
               {i + 1}
@@ -221,14 +167,12 @@ const GeneralFollowUp = () => {
               {totalPages}
             </button>
           )}
-
           <button onClick={() => goToPage(currentPage + 1)} className="px-3 py-1 border rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
             Next
           </button>
         </div>
       </div>
 
-      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex justify-center items-center z-50" onClick={() => setIsModalOpen(false)}>
           <div className="bg-white p-6 rounded-md w-full max-w-md" onClick={(e) => e.stopPropagation()}>
@@ -236,26 +180,45 @@ const GeneralFollowUp = () => {
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block text-sm font-medium">Follow-Up Name</label>
-                <input type="text" name="followUpName" value={formData.followUpName} onChange={handleInputChange} className="border border-gray-300 p-2 rounded-md w-full" required />
+                <input type="text" name="followUpName" value={formData.followUpName} onChange={handleInputChange} className="border p-2 rounded-md w-full" required />
               </div>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium">Follow-Up Person</label>
-                <select name="followUpPerson" value={formData.followUpPerson} onChange={handleSelectChange} className="border border-gray-300 p-2 rounded-md w-full" required>
+                <select name="followUpPerson" value={formData.followUpPerson} onChange={handleSelectChange} className="border p-2 rounded-md w-full" required>
                   <option value="">Select Person</option>
                   <option value="Person 1">Person 1</option>
                   <option value="Person 2">Person 2</option>
                 </select>
               </div>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium">Description</label>
-                <textarea name="description" value={formData.description} onChange={handleInputChange} className="border border-gray-300 p-2 rounded-md w-full" />
+                <textarea name="description" value={formData.description} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
               </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium">Status</label>
+                <select name="status" value={formData.status} onChange={handleSelectChange} className="border p-2 rounded-md w-full">
+                  <option value="">Select Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="COMPLETED">Done</option>
+                  <option value="Modify">Modify</option>
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium">Status Notes</label>
+                <textarea name="statusNotes" value={formData.statusNotes} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
+              </div>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium">Due Date</label>
-                <input type="date" name="dueDate" value={formData.dueDate} onChange={handleInputChange} className="border border-gray-300 p-2 rounded-md w-full" />
+                <input type="date" name="dueDate" value={formData.dueDate} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
               </div>
+
               <div className="flex justify-end gap-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 text-black rounded-md">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded-md">
                   Cancel
                 </button>
                 <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md">
@@ -270,4 +233,4 @@ const GeneralFollowUp = () => {
   );
 };
 
-export default GeneralFollowUp;
+export default FollowUpTable;
