@@ -177,10 +177,10 @@ const Consultant = () => {
                   <td className="p-2">{consultant.updatedAt}</td>
                   <td className="p-2">{consultant.createdBy}</td>
                   <td className="p-2">
-                    <button className="text-blue-600 hover:underline mr-2" onClick={() => handleEdit(consultant)}>
+                    <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => handleEdit(consultant)}>
                       Edit
                     </button>
-                    <button className="text-red-600 hover:underline" onClick={() => handleDelete(consultant.id)}>
+                    <button className="bg-red-600 text-white px-2 py-1 rounded" onClick={() => handleDelete(consultant.id)}>
                       Delete
                     </button>
                   </td>

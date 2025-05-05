@@ -51,20 +51,18 @@ const Consumer = () => {
   useEffect(() => {
     const fetchConsumers = async () => {
       try {
-        const response = await axios.get("https://nicoindustrial.com/api/consumer/all",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            params: {
-              page: currentPage,
-              size: consumersPerPage,
-              search: search, // Include search query
-              filter1: filter1, // Include filter1 if necessary
-              filter2: filter2, // Include filter2 if necessary
-            },
-          }
-        );
+        const response = await axios.get("https://nicoindustrial.com/api/consumer/all", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            page: currentPage,
+            size: consumersPerPage,
+            search: search, // Include search query
+            filter1: filter1, // Include filter1 if necessary
+            filter2: filter2, // Include filter2 if necessary
+          },
+        });
         if (response.data?.statusCode === 200) {
           setConsumers(response.data.data.consumers);
         }
@@ -76,9 +74,7 @@ const Consumer = () => {
     fetchConsumers();
   }, []);
 
-  const filteredConsumers = consumers.filter((consumer) =>
-    consumer.consumerName.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredConsumers = consumers.filter((consumer) => consumer.consumerName.toLowerCase().includes(search.toLowerCase()));
 
   const totalPages = Math.ceil(filteredConsumers.length / consumersPerPage);
   const startIndex = (currentPage - 1) * consumersPerPage;
@@ -175,10 +171,7 @@ const Consumer = () => {
           }}
           className="border border-gray-300 p-2 rounded-md w-full max-w-xs"
         />
-        <button
-          onClick={handleCreateConsumer}
-          className="ml-4 bg-gray-100 text-black border border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400"
-        >
+        <button onClick={handleCreateConsumer} className="ml-4 bg-gray-100 text-black border border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400">
           Create Consumer
         </button>
       </div>
@@ -208,16 +201,10 @@ const Consumer = () => {
                   <td className="p-2">{consumer.contact}</td>
                   <td className="p-2">{consumer.createdBy?.name || "N/A"}</td>
                   <td className="p-2">
-                    <button
-                      onClick={() => handleEdit(consumer)}
-                      className="text-blue-600 hover:underline mr-2"
-                    >
+                    <button onClick={() => handleEdit(consumer)} className="bg-blue-500 text-white px-2 py-1 rounded">
                       Edit
                     </button>
-                    <button
-                      onClick={() => handleDelete(consumer.consumerId)}
-                      className="text-red-600 hover:underline"
-                    >
+                    <button onClick={() => handleDelete(consumer.consumerId)} className="bg-red-600 text-white px-2 py-1 rounded">
                       Delete
                     </button>
                   </td>
@@ -239,33 +226,18 @@ const Consumer = () => {
             Showing {startIndex + 1} to {endIndex} of {filteredConsumers.length} results
           </p>
           <div className="flex gap-2">
-            <button
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 border rounded ${
-                currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"
-              }`}
-            >
+            <button onClick={handlePrev} disabled={currentPage === 1} className={`px-3 py-1 border rounded ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
               Previous
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-              <button
-                key={pageNum}
-                onClick={() => handlePageClick(pageNum)}
-                className={`px-3 py-1 border rounded ${
-                  currentPage === pageNum ? "bg-blue-600 text-white" : "hover:bg-gray-100"
-                }`}
-              >
+              <button key={pageNum} onClick={() => handlePageClick(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
                 {pageNum}
               </button>
             ))}
             <button
               onClick={handleNext}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1 border rounded ${
-                currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"
-              }`}
-            >
+              className={`px-3 py-1 border rounded ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
               Next
             </button>
           </div>
@@ -279,47 +251,19 @@ const Consumer = () => {
             <h2 className="text-xl mb-4">{editConsumerId ? "Edit Consumer" : "Create Consumer"}</h2>
             <div className="mb-4">
               <label className="block text-sm text-gray-600">Consumer Name</label>
-              <input
-                type="text"
-                name="name"
-                placeholder="Consumer Name"
-                value={newConsumer.name}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 w-full rounded-md"
-              />
+              <input type="text" name="name" placeholder="Consumer Name" value={newConsumer.name} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
             </div>
             <div className="mb-4">
               <label className="block text-sm text-gray-600">Email</label>
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={newConsumer.email}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 w-full rounded-md"
-              />
+              <input type="email" name="email" placeholder="Email" value={newConsumer.email} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
             </div>
             <div className="mb-4">
               <label className="block text-sm text-gray-600">Address</label>
-              <input
-                type="text"
-                name="address"
-                placeholder="Address"
-                value={newConsumer.address}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 w-full rounded-md"
-              />
+              <input type="text" name="address" placeholder="Address" value={newConsumer.address} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
             </div>
             <div className="mb-4">
               <label className="block text-sm text-gray-600">Contact</label>
-              <input
-                type="text"
-                name="phone"
-                placeholder="Contact"
-                value={newConsumer.phone}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 w-full rounded-md"
-              />
+              <input type="text" name="phone" placeholder="Contact" value={newConsumer.phone} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
             </div>
             <div className="flex justify-between">
               <button onClick={handleCloseModal} className="px-4 py-2 bg-gray-300 text-black rounded-md">

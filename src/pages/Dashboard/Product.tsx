@@ -159,10 +159,10 @@ const Product = () => {
                   <td className="p-2">{product.createdBy}</td>
                   <td className="p-2">{product.createdAt}</td>
                   <td className="p-2">
-                    <button onClick={() => handleEditProduct(product)} className="text-blue-600 hover:underline mr-2">
+                    <button onClick={() => handleEditProduct(product)} className="bg-blue-500 text-white px-2 py-1 rounded">
                       Edit
                     </button>
-                    <button onClick={() => handleDeleteProduct(product.id)} className="text-red-600 hover:underline">
+                    <button onClick={() => handleDeleteProduct(product.id)} className="bg-red-600 text-white px-2 py-1 rounded">
                       Delete
                     </button>
                   </td>
