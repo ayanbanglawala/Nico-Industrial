@@ -1,3 +1,4 @@
+import { FaPlus } from "react-icons/fa";
 import { useRole } from "../../hooks/userole";
 import React from "react";
 
@@ -36,10 +37,8 @@ const RoleComponent = () => {
           }}
           className="border p-2 rounded w-full max-w-xs"
         />
-        <button
-          onClick={() => handleModalOpen()}
-          className="ml-4 bg-gray-100 text-black border border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400"
-        >
+        <button onClick={() => handleModalOpen()} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <FaPlus />
           Create Role
         </button>
       </div>
@@ -66,16 +65,10 @@ const RoleComponent = () => {
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{role.name}</td>
                 <td className="p-2 space-x-2">
-                  <button
-                    onClick={() => handleModalOpen(role)}
-                    className="bg-blue-500 text-white px-2 py-1 rounded"
-                  >
+                  <button onClick={() => handleModalOpen(role)} className="bg-blue-500 text-white px-2 py-1 rounded">
                     Edit
                   </button>
-                  <button
-                    onClick={() => handleDeleteRole(role.Id)}
-                    className="bg-red-600 text-white px-2 py-1 rounded"
-                  >
+                  <button onClick={() => handleDeleteRole(role.Id)} className="bg-red-600 text-white px-2 py-1 rounded">
                     Delete
                   </button>
                 </td>
@@ -97,27 +90,15 @@ const RoleComponent = () => {
           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, roles.length)} of {roles.length} results
         </p>
         <div className="flex gap-2">
-          <button
-            onClick={() => goToPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-3 py-1 border rounded hover:bg-gray-100"
-          >
+          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 border rounded hover:bg-gray-100">
             Previous
           </button>
           {[...Array(totalPages).keys()].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goToPage(i + 1)}
-              className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-indigo-600 text-white" : "hover:bg-gray-100"}`}
-            >
+            <button key={i} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-indigo-600 text-white" : "hover:bg-gray-100"}`}>
               {i + 1}
             </button>
           ))}
-          <button
-            onClick={() => goToPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 border rounded hover:bg-gray-100"
-          >
+          <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 border rounded hover:bg-gray-100">
             Next
           </button>
         </div>
@@ -132,27 +113,13 @@ const RoleComponent = () => {
               <label htmlFor="roleName" className="block text-sm font-medium text-gray-700">
                 Role Name
               </label>
-              <input
-                type="text"
-                id="roleName"
-                placeholder="Enter Role Name"
-                value={roleName}
-                onChange={(e) => setRoleName(e.target.value)}
-                className="border p-2 rounded w-full mt-2"
-              />
+              <input type="text" id="roleName" placeholder="Enter Role Name" value={roleName} onChange={(e) => setRoleName(e.target.value)} className="border p-2 rounded w-full mt-2" />
             </div>
             <div className="flex justify-end gap-4">
-              <button
-                onClick={handleModalClose}
-                className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
-              >
+              <button onClick={handleModalClose} className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400">
                 Cancel
               </button>
-              <button
-                onClick={handleCreateOrUpdateRole}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                disabled={isSaving}
-              >
+              <button onClick={handleCreateOrUpdateRole} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" disabled={isSaving}>
                 {isSaving ? "Saving..." : editingRole ? "Update" : "Create"}
               </button>
             </div>

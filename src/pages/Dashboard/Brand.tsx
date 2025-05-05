@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FaPlus } from "react-icons/fa";
 
 type BrandType = {
   _id: string;
@@ -19,24 +20,25 @@ const Brand = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [brandName, setBrandName] = useState("");
   const [editingBrand, setEditingBrand] = useState<BrandType | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch brands from API
-  useEffect(() => {
-    const fetchBrands = async () => {
-      try {
-        const res = await axios.get("https://nicoindustrial.com/api/brand/list", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (res.data && Array.isArray(res.data.data)) {
-          setBrands(res.data.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch brands:", error);
+  const fetchBrands = async () => {
+    try {
+      const res = await axios.get("https://nicoindustrial.com/api/brand/list", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.data && Array.isArray(res.data.data)) {
+        setBrands(res.data.data);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch brands:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchBrands();
   }, []);
 
@@ -60,26 +62,64 @@ const Brand = () => {
     }
   };
 
-  const handleCreateOrUpdate = () => {
-    if (editingBrand) {
-      setBrands((prev) => prev.map((b) => (b._id === editingBrand._id ? { ...b, brandName } : b)));
-    } else {
-      const newBrand: BrandType = {
-        _id: `${brands.length + 1}`, // Temporary ID for local state only
-        brandName,
-      };
-      setBrands((prev) => [...prev, newBrand]);
+  const handleCreateOrUpdate = async () => {
+    setIsLoading(true);
+    try {
+      if (editingBrand) {
+        // Update existing brand
+        const response = await axios.put(
+          `https://nicoindustrial.com/api/brand/edit/${editingBrand._id}`,
+          { brandName },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data) {
+          await fetchBrands(); // Refresh the list
+          setIsModalOpen(false);
+        }
+      } else {
+        // Create new brand
+        const response = await axios.post(
+          "https://nicoindustrial.com/api/brand/save",
+          { brandName },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data) {
+          await fetchBrands(); // Refresh the list
+          setIsModalOpen(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error saving brand:", error);
+    } finally {
+      setIsLoading(false);
+      setBrandName("");
+      setEditingBrand(null);
     }
-
-    setIsModalOpen(false);
-    setBrandName("");
-    setEditingBrand(null);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this brand?");
-    if (confirmDelete) {
-      setBrands((prev) => prev.filter((b) => b._id !== id));
+    if (!confirmDelete) return;
+
+    try {
+      const response = await axios.delete(`https://nicoindustrial.com/api/brand/delete/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data) {
+        await fetchBrands(); // Refresh the list
+      }
+    } catch (error) {
+      console.error("Error deleting brand:", error);
     }
   };
 
@@ -97,7 +137,8 @@ const Brand = () => {
           }}
           className="border border-gray-300 p-2 rounded-md w-full max-w-xs"
         />
-        <button className="ml-4 bg-gray-100 text-black border border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400" onClick={() => handleModalOpen()}>
+        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" onClick={() => handleModalOpen()}>
+          <FaPlus />
           Create Brand
         </button>
       </div>
@@ -183,11 +224,12 @@ const Brand = () => {
                   setBrandName("");
                   setEditingBrand(null);
                 }}
-                className="px-4 py-2 bg-gray-300 rounded-md">
+                className="px-4 py-2 bg-gray-300 rounded-md"
+                disabled={isLoading}>
                 Cancel
               </button>
-              <button onClick={handleCreateOrUpdate} className="px-4 py-2 bg-blue-600 text-white rounded-md">
-                {editingBrand ? "Update" : "Create"}
+              <button onClick={handleCreateOrUpdate} className="px-4 py-2 bg-blue-600 text-white rounded-md" disabled={isLoading || !brandName.trim()}>
+                {isLoading ? "Processing..." : editingBrand ? "Update" : "Create"}
               </button>
             </div>
           </div>

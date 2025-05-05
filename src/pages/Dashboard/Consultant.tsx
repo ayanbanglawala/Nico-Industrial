@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FaPlus } from "react-icons/fa";
 
 const Consultant = () => {
   const [search, setSearch] = useState("");
@@ -145,7 +146,8 @@ const Consultant = () => {
           }}
           className="border border-gray-300 p-2 rounded-md w-full max-w-xs"
         />
-        <button onClick={handleModalOpen} className="ml-4 bg-gray-100 text-black border border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400">
+        <button onClick={handleModalOpen} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <FaPlus />
           Create Consultant
         </button>
       </div>

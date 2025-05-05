@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaPlus } from "react-icons/fa";
 
 const Inquiry = () => {
   const [status, setStatus] = useState("");
@@ -181,7 +182,8 @@ const Inquiry = () => {
           <button className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">Export to Excel</button>
         </div>
         <div className="flex gap-2 mt-6 sm:mt-0 w-full justify-end">
-          <button onClick={() => setShowModal(true)} className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <FaPlus />
             Create Inquiry
           </button>
         </div>

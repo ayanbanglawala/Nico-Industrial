@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FaPlus } from "react-icons/fa";
+import useCreateUsers from "../../hooks/useCreateUsers";
+import { toast } from "react-toastify";
 
 const Users = () => {
   const [search, setSearch] = useState("");
@@ -11,6 +14,7 @@ const Users = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const { loading, createUser } = useCreateUsers();
 
   const [newUser, setNewUser] = useState({
     name: "",
@@ -56,6 +60,7 @@ const Users = () => {
       setTotalPages(totalPages);
     } catch (error) {
       console.error("Failed to fetch users:", error);
+      toast.error("Failed to fetch users");
     }
   };
 
@@ -81,8 +86,10 @@ const Users = () => {
         }
       );
       fetchUsers(currentPage, itemsPerPage, search);
+      toast.success(`User ${!currentStatus ? "activated" : "deactivated"} successfully`);
     } catch (error) {
       console.error("Failed to toggle status:", error);
+      toast.error("Failed to toggle user status");
     }
   };
 
@@ -128,53 +135,26 @@ const Users = () => {
   };
 
   const handleCreateOrUpdateUser = async () => {
-    if (Object.values(newUser).some((field) => !field.trim())) {
-      alert("Please fill in all fields.");
+    if (!newUser.name || !newUser.email || (!isEditing && !newUser.password) || !newUser.role) {
+      toast.error("Please fill in all required fields");
       return;
     }
 
-    try {
-      if (isEditing && editingId !== null) {
-        await axios.put(
-          `https://nicoindustrial.com/api/user/editProfile`,
-          {
-            id: editingId,
-            name: newUser.name,
-            email: newUser.email,
-            password: newUser.password || undefined,
-            designation: newUser.designation,
-            mobileNo: newUser.mobile,
-            role: { name: newUser.role },
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      } else {
-        await axios.post(
-          `https://nicoindustrial.com/api/user/signup`,
-          {
-            name: newUser.name,
-            email: newUser.email,
-            password: newUser.password,
-            designation: newUser.designation,
-            mobileNo: newUser.mobile,
-            role: { name: newUser.role },
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
+    const userData = {
+      userId: editingId || undefined,
+      name: newUser.name,
+      email: newUser.email,
+      password: newUser.password,
+      designation: newUser.designation,
+      mobileNo: newUser.mobile,
+      roleId: newUser.role,
+    };
 
+    const result = await createUser(userData, isEditing);
+
+    if (result.success) {
       fetchUsers(currentPage, itemsPerPage, search);
       handleModalClose();
-    } catch (error) {
-      console.error("Failed to save user:", error);
     }
   };
 
@@ -186,9 +166,11 @@ const Users = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+        toast.success("User deleted successfully");
         fetchUsers(currentPage, itemsPerPage, search);
       } catch (error) {
         console.error("Failed to delete user:", error);
+        toast.error("Failed to delete user");
       }
     }
   };
@@ -206,8 +188,9 @@ const Users = () => {
           }}
           className="border p-2 rounded w-full max-w-xs"
         />
-        <button onClick={() => handleModalOpen()} className="ml-4 bg-gray-100 text-black border-1 border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400">
-          Create User
+        <button onClick={() => handleModalOpen()} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" disabled={loading}>
+          <FaPlus />
+          {loading ? "Processing..." : "Create User"}
         </button>
       </div>
 
@@ -216,8 +199,6 @@ const Users = () => {
           <tr className="text-center">
             <th className="border p-2">Sr No</th>
             <th className="border p-2">Username</th>
-            {/* <th className="border p-2">Email</th> */}
-            {/* <th className="border p-2">Designation</th> */}
             <th className="border p-2">Status</th>
             <th className="border p-2">Actions</th>
           </tr>
@@ -228,8 +209,6 @@ const Users = () => {
               <tr className="text-center hover:bg-gray-200" key={user.id}>
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{user.username}</td>
-                {/* <td className="p-2">{user.email}</td> */}
-                {/* <td className="p-2">{user.designation}</td> */}
                 <td className="p-2 text-center">
                   <button
                     onClick={() => toggleStatus(user.id, user.status)}
@@ -249,7 +228,7 @@ const Users = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={6} className="text-center p-4">
+              <td colSpan={4} className="text-center p-4">
                 No users found.
               </td>
             </tr>
@@ -328,7 +307,6 @@ const Users = () => {
                 />
               </div>
             ))}
-            {/* Role Dropdown */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Role *</label>
               <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })} className="border p-2 rounded w-full mt-2" required>
@@ -343,8 +321,8 @@ const Users = () => {
               <button onClick={handleModalClose} className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400">
                 Cancel
               </button>
-              <button onClick={handleCreateOrUpdateUser} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                {isEditing ? "Update" : "Create"}
+              <button onClick={handleCreateOrUpdateUser} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" disabled={loading}>
+                {loading ? "Processing..." : isEditing ? "Update" : "Create"}
               </button>
             </div>
           </div>
