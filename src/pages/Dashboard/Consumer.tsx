@@ -1,5 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
+interface CreatedByType {
+  id: number;
+  name: string;
+  email: string;
+  designation: string;
+  mobileNo: string;
+  active: boolean;
+  deleted: boolean;
+}
+
 interface ConsumerType {
+  consumerId: number;
+  consumerName: string;
+  emailId: string;
+  address: string;
+  contact: string;
+  createdAt: string;
+  createdBy: CreatedByType;
+}
+
+interface EditableConsumer {
   id: number;
   name: string;
   email: string;
@@ -10,56 +32,72 @@ interface ConsumerType {
 
 const Consumer = () => {
   const [search, setSearch] = useState("");
+  const [filter1, setFilter1] = useState("");
+  const [filter2, setFilter2] = useState("");
+  const token = localStorage.getItem("token");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editConsumerId, setEditConsumerId] = useState<number | null>(null);
+  const [consumers, setConsumers] = useState<ConsumerType[]>([]);
   const [newConsumer, setNewConsumer] = useState({
     name: "",
     email: "",
     address: "",
     phone: "",
   });
-  const [consumers, setConsumers] = useState(() =>
-    Array.from({ length: 27 }, (_, i) => ({
-      id: i + 1,
-      name: `Consumer ${i + 1}`,
-      email: `consumer${i + 1}@example.com`,
-      address: `consumer address ${i + 1}`,
-      phone: `+91 9${Math.floor(Math.random() * 1000000000)}`,
-      createdAt: "2025-05-01",
-    }))
-  );
-  const [editConsumerId, setEditConsumerId] = useState<number | null>(null); // Track which consumer we're editing
 
   const consumersPerPage = 10;
 
-  const filteredConsumers = consumers.filter((consumer) => consumer.name.toLowerCase().includes(search.toLowerCase()));
+  useEffect(() => {
+    const fetchConsumers = async () => {
+      try {
+        const response = await axios.get("https://nicoindustrial.com/api/consumer/all",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            params: {
+              page: currentPage,
+              size: consumersPerPage,
+              search: search, // Include search query
+              filter1: filter1, // Include filter1 if necessary
+              filter2: filter2, // Include filter2 if necessary
+            },
+          }
+        );
+        if (response.data?.statusCode === 200) {
+          setConsumers(response.data.data.consumers);
+        }
+      } catch (error) {
+        console.error("Error fetching consumers:", error);
+      }
+    };
+
+    fetchConsumers();
+  }, []);
+
+  const filteredConsumers = consumers.filter((consumer) =>
+    consumer.consumerName.toLowerCase().includes(search.toLowerCase())
+  );
 
   const totalPages = Math.ceil(filteredConsumers.length / consumersPerPage);
   const startIndex = (currentPage - 1) * consumersPerPage;
   const endIndex = Math.min(startIndex + consumersPerPage, filteredConsumers.length);
   const currentConsumers = filteredConsumers.slice(startIndex, endIndex);
 
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-
-  const handlePageClick = (pageNum: number) => {
-    setCurrentPage(pageNum);
-  };
+  const handlePrev = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+  const handleNext = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
+  const handlePageClick = (pageNum: number) => setCurrentPage(pageNum);
 
   const handleCreateConsumer = () => {
-    setEditConsumerId(null); // Reset edit mode
+    setEditConsumerId(null);
     setNewConsumer({ name: "", email: "", address: "", phone: "" });
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setNewConsumer({ name: "", email: "", address: "", phone: "" }); // Reset form after closing
+    setNewConsumer({ name: "", email: "", address: "", phone: "" });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,14 +107,36 @@ const Consumer = () => {
 
   const handleSubmit = () => {
     if (editConsumerId !== null) {
-      // Update existing consumer
-      setConsumers((prev) => prev.map((consumer) => (consumer.id === editConsumerId ? { ...consumer, ...newConsumer } : consumer)));
+      setConsumers((prev) =>
+        prev.map((consumer) =>
+          consumer.consumerId === editConsumerId
+            ? {
+                ...consumer,
+                consumerName: newConsumer.name,
+                emailId: newConsumer.email,
+                address: newConsumer.address,
+                contact: newConsumer.phone,
+              }
+            : consumer
+        )
+      );
     } else {
-      // Add new consumer
-      const newEntry = {
-        ...newConsumer,
-        id: consumers.length ? consumers[consumers.length - 1].id + 1 : 1,
-        createdAt: new Date().toISOString().split("T")[0],
+      const newEntry: ConsumerType = {
+        consumerId: consumers.length ? consumers[consumers.length - 1].consumerId + 1 : 1,
+        consumerName: newConsumer.name,
+        emailId: newConsumer.email,
+        address: newConsumer.address,
+        contact: newConsumer.phone,
+        createdAt: new Date().toISOString(),
+        createdBy: {
+          id: 0,
+          name: "Unknown",
+          email: "",
+          designation: "",
+          mobileNo: "",
+          active: false,
+          deleted: false,
+        },
       };
       setConsumers((prev) => [...prev, newEntry]);
     }
@@ -85,20 +145,25 @@ const Consumer = () => {
   };
 
   const handleEdit = (consumer: ConsumerType) => {
-    setEditConsumerId(consumer.id);
-    setNewConsumer(consumer);
+    setEditConsumerId(consumer.consumerId);
+    setNewConsumer({
+      name: consumer.consumerName,
+      email: consumer.emailId,
+      address: consumer.address,
+      phone: consumer.contact,
+    });
     setIsModalOpen(true);
   };
 
   const handleDelete = (id: number) => {
     if (confirm("Are you sure you want to delete this consumer?")) {
-      setConsumers((prev) => prev.filter((consumer) => consumer.id !== id));
+      setConsumers((prev) => prev.filter((c) => c.consumerId !== id));
     }
   };
 
   return (
     <div className="p-4">
-      {/* Top Controls */}
+      {/* Search + Add */}
       <div className="flex justify-between items-center mb-4">
         <input
           type="text"
@@ -110,16 +175,19 @@ const Consumer = () => {
           }}
           className="border border-gray-300 p-2 rounded-md w-full max-w-xs"
         />
-        <button onClick={handleCreateConsumer} className="ml-4 bg-gray-100 text-black border border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400">
+        <button
+          onClick={handleCreateConsumer}
+          className="ml-4 bg-gray-100 text-black border border-gray-400 px-4 py-2 rounded-md hover:bg-gray-400"
+        >
           Create Consumer
         </button>
       </div>
 
-      {/* Consumer Table */}
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
           <thead className="bg-gray-300">
-            <tr>
+            <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Name</th>
               <th className="border p-2">Email</th>
@@ -132,18 +200,24 @@ const Consumer = () => {
           <tbody>
             {currentConsumers.length ? (
               currentConsumers.map((consumer, index) => (
-                <tr key={consumer.id}>
+                <tr className="text-center" key={consumer.consumerId}>
                   <td className="p-2">{startIndex + index + 1}</td>
-                  <td className="p-2">{consumer.name}</td>
-                  <td className="p-2">{consumer.email}</td>
+                  <td className="p-2">{consumer.consumerName}</td>
+                  <td className="p-2">{consumer.emailId}</td>
                   <td className="p-2">{consumer.address}</td>
-                  <td className="p-2">{consumer.phone}</td>
-                  <td className="p-2">{consumer.createdAt}</td>
+                  <td className="p-2">{consumer.contact}</td>
+                  <td className="p-2">{consumer.createdBy?.name || "N/A"}</td>
                   <td className="p-2">
-                    <button onClick={() => handleEdit(consumer)} className="text-blue-600 hover:underline mr-2">
+                    <button
+                      onClick={() => handleEdit(consumer)}
+                      className="text-blue-600 hover:underline mr-2"
+                    >
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(consumer.id)} className="text-red-600 hover:underline">
+                    <button
+                      onClick={() => handleDelete(consumer.consumerId)}
+                      className="text-red-600 hover:underline"
+                    >
                       Delete
                     </button>
                   </td>
@@ -164,48 +238,88 @@ const Consumer = () => {
           <p className="text-sm text-gray-600">
             Showing {startIndex + 1} to {endIndex} of {filteredConsumers.length} results
           </p>
-
           <div className="flex gap-2">
-            <button onClick={handlePrev} disabled={currentPage === 1} className={`px-3 py-1 border rounded ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
+            <button
+              onClick={handlePrev}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 border rounded ${
+                currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"
+              }`}
+            >
               Previous
             </button>
-
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-              <button key={pageNum} onClick={() => handlePageClick(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
+              <button
+                key={pageNum}
+                onClick={() => handlePageClick(pageNum)}
+                className={`px-3 py-1 border rounded ${
+                  currentPage === pageNum ? "bg-blue-600 text-white" : "hover:bg-gray-100"
+                }`}
+              >
                 {pageNum}
               </button>
             ))}
-
             <button
               onClick={handleNext}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1 border rounded ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
+              className={`px-3 py-1 border rounded ${
+                currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"
+              }`}
+            >
               Next
             </button>
           </div>
         </div>
       </div>
 
-      {/* Modal for Creating/Editing Consumer */}
+      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-[#00000071] flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-96">
             <h2 className="text-xl mb-4">{editConsumerId ? "Edit Consumer" : "Create Consumer"}</h2>
             <div className="mb-4">
               <label className="block text-sm text-gray-600">Consumer Name</label>
-              <input type="text" name="name" placeholder="Consumer Name" value={newConsumer.name} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
+              <input
+                type="text"
+                name="name"
+                placeholder="Consumer Name"
+                value={newConsumer.name}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 w-full rounded-md"
+              />
             </div>
             <div className="mb-4">
               <label className="block text-sm text-gray-600">Email</label>
-              <input type="email" name="email" placeholder="Email" value={newConsumer.email} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={newConsumer.email}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 w-full rounded-md"
+              />
             </div>
             <div className="mb-4">
               <label className="block text-sm text-gray-600">Address</label>
-              <input type="text" name="address" placeholder="Address" value={newConsumer.address} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
+              <input
+                type="text"
+                name="address"
+                placeholder="Address"
+                value={newConsumer.address}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 w-full rounded-md"
+              />
             </div>
             <div className="mb-4">
               <label className="block text-sm text-gray-600">Contact</label>
-              <input type="text" name="phone" placeholder="Contact" value={newConsumer.phone} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
+              <input
+                type="text"
+                name="phone"
+                placeholder="Contact"
+                value={newConsumer.phone}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 w-full rounded-md"
+              />
             </div>
             <div className="flex justify-between">
               <button onClick={handleCloseModal} className="px-4 py-2 bg-gray-300 text-black rounded-md">
