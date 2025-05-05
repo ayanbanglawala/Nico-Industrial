@@ -57,7 +57,7 @@ const Inquiry = () => {
   });
   const [editId, setEditId] = useState(null);
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -96,7 +96,7 @@ const Inquiry = () => {
     setShowModal(false);
   };
 
-  const handleEdit = (inq) => {
+  const handleEdit = (inq: any) => {
     setForm({
       projectName: inq.projectName,
       status: inq.status,
