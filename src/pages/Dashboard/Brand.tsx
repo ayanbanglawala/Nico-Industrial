@@ -5,8 +5,11 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 type BrandType = {
-  _id: string;
+  brandId: number;
   brandName: string;
+  products: any;
+  createdAt: string;
+  updatedAt: string | null;
 };
 
 const Brand = () => {
@@ -48,88 +51,123 @@ const Brand = () => {
     fetchBrands();
   }, []);
 
-  const filtered = brands.filter((brand) =>
-    brand.brandName.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = brands.filter((brand) => brand.brandName.toLowerCase().includes(search.toLowerCase()));
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const paginated = filtered.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const handleModalOpen = (brand: BrandType | null = null) => {
-    setIsModalOpen(true);
+  const handleModalOpen = async (brand: BrandType | null = null) => {
     if (brand) {
-      setBrandName(brand.brandName);
-      setEditingBrand(brand);
+      try {
+        // First check if we have all needed data already
+        if (brand.brandId && brand.brandName) {
+          setBrandName(brand.brandName);
+          setEditingBrand(brand);
+          setIsModalOpen(true);
+          return;
+        }
+
+        // Only fetch if we don't have complete data
+        const response = await axios.get(`https://nicoindustrial.com/api/brand/${brand.brandId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const brandData = response.data.data;
+        console.log("Fetched brand data:", brandData);
+
+        setBrandName(brandData.brandName);
+        setEditingBrand({
+          brandId: brandData.brandId,
+          brandName: brandData.brandName,
+          products: brandData.products,
+          createdAt: brandData.createdAt,
+          updatedAt: brandData.updatedAt,
+        });
+
+        setIsModalOpen(true);
+      } catch (error) {
+        console.error("Failed to fetch brand data:", error);
+        toast.error("Error fetching brand data", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
     } else {
+      // For creating new brand
       setBrandName("");
       setEditingBrand(null);
+      setIsModalOpen(true);
     }
   };
+  const userId = localStorage.getItem("userId");
 
   const handleCreateOrUpdate = async () => {
-    if (!brandName.trim()) return;
+    if (!brandName.trim()) {
+      toast.error("Brand name is required", { position: "top-right", autoClose: 3000 });
+      return;
+    }
 
     setIsLoading(true);
 
-    const url =
-      editingBrand && editingBrand._id
-        ? `https://nicoindustrial.com/api/brand/edit/${editingBrand._id}?userId=1`
-        : `https://nicoindustrial.com/api/brand/save?userId=1`;
-
     try {
-      const res = await axios({
-        method: editingBrand ? "PUT" : "POST",
+      const url = editingBrand ? `https://nicoindustrial.com/api/brand/edit/${editingBrand.brandId}?userId=${userId}` : `https://nicoindustrial.com/api/brand`;
+
+      const method = editingBrand ? "PUT" : "POST";
+      console.log("URL:", url);
+
+      console.log("Save response:", method);
+      const response = await axios({
+        method,
         url,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        data: { brandName },
+        data: {
+          brandName,
+          userId, // Include userId if your backend requires it
+        },
       });
 
-      if (res.data) {
-        toast.success(
-          res.data.message || `Brand ${editingBrand ? "updated" : "created"} successfully`
-        );
-        setIsModalOpen(false);
-        setBrandName("");
-        setEditingBrand(null);
-        fetchBrands();
-      }
-    } catch (error) {
-      toast.error("Error saving brand");
+      toast.success(response.data?.message || `Brand ${editingBrand ? "updated" : "created"} successfully`, { position: "top-right", autoClose: 3000 });
+
+      setIsModalOpen(false);
+      setBrandName("");
+      setEditingBrand(null);
+      fetchBrands();
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Error saving brand";
+      toast.error(errorMessage, { position: "top-right", autoClose: 3000 });
       console.error("Save error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!id || id === "undefined") {
-      toast.error("Invalid ID");
-      console.warn("Attempted to delete with invalid ID:", id);
+  const handleDelete = async (brandId: number) => {
+    if (!brandId) {
+      toast.error("Invalid brand ID");
+      console.warn("Attempted to delete with invalid ID:", brandId);
       return;
     }
 
     try {
-      const response = await axios.delete(
-        `https://nicoindustrial.com/api/brand/delete/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.delete(`https://nicoindustrial.com/api/brand/${brandId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       if (response.data) {
         toast.success(response.data.message || "Brand deleted successfully!");
-        setBrands((prevBrands) => prevBrands.filter((brand) => brand._id !== id));
+        setBrands((prevBrands) => prevBrands.filter((brand) => brand.brandId !== brandId));
       }
     } catch (error) {
       toast.error("Error deleting brand. Please try again.");
@@ -151,10 +189,7 @@ const Brand = () => {
           }}
           className="border border-gray-300 p-2 rounded-md w-full max-w-xs"
         />
-        <button
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          onClick={() => handleModalOpen()}
-        >
+        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" onClick={() => handleModalOpen()}>
           <FaPlus />
           Create Brand
         </button>
@@ -172,20 +207,14 @@ const Brand = () => {
           <tbody>
             {paginated.length ? (
               paginated.map((brand, index) => (
-                <tr className="text-center hover:bg-gray-200" key={brand._id}>
+                <tr className="text-center hover:bg-gray-200" key={brand.brandId}>
                   <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="p-2">{brand.brandName}</td>
                   <td className="p-2 space-x-2">
-                    <button
-                      className="bg-blue-500 text-white px-2 py-1 rounded"
-                      onClick={() => handleModalOpen(brand)}
-                    >
+                    <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => handleModalOpen(brand)}>
                       Edit
                     </button>
-                    <button
-                      className="bg-red-600 text-white px-2 py-1 rounded"
-                      onClick={() => handleDelete(brand._id)}
-                    >
+                    <button className="bg-red-600 text-white px-2 py-1 rounded" onClick={() => handleDelete(brand.brandId)}>
                       Delete
                     </button>
                   </td>
@@ -204,26 +233,15 @@ const Brand = () => {
 
       <div className="flex justify-between items-center mt-6">
         <p className="text-sm text-gray-600">
-          Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-          {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length} results
+          Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length} results
         </p>
         <div className="flex gap-2">
-          <button
-            onClick={() => goToPage(currentPage - 1)}
-            className="px-3 py-1 border rounded hover:bg-gray-100"
-            disabled={currentPage === 1}
-          >
+          <button onClick={() => goToPage(currentPage - 1)} className="px-3 py-1 border rounded hover:bg-gray-100" disabled={currentPage === 1}>
             Previous
           </button>
 
           {[...Array(totalPages).keys()].slice(0, 3).map((_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => goToPage(i + 1)}
-              className={`px-3 py-1 border rounded ${
-                currentPage === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"
-              }`}
-            >
+            <button key={i + 1} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
               {i + 1}
             </button>
           ))}
@@ -231,19 +249,12 @@ const Brand = () => {
           {totalPages > 4 && <span className="px-2 py-1">...</span>}
 
           {totalPages > 3 && (
-            <button
-              onClick={() => goToPage(totalPages)}
-              className="px-3 py-1 border rounded hover:bg-gray-100"
-            >
+            <button onClick={() => goToPage(totalPages)} className="px-3 py-1 border rounded hover:bg-gray-100">
               {totalPages}
             </button>
           )}
 
-          <button
-            onClick={() => goToPage(currentPage + 1)}
-            className="px-3 py-1 border rounded hover:bg-gray-100"
-            disabled={currentPage === totalPages}
-          >
+          <button onClick={() => goToPage(currentPage + 1)} className="px-3 py-1 border rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
             Next
           </button>
         </div>
@@ -252,31 +263,16 @@ const Brand = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-opacity-50 bg-[#00000071] backdrop-blur-xs flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-md w-96">
-            <h3 className="text-lg font-medium mb-4">
-              {editingBrand ? "Edit Brand" : "Create New Brand"}
-            </h3>
+            <h3 className="text-lg font-medium mb-4">{editingBrand ? "Edit Brand" : "Create New Brand"}</h3>
             <div className="mb-4">
               <label className="block text-sm font-medium">Brand Name</label>
-              <input
-                type="text"
-                value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
-                className="border border-gray-300 p-2 rounded-md w-full"
-                placeholder="Enter brand name"
-              />
+              <input type="text" value={brandName} onChange={(e) => setBrandName(e.target.value)} className="border border-gray-300 p-2 rounded-md w-full" placeholder="Enter brand name" />
             </div>
             <div className="flex justify-end gap-2">
-              <button
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md"
-                onClick={() => setIsModalOpen(false)}
-              >
+              <button className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md" onClick={() => setIsModalOpen(false)}>
                 Cancel
               </button>
-              <button
-                className={`px-4 py-2 ${isLoading ? "bg-gray-400" : "bg-blue-600"} text-white rounded-md`}
-                onClick={handleCreateOrUpdate}
-                disabled={isLoading}
-              >
+              <button className={`px-4 py-2 ${isLoading ? "bg-gray-400" : "bg-blue-600"} text-white rounded-md`} onClick={handleCreateOrUpdate} disabled={isLoading}>
                 {isLoading ? "Saving..." : "Save"}
               </button>
             </div>

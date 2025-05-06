@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaPlus } from "react-icons/fa";
-import useCreateUsers from "../../hooks/useCreateUsers";
 import { toast } from "react-toastify";
 
 const Users = () => {
@@ -14,7 +13,7 @@ const Users = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const { loading, createUser } = useCreateUsers();
+  const [loading, setLoading] = useState(false);
 
   const [newUser, setNewUser] = useState({
     name: "",
@@ -205,11 +204,17 @@ const Users = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        toast.success("User deleted successfully");
+        toast.success("User deleted successfully", {
+          position: "top-right",
+          autoClose: 3000,
+        });
         fetchUsers(currentPage, itemsPerPage, search);
       } catch (error) {
         console.error("Failed to delete user:", error);
-        toast.error("Failed to delete user");
+        toast.error("Error deleting user", {
+          position: "top-right",
+          autoClose: 3000,
+        });
       }
     }
   };
