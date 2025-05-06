@@ -93,19 +93,36 @@ const Users = () => {
     }
   };
 
-  const handleModalOpen = (user?: any) => {
+  const handleModalOpen = async (user?: any) => {
     if (user) {
-      setNewUser({
-        name: user.username,
-        email: user.email || "",
-        password: "",
-        designation: user.designation || "",
-        mobile: user.mobile || "",
-        role: user.role || "",
-      });
-      setIsEditing(true);
-      setEditingId(user.id);
+      try {
+        // Fetch the full user data from the API
+        const response = await axios.get(`https://nicoindustrial.com/api/user/get/${user.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const userData = response.data.data;
+
+        setNewUser({
+          name: userData.name,
+          email: userData.email,
+          password: "", // Password is intentionally left blank for edits
+          designation: userData.designation,
+          mobile: userData.mobileNo,
+          role: userData.role?.id || userData.roleId, // Handle both role object and roleId
+        });
+
+        setIsEditing(true);
+        setEditingId(userData.Id || userData.userId || userData.id || userData.userid);
+        setIsModalOpen(true);
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        toast.error("Error fetching user data", { position: "top-right", autoClose: 3000 });
+      }
     } else {
+      // For creating new user
       setNewUser({
         name: "",
         email: "",
@@ -116,8 +133,8 @@ const Users = () => {
       });
       setIsEditing(false);
       setEditingId(null);
+      setIsModalOpen(true);
     }
-    setIsModalOpen(true);
   };
 
   const handleModalClose = () => {
@@ -135,26 +152,48 @@ const Users = () => {
   };
 
   const handleCreateOrUpdateUser = async () => {
-    if (!newUser.name || !newUser.email || (!isEditing && !newUser.password) || !newUser.role) {
-      toast.error("Please fill in all required fields");
+    const requiredFields = ["name", "email", "designation", "role"];
+    for (let field of requiredFields) {
+      if (!newUser[field as keyof typeof newUser]) {
+        toast.error(`Please fill in the ${field} field.`, { position: "top-right", autoClose: 3000 });
+        return;
+      }
+    }
+
+    if (!isEditing && !newUser.password) {
+      toast.error("Please fill in the password field.", { position: "top-right", autoClose: 3000 });
       return;
     }
 
-    const userData = {
-      userId: editingId || undefined,
-      name: newUser.name,
-      email: newUser.email,
-      password: newUser.password,
-      designation: newUser.designation,
-      mobileNo: newUser.mobile,
-      roleId: newUser.role,
-    };
+    try {
+      const submissionData = {
+        id: editingId || undefined,
+        name: newUser.name,
+        email: newUser.email,
+        password: newUser.password || undefined,
+        designation: newUser.designation,
+        role: { id: newUser.role },
+        mobileNo: newUser.mobile, // This should match your API expectation
+      };
 
-    const result = await createUser(userData, isEditing);
+      let response;
+      if (isEditing) {
+        response = await axios.put(`https://nicoindustrial.com/api/user/editProfile`, submissionData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        response = await axios.post(`https://nicoindustrial.com/api/user/signup`, submissionData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
 
-    if (result.success) {
-      fetchUsers(currentPage, itemsPerPage, search);
+      toast.success(response.data.message || (isEditing ? "User updated successfully" : "User created successfully"), { position: "top-right", autoClose: 3000 });
+
       handleModalClose();
+      fetchUsers(currentPage, itemsPerPage, search);
+    } catch (error: any) {
+      const errorMessage = (error.response && error.response.data && error.response.data.message) || "Error processing the request. Please try again.";
+      toast.error(errorMessage, { position: "top-right", autoClose: 3000 });
     }
   };
 
@@ -311,10 +350,10 @@ const Users = () => {
               <label className="block text-sm font-medium text-gray-700">Role *</label>
               <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })} className="border p-2 rounded w-full mt-2" required>
                 <option value="">Select Role</option>
-                <option value="user">User</option>
-                <option value="sales">Sales</option>
-                <option value="admin">Admin</option>
-                <option value="accounts">Accounts</option>
+                <option value="1">User</option>
+                <option value="2">Sales</option>
+                <option value="3">Admin</option>
+                <option value="4">Accounts</option>
               </select>
             </div>
             <div className="flex justify-end gap-4">
