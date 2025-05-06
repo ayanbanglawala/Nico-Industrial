@@ -76,9 +76,7 @@ const Consumer = () => {
   }, []);
 
   // const filteredConsumers = consumers.filter((consumer) => consumer.consumerName.toLowerCase().includes(search.toLowerCase()));
-const filteredConsumers = consumers.filter((consumer) =>
-  consumer.consumerName && consumer.consumerName.toLowerCase().includes(search.toLowerCase())
-);
+  const filteredConsumers = consumers.filter((consumer) => consumer.consumerName && consumer.consumerName.toLowerCase().includes(search.toLowerCase()));
 
   const totalPages = Math.ceil(filteredConsumers.length / consumersPerPage);
   const startIndex = (currentPage - 1) * consumersPerPage;
