@@ -389,7 +389,7 @@ const FollowUpTable = () => {
 
               <div className="mb-4">
                 <label className="block text-sm font-medium">Due Date</label>
-                <input type="date" name="dueDate" value={formData.dueDate} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
+                <input type="datetime-local" name="dueDate" value={formData.dueDate} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
               </div>
 
               <div className="flex justify-end gap-4">

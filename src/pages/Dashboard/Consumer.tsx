@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface CreatedByType {
   id: number;
@@ -22,60 +24,92 @@ interface ConsumerType {
   createdBy: CreatedByType;
 }
 
-interface EditableConsumer {
-  id: number;
-  name: string;
-  email: string;
-  address: string;
-  phone: string;
-  createdAt: string;
-}
-
 const Consumer = () => {
   const [search, setSearch] = useState("");
   const [filter1, setFilter1] = useState("");
   const [filter2, setFilter2] = useState("");
   const token = localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editConsumerId, setEditConsumerId] = useState<number | null>(null);
   const [consumers, setConsumers] = useState<ConsumerType[]>([]);
   const [newConsumer, setNewConsumer] = useState({
-    name: "",
-    email: "",
+    consumerName: "",
+    emailId: "",
     address: "",
-    phone: "",
+    contact: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const consumersPerPage = 10;
 
-  useEffect(() => {
-    const fetchConsumers = async () => {
-      try {
-        const response = await axios.get("https://nicoindustrial.com/api/consumer/all", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            page: currentPage,
-            size: consumersPerPage,
-            search: search, // Include search query
-            filter1: filter1, // Include filter1 if necessary
-            filter2: filter2, // Include filter2 if necessary
-          },
-        });
-        if (response.data?.statusCode === 200) {
-          setConsumers(response.data.data.consumers);
-        }
-      } catch (error) {
-        console.error("Error fetching consumers:", error);
+  const fetchConsumers = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`https://nicoindustrial.com/api/consumer/all`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          page: currentPage,
+          size: consumersPerPage,
+          search: search,
+          filter1: filter1,
+          filter2: filter2,
+        },
+      });
+      if (response.data?.statusCode === 200) {
+        setConsumers(response.data.data.consumers);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching consumers:", error);
+      toast.error("Failed to fetch consumers", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        style: { backgroundColor: "red" },
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchConsumers();
-  }, []);
+  }, [currentPage, search, filter1, filter2]);
 
-  // const filteredConsumers = consumers.filter((consumer) => consumer.consumerName.toLowerCase().includes(search.toLowerCase()));
+  const validateForm = () => {
+    if (!newConsumer.consumerName.trim()) {
+      toast.error("Consumer name is required", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        style: { backgroundColor: "red" },
+      });
+      return false;
+    }
+    if (!newConsumer.emailId.trim()) {
+      toast.error("Email is required", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        style: { backgroundColor: "red" },
+      });
+      return false;
+    }
+    if (!newConsumer.contact.trim()) {
+      toast.error("Contact number is required", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        style: { backgroundColor: "red" },
+      });
+      return false;
+    }
+    return true;
+  };
+
   const filteredConsumers = consumers.filter((consumer) => consumer.consumerName && consumer.consumerName.toLowerCase().includes(search.toLowerCase()));
 
   const totalPages = Math.ceil(filteredConsumers.length / consumersPerPage);
@@ -89,13 +123,23 @@ const Consumer = () => {
 
   const handleCreateConsumer = () => {
     setEditConsumerId(null);
-    setNewConsumer({ name: "", email: "", address: "", phone: "" });
+    setNewConsumer({
+      consumerName: "",
+      emailId: "",
+      address: "",
+      contact: "",
+    });
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setNewConsumer({ name: "", email: "", address: "", phone: "" });
+    setNewConsumer({
+      consumerName: "",
+      emailId: "",
+      address: "",
+      contact: "",
+    });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,59 +147,129 @@ const Consumer = () => {
     setNewConsumer((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    if (editConsumerId !== null) {
-      setConsumers((prev) =>
-        prev.map((consumer) =>
-          consumer.consumerId === editConsumerId
-            ? {
-                ...consumer,
-                consumerName: newConsumer.name,
-                emailId: newConsumer.email,
-                address: newConsumer.address,
-                contact: newConsumer.phone,
-              }
-            : consumer
-        )
-      );
-    } else {
-      const newEntry: ConsumerType = {
-        consumerId: consumers.length ? consumers[consumers.length - 1].consumerId + 1 : 1,
-        consumerName: newConsumer.name,
-        emailId: newConsumer.email,
-        address: newConsumer.address,
-        contact: newConsumer.phone,
-        createdAt: new Date().toISOString(),
-        createdBy: {
-          id: 0,
-          name: "Unknown",
-          email: "",
-          designation: "",
-          mobileNo: "",
-          active: false,
-          deleted: false,
-        },
-      };
-      setConsumers((prev) => [...prev, newEntry]);
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    if (!userId) {
+      toast.error("User ID not found in localStorage", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        style: { backgroundColor: "red" },
+      });
+      return;
     }
 
-    handleCloseModal();
+    try {
+      let response;
+      if (editConsumerId !== null) {
+        // Update consumer
+        response = await axios.put(
+          `https://nicoindustrial.com/api/consumer/update/${editConsumerId}`,
+          { ...newConsumer, createdBy: { id: parseInt(userId, 10) } },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const successMessage = response.data.message || "Consumer updated successfully";
+        toast.success(successMessage, {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          className: "toast-success",
+          style: { backgroundColor: "green" },
+        });
+      } else {
+        // Create new consumer
+        response = await axios.post(
+          `https://nicoindustrial.com/api/consumer/save`,
+          { ...newConsumer, createdBy: { id: parseInt(userId, 10) } },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const successMessage = response.data.message || "Consumer created successfully";
+        toast.success(successMessage, {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          className: "toast-success",
+          style: { backgroundColor: "green" },
+        });
+      }
+
+      handleCloseModal();
+      fetchConsumers();
+    } catch (error) {
+      const backendError = (error as any).response?.data?.message || "Error submitting consumer. Please try again later.";
+      toast.error(backendError, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        style: { backgroundColor: "red" },
+      });
+    }
   };
 
-  const handleEdit = (consumer: ConsumerType) => {
-    setEditConsumerId(consumer.consumerId);
-    setNewConsumer({
-      name: consumer.consumerName,
-      email: consumer.emailId,
-      address: consumer.address,
-      phone: consumer.contact,
-    });
-    setIsModalOpen(true);
+  const handleEdit = async (consumer: ConsumerType) => {
+    try {
+      const response = await axios.get(`https://nicoindustrial.com/api/consumer/get/${consumer.consumerId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const consumerData = response.data.data;
+
+      setNewConsumer({
+        consumerName: consumerData.consumerName || "",
+        emailId: consumerData.emailId || "",
+        address: consumerData.address || "",
+        contact: consumerData.contact || "",
+      });
+
+      setEditConsumerId(consumer.consumerId);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching consumer details:", error);
+      toast.error("Failed to fetch consumer details", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        style: { backgroundColor: "red" },
+      });
+    }
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this consumer?")) {
-      setConsumers((prev) => prev.filter((c) => c.consumerId !== id));
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this consumer?")) return;
+
+    try {
+      const response = await axios.delete(`https://nicoindustrial.com/api/consumer/delete/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const successMessage = response.data.message || "Consumer deleted successfully";
+      toast.success(successMessage, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        className: "toast-success",
+        style: { backgroundColor: "green" },
+      });
+      fetchConsumers();
+    } catch (error) {
+      const backendError = (error as any).response?.data?.message || "Error deleting consumer. Please try again later.";
+      toast.error(backendError, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        style: { backgroundColor: "red" },
+      });
     }
   };
 
@@ -178,6 +292,13 @@ const Consumer = () => {
           Create Consumer
         </button>
       </div>
+
+      {/* Loading indicator */}
+      {loading && (
+        <div className="text-center py-4">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      )}
 
       {/* Table */}
       <div className="overflow-x-auto">
@@ -203,11 +324,11 @@ const Consumer = () => {
                   <td className="p-2">{consumer.address}</td>
                   <td className="p-2">{consumer.contact}</td>
                   <td className="p-2">{consumer.createdBy?.name || "N/A"}</td>
-                  <td className="p-2">
-                    <button onClick={() => handleEdit(consumer)} className="bg-blue-500 text-white px-2 py-1 rounded">
+                  <td className="p-2 space-x-2">
+                    <button onClick={() => handleEdit(consumer)} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(consumer.consumerId)} className="bg-red-600 text-white px-2 py-1 rounded">
+                    <button onClick={() => handleDelete(consumer.consumerId)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
                       Delete
                     </button>
                   </td>
@@ -216,7 +337,7 @@ const Consumer = () => {
             ) : (
               <tr>
                 <td colSpan={7} className="text-center p-4">
-                  No consumers found.
+                  {loading ? "Loading..." : "No consumers found."}
                 </td>
               </tr>
             )}
@@ -251,28 +372,56 @@ const Consumer = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-[#00000071] flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-96">
-            <h2 className="text-xl mb-4">{editConsumerId ? "Edit Consumer" : "Create Consumer"}</h2>
+            <h2 className="text-xl mb-4 font-semibold">{editConsumerId ? "Edit Consumer" : "Create Consumer"}</h2>
             <div className="mb-4">
-              <label className="block text-sm text-gray-600">Consumer Name</label>
-              <input type="text" name="name" placeholder="Consumer Name" value={newConsumer.name} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
+              <label className="block text-sm text-gray-600 mb-1">Consumer Name *</label>
+              <input
+                type="text"
+                name="consumerName"
+                placeholder="Consumer Name"
+                value={newConsumer.consumerName}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
             <div className="mb-4">
-              <label className="block text-sm text-gray-600">Email</label>
-              <input type="email" name="email" placeholder="Email" value={newConsumer.email} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
+              <label className="block text-sm text-gray-600 mb-1">Email *</label>
+              <input
+                type="email"
+                name="emailId"
+                placeholder="Email"
+                value={newConsumer.emailId}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
             <div className="mb-4">
-              <label className="block text-sm text-gray-600">Address</label>
-              <input type="text" name="address" placeholder="Address" value={newConsumer.address} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
+              <label className="block text-sm text-gray-600 mb-1">Address</label>
+              <input
+                type="text"
+                name="address"
+                placeholder="Address"
+                value={newConsumer.address}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
             <div className="mb-4">
-              <label className="block text-sm text-gray-600">Contact</label>
-              <input type="text" name="phone" placeholder="Contact" value={newConsumer.phone} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md" />
+              <label className="block text-sm text-gray-600 mb-1">Contact *</label>
+              <input
+                type="text"
+                name="contact"
+                placeholder="Contact"
+                value={newConsumer.contact}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
             <div className="flex justify-between">
-              <button onClick={handleCloseModal} className="px-4 py-2 bg-gray-300 text-black rounded-md">
+              <button onClick={handleCloseModal} className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400">
                 Cancel
               </button>
-              <button onClick={handleSubmit} className="px-4 py-2 bg-blue-600 text-white rounded-md">
+              <button onClick={handleSubmit} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                 {editConsumerId ? "Update" : "Save"}
               </button>
             </div>
