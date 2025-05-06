@@ -117,7 +117,7 @@ const Brand = () => {
     setIsLoading(true);
 
     try {
-      const url = editingBrand ? `https://nicoindustrial.com/api/brand/edit/${editingBrand.brandId}?userId=${userId}` : `https://nicoindustrial.com/api/brand`;
+      const url = editingBrand ? `https://nicoindustrial.com/api/brand/edit/${editingBrand.brandId}?userId=${userId}` : `https://nicoindustrial.com/api/brand/save?userId=${userId}`;
 
       const method = editingBrand ? "PUT" : "POST";
       console.log("URL:", url);
@@ -159,7 +159,7 @@ const Brand = () => {
     }
 
     try {
-      const response = await axios.delete(`https://nicoindustrial.com/api/brand/${brandId}`, {
+      const response = await axios.delete(`https://nicoindustrial.com/api/brand/delete/${brandId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

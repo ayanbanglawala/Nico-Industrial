@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Consultant = () => {
   const [search, setSearch] = useState("");
@@ -15,13 +17,18 @@ const Consultant = () => {
     contactNumber: "",
     contactPerson: "",
   });
+  const [errors, setErrors] = useState({
+    consultantName: "",
+    contactNumber: "",
+    contactPerson: "",
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     fetchConsultants();
   }, [currentPage, search]);
-  const token = localStorage.getItem("token");
 
   const fetchConsultants = async () => {
     try {
@@ -44,8 +51,8 @@ const Consultant = () => {
         consultantName: item.consultantName,
         contactNumber: item.contactNumber,
         contactPerson: item.contactPerson,
-        createdAt: item.createdAt.split("T")[0],
-        updatedAt: item.updatedAt.split("T")[0],
+        createdAt: item.createdAt ? item.createdAt.split("T")[0] : "N/A",
+        updatedAt: item.updatedAt ? item.updatedAt.split("T")[0] : "N/A",
         createdBy: item.createdBy?.name || "N/A",
       }));
 
@@ -53,6 +60,77 @@ const Consultant = () => {
       setTotalRecords(data.totalRecords);
     } catch (error) {
       console.error("Error fetching consultants:", error);
+    }
+  };
+
+  const handleSubmit = async () => {
+    const { consultantName, contactPerson, contactNumber } = newConsultant;
+
+    // Validation logic
+    const newErrors = {
+      consultantName: "",
+      contactNumber: "",
+      contactPerson: "",
+    };
+
+    let isValid = true;
+
+    if (!consultantName) {
+      newErrors.consultantName = "Consultant Name is required";
+      isValid = false;
+    }
+    if (!contactPerson) {
+      newErrors.contactPerson = "Contact Person is required";
+      isValid = false;
+    }
+    if (!contactNumber) {
+      newErrors.contactNumber = "Contact Number is required";
+      isValid = false;
+    }
+
+    if (!isValid) {
+      setErrors(newErrors);
+      return; // Don't hit the API if there are errors
+    }
+
+    const userId = localStorage.getItem("userId");
+    const payload = { ...newConsultant, createdBy: { id: userId } };
+
+    try {
+      let response;
+      if (isEditing && editId !== null) {
+        response = await axios.put(`https://nicoindustrial.com/api/consultant/update/${editId}`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } else {
+        response = await axios.post(`https://nicoindustrial.com/api/consultant/save`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+
+      const successMessage = response.data.message || "Operation successful";
+      toast.success(successMessage, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        className: "toast-success",
+        style: { backgroundColor: "green" },
+      });
+
+      handleModalClose();
+      fetchConsultants(); // Refresh the data
+    } catch (error) {
+      const backendError = (error as any).response?.data?.message || "An error occurred";
+      toast.error(backendError, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        style: { backgroundColor: "red" },
+      });
     }
   };
 
@@ -75,6 +153,7 @@ const Consultant = () => {
     setIsEditing(false);
     setNewConsultant({ consultantName: "", contactNumber: "", contactPerson: "" });
     setEditId(null);
+    setErrors({ consultantName: "", contactNumber: "", contactPerson: "" });
   };
 
   const handleModalOpen = () => {
@@ -84,35 +163,8 @@ const Consultant = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewConsultant((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (isEditing && editId !== null) {
-      setConsultants((prev) =>
-        prev.map((consultant) =>
-          consultant.id === editId
-            ? {
-                ...consultant,
-                ...newConsultant,
-                updatedAt: new Date().toISOString().split("T")[0],
-              }
-            : consultant
-        )
-      );
-    } else {
-      const newEntry = {
-        ...newConsultant,
-        id: Date.now(),
-        createdAt: new Date().toISOString().split("T")[0],
-        updatedAt: new Date().toISOString().split("T")[0],
-        createdBy: "Admin",
-      };
-      setConsultants((prev) => [newEntry, ...prev]);
-    }
-
-    handleModalClose();
+    // Clear error when user starts typing
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleEdit = (consultant: any) => {
@@ -126,9 +178,31 @@ const Consultant = () => {
     setShowModal(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this consultant?")) {
-      setConsultants((prev) => prev.filter((consultant) => consultant.id !== id));
+      try {
+        await axios.delete(`https://nicoindustrial.com/api/consultant/delete/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        toast.success("Consultant deleted successfully", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          className: "toast-success",
+          style: { backgroundColor: "green" },
+        });
+        fetchConsultants(); // Refresh the data
+      } catch (error) {
+        const backendError = (error as any).response?.data?.message || "An error occurred";
+        toast.error(backendError, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          style: { backgroundColor: "red" },
+        });
+      }
     }
   };
 
@@ -179,7 +253,7 @@ const Consultant = () => {
                   <td className="p-2">{consultant.updatedAt}</td>
                   <td className="p-2">{consultant.createdBy}</td>
                   <td className="p-2">
-                    <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => handleEdit(consultant)}>
+                    <button className="bg-blue-500 text-white px-2 py-1 rounded mr-2" onClick={() => handleEdit(consultant)}>
                       Edit
                     </button>
                     <button className="bg-red-600 text-white px-2 py-1 rounded" onClick={() => handleDelete(consultant.id)}>
@@ -224,7 +298,11 @@ const Consultant = () => {
         <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-md w-96">
             <h2 className="text-lg font-semibold mb-4">{isEditing ? "Edit Consultant" : "Create Consultant"}</h2>
-            <form onSubmit={handleFormSubmit}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}>
               <div className="mb-4">
                 <label htmlFor="consultantName" className="block text-sm font-medium text-gray-700">
                   Consultant Name
@@ -235,9 +313,9 @@ const Consultant = () => {
                   name="consultantName"
                   value={newConsultant.consultantName}
                   onChange={handleInputChange}
-                  required
-                  className="border border-gray-300 p-2 rounded-md w-full"
+                  className={`border ${errors.consultantName ? "border-red-500" : "border-gray-300"} p-2 rounded-md w-full`}
                 />
+                {errors.consultantName && <p className="text-red-500 text-xs mt-1">{errors.consultantName}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700">
@@ -249,9 +327,9 @@ const Consultant = () => {
                   name="contactPerson"
                   value={newConsultant.contactPerson}
                   onChange={handleInputChange}
-                  required
-                  className="border border-gray-300 p-2 rounded-md w-full"
+                  className={`border ${errors.contactPerson ? "border-red-500" : "border-gray-300"} p-2 rounded-md w-full`}
                 />
+                {errors.contactPerson && <p className="text-red-500 text-xs mt-1">{errors.contactPerson}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700">
@@ -263,9 +341,9 @@ const Consultant = () => {
                   name="contactNumber"
                   value={newConsultant.contactNumber}
                   onChange={handleInputChange}
-                  required
-                  className="border border-gray-300 p-2 rounded-md w-full"
+                  className={`border ${errors.contactNumber ? "border-red-500" : "border-gray-300"} p-2 rounded-md w-full`}
                 />
+                {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber}</p>}
               </div>
               <div className="flex justify-end gap-2">
                 <button type="button" onClick={handleModalClose} className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md">
