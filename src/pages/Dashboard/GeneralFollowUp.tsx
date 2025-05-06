@@ -116,36 +116,44 @@ const FollowUpTable = () => {
           </tr>
         </thead>
         <tbody>
-          {paginated.map((item, index) => (
-            <tr className="text-center hover:bg-gray-200" key={item.generalFollowUpId}>
-              <td className="border px-3 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-              <td className="border px-3 py-2">{item.generalFollowUpName}</td>
-              <td className="border px-3 py-2">{item.createdBy?.name}</td>
-              <td className="border px-3 py-2">{item.description}</td>
-              <td className="border px-3 py-2">{item.updatedBy?.name || "—"}</td>
-              <td className="border px-3 py-2 space-x-2">
-                <button
-                  onClick={() => {
-                    setFormData({
-                      followUpName: item.generalFollowUpName,
-                      followUpPerson: item.createdBy?.name || "",
-                      description: item.description,
-                      status: item.status,
-                      statusNotes: item.statusNotes,
-                      dueDate: item.dueDate ? item.dueDate.split("T")[0] : "",
-                      dueTime: "",
-                    });
-                    setIsEditing(true);
-                    setEditingFollowUpId(item.generalFollowUpId);
-                    setIsModalOpen(true);
-                  }}
-                  className="bg-blue-500 text-white px-2 py-1 rounded">
-                  Edit
-                </button>
-                <button className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+          {paginated.length ? (
+            paginated.map((item, index) => (
+              <tr className="text-center hover:bg-gray-200" key={item.generalFollowUpId}>
+                <td className="border px-3 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                <td className="border px-3 py-2">{item.generalFollowUpName}</td>
+                <td className="border px-3 py-2">{item.createdBy?.name}</td>
+                <td className="border px-3 py-2">{item.description}</td>
+                <td className="border px-3 py-2">{item.updatedBy?.name || "—"}</td>
+                <td className="border px-3 py-2 space-x-2">
+                  <button
+                    onClick={() => {
+                      setFormData({
+                        followUpName: item.generalFollowUpName,
+                        followUpPerson: item.createdBy?.name || "",
+                        description: item.description,
+                        status: item.status,
+                        statusNotes: item.statusNotes,
+                        dueDate: item.dueDate ? item.dueDate.split("T")[0] : "",
+                        dueTime: "",
+                      });
+                      setIsEditing(true);
+                      setEditingFollowUpId(item.generalFollowUpId);
+                      setIsModalOpen(true);
+                    }}
+                    className="bg-blue-500 text-white px-2 py-1 rounded">
+                    Edit
+                  </button>
+                  <button className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={6} className="text-center p-4">
+                No Follow-Ups found.
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
 

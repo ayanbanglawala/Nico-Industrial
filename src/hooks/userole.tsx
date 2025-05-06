@@ -23,20 +23,22 @@ export const useRole = () => {
   const fetchData = async (query = "") => {
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `https://nicoindustrial.com/api/roles/list?search=${query}&page=${currentPage}&perPage=${itemsPerPage}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`https://nicoindustrial.com/api/roles/list?search=${query}&page=${currentPage}&perPage=${itemsPerPage}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
-        setRoles(data.data.roles || []);
+        const fetchedRoles = data.data.roles || [];
+
+        setRoles(fetchedRoles);
         setTotalPages(data.data.totalPages || 1);
-        setTotalRecords(data.data.totalRecords || 0);
+
+        // Fix for incorrect totalRecords
+        const total = data.data.totalRecords;
+        setTotalRecords(total !== undefined && total !== 0 ? total : fetchedRoles.length);
       } else {
         toast.error("Failed to fetch data.");
       }
@@ -82,9 +84,7 @@ export const useRole = () => {
     try {
       setIsSaving(true);
 
-      const url = editingRole
-        ? `https://nicoindustrial.com/api/roles/edit/${editingRole.Id}`
-        : `https://nicoindustrial.com/api/roles/save`;
+      const url = editingRole ? `https://nicoindustrial.com/api/roles/edit/${editingRole.Id}` : `https://nicoindustrial.com/api/roles/save`;
 
       const method = editingRole ? "PUT" : "POST";
 
