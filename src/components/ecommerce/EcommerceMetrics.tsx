@@ -58,6 +58,8 @@ export default function EcommerceMetrics() {
   const pageSize = 10;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUpItem | null>(null);
+  const [doneModalOpen, setDoneModalOpen] = useState(false);
+  const [doneDescription, setDoneDescription] = useState("");
 
   const navigate = useNavigate();
   const authToken = localStorage.getItem("token");
@@ -274,6 +276,44 @@ export default function EcommerceMetrics() {
     }
   };
 
+  const handleMarkAsDone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedReminder) return;
+
+    // Add null check at the start
+    if (!selectedReminder) {
+      console.error("No reminder selected");
+      alert("No reminder selected");
+      return;
+    }
+
+    try {
+      const reminderId = selectedReminder.id || selectedReminder.generalFollowUpId;
+      const updatedData = {
+        description: doneDescription || "Marked as completed",
+        updatedBy: {
+          id: userId || "", // Add fallback for userId
+        },
+        status: "COMPLETED",
+      };
+
+      const response = await axios.put(`https://nicoindustrial.com/api/generalFollowUp/make/done/${reminderId}`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      // alert(response.data.message || "Follow-up marked as done successfully");
+      toast.success(response.data.message || "Follow-up marked as done successfully");
+      setDoneModalOpen(false);
+      setDoneDescription("");
+      fetchFollowUps(currentPage);
+    } catch (error) {
+      console.error("Error marking as done:", error);
+      alert((error as any).response?.data?.message || "Error marking follow-up as done");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       {/* Metric Cards */}
@@ -334,7 +374,14 @@ export default function EcommerceMetrics() {
                     <td className="px-4 py-2">{item.description || "N/A"}</td>
                     <td className="px-4 py-2">{new Date(item.dueDate).toLocaleDateString()}</td>
                     <td className="px-4 py-2 text-blue-600 dark:text-blue-400 flex justify-center gap-2">
-                      <div className="cursor-pointer hover:scale-110 hover:text-gray-700">Check</div>
+                      <div
+                        className="cursor-pointer hover:scale-110 hover:text-gray-700"
+                        onClick={() => {
+                          setSelectedReminder(item);
+                          setDoneModalOpen(true);
+                        }}>
+                        Check
+                      </div>
                       <div className="cursor-pointer hover:scale-110 hover:text-gray-700" onClick={() => handleEditClick(item)}>
                         Edit
                       </div>
@@ -474,6 +521,35 @@ export default function EcommerceMetrics() {
                 </button>
                 <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                   Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Mark as Done Modal */}
+      {doneModalOpen && selectedReminder && (
+        <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Mark as Done</h3>
+              <button onClick={() => setDoneModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <IoCloseCircleOutline size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleMarkAsDone}>
+              <div className="mb-4">
+                <label className="block text-sm text-gray-600 dark:text-gray-300 mb-2">Description</label>
+                <textarea value={selectedReminder.description || ""} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" rows={3} placeholder="Add any notes about completing this follow-up" />
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button type="button" onClick={() => setDoneModalOpen(false)} className="px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                  Cancel
+                </button>
+                <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                  Mark as Done
                 </button>
               </div>
             </form>

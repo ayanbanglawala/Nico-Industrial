@@ -15,7 +15,7 @@ interface FollowUp {
   description: string;
   status: string;
   statusNotes: string;
-  dueDate: string;
+  dueDate: Date;
   followUpPerson: { id: number; name: string };
   createdBy: { name: string };
   updatedBy: { name: string } | null;
@@ -27,7 +27,7 @@ interface FollowUpSubmitData {
   description: string;
   status: string;
   statusNotes: string;
-  dueDate: string;
+  dueDate: Date;
   createdBy: { id: string | null };
   updatedBy?: { id: string | null }; // Make updatedBy optional
 }
@@ -142,7 +142,7 @@ const FollowUpTable = () => {
       description: formData.description,
       status: formData.status,
       statusNotes: formData.statusNotes,
-      dueDate: formData.dueDate + (formData.dueTime ? `T${formData.dueTime}:00` : "T00:00:00"),
+      dueDate: new Date(formData.dueDate + (formData.dueTime ? `T${formData.dueTime}:00` : "T00:00:00")),
       createdBy: { id: userId },
     };
 
