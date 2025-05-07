@@ -1,172 +1,316 @@
-import { ArrowDownIcon, ArrowUpIcon, BoxIconLine, GroupIcon } from "../../icons";
-import Badge from "../ui/badge/Badge";
-import { LuMessageSquareText } from "react-icons/lu";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+import { LuMessageSquareText, LuAlarmClock } from "react-icons/lu";
 import { IoIosMail } from "react-icons/io";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { IoMdPeople } from "react-icons/io";
 import { IoCloseCircleOutline } from "react-icons/io5";
-import { LuAlarmClock } from "react-icons/lu";
 import { MdOutlineDonutSmall } from "react-icons/md";
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import axios from "axios";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { toast } from "react-toastify";
+
+interface FollowUpItem {
+  id: string;
+  generalFollowUpName?: string;
+  generalFollowUpId?: string;
+  description?: string;
+  dueDate: string;
+  statusNotes?: string;
+  status?: string;
+  createdAt?: string;
+  createdBy?: {
+    id: string;
+    name?: string;
+  };
+  followUpPerson?: {
+    id: number;
+    name: string;
+    email: string;
+    designation: string;
+    mobileNo: string;
+    active: boolean;
+    deleted: boolean;
+  };
+}
 
 export default function EcommerceMetrics() {
-  const dummyFollowUps = Array.from({ length: 22 }, (_, i) => ({
-    id: i + 1,
-    name: `Follow Up ${i + 1}`,
-    description: `Description for follow up ${i + 1}`,
-    dueDate: `2025-05-${((i % 30) + 1).toString().padStart(2, "0")}`,
-  }));
-
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [users, setUsers] = useState<{ value: number; label: string }[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [selectedReminder, setSelectedReminder] = useState<FollowUpItem | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [inquiries, setInquiries] = useState(0);
+  const [activeUserCount, setActiveUserCount] = useState(0);
+  const [completedInquiriesCount, setCompletedInquiriesCount] = useState(0);
+  const [ongoingInquiriesCount, setOngoingInquiriesCount] = useState(0);
+  const [remindersCount, setRemindersCount] = useState(0);
+  const [rejectedInquiriesCount, setRejectedInquiriesCount] = useState(0);
+  const [assignInquary, setAssignInquary] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [followUps, setFollowUps] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = dummyFollowUps.slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(dummyFollowUps.length / itemsPerPage);
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-  };
+  const [totalPages, setTotalPages] = useState(1);
+  const [followUpPersonName, setfollowUpPersonName] = useState(1);
+  const pageSize = 10;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUpItem | null>(null);
 
   const navigate = useNavigate();
+  const authToken = localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
+
+  const fetchFollowUps = async (page = 1) => {
+    try {
+      const currentDate = new Date().toISOString().split("T")[0];
+      const response = await axios.get(`https://nicoindustrial.com/api/generalFollowUp/getall`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        params: {
+          userId: userId,
+          dueDate: currentDate,
+          page: page,
+          size: pageSize,
+        },
+      });
+      setFollowUps(response.data.data.list);
+      setTotalPages(response.data.data.totalPages);
+    } catch (error) {
+      console.error("Error fetching follow-ups:", error);
+      setError((error as any).message);
+    }
+  };
+
+  useEffect(() => {
+    const fetchInquiries = async () => {
+      try {
+        const res = await axios.get(`https://nicoindustrial.com/api/inquiry/totalinquiries`, {
+          params: { userId, isAdmin: false },
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        setInquiries(res.data.data.totalInquiries);
+      } catch (err: any) {
+        setError(err.message);
+      }
+    };
+
+    const dashboardDataFetch = async () => {
+      try {
+        const res = await axios.get(`https://nicoindustrial.com/api/user/dashboard/data`, {
+          params: { userId },
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+
+        setActiveUserCount(res.data.data.urgentInquiryCount || 0);
+        setCompletedInquiriesCount(res.data.data.purchaseInquiryCount || 0);
+        setOngoingInquiriesCount(res.data.data.procurementInquiryCount || 0);
+        setRemindersCount(res.data.data.remindersCount || 0);
+        setRejectedInquiriesCount(res.data.data.tenderInquiryCount || 0);
+        setAssignInquary(res.data.data.assignInquiryCount || 0);
+        setTotalUsers(res.data.data.totalUser || 0);
+        setfollowUpPersonName(res.data.data.followUpPerson.name || 0);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInquiries();
+    dashboardDataFetch();
+    fetchFollowUps();
+  }, []);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      fetchFollowUps(page);
+    }
+  };
+
+  const metricCards = [
+    { title: "Unassign Inquiries", count: inquiries, bg: "bg-green-100", icon: <LuMessageSquareText className="text-white size-6" /> },
+    { title: "Procurement Inquiries", count: ongoingInquiriesCount, bg: "bg-pink-100", icon: <IoIosMail className="text-white size-6" /> },
+    { title: "Purchase Inquiries", count: completedInquiriesCount, bg: "bg-emerald-100", icon: <FaRegCheckCircle className="text-white size-6" /> },
+    { title: "Urgent Inquiries", count: activeUserCount, bg: "bg-rose-100", icon: <IoMdPeople className="text-white size-6" /> },
+    { title: "Tender Inquiries", count: rejectedInquiriesCount, bg: "bg-yellow-100", icon: <IoCloseCircleOutline className="text-white size-6" /> },
+    { title: "Reminders", count: remindersCount, bg: "bg-purple-100", icon: <LuAlarmClock className="text-white size-6" /> },
+    { title: "Rejected Inquiries", count: rejectedInquiriesCount, bg: "bg-blue-100", icon: <LuMessageSquareText className="text-white size-6" /> },
+    { title: "Assign Inquiries", count: assignInquary, bg: "bg-cyan-100", icon: <LuMessageSquareText className="text-white size-6" /> },
+  ];
+
+  const CalendarWidget = () => (
+    <div className="rounded-2xl border text-center border-gray-600 bg-white p-4 pb-0 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="justify-between flex ">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Calendar</h2>
+        <p className="text-lg font-medium text-gray-800 dark:text-white">Selected: {selectedDate.toDateString()}</p>
+      </div>
+      <DatePicker
+        inline
+        selected={selectedDate}
+        onChange={(date: Date | null) => {
+          if (date) {
+            setSelectedDate(date);
+          }
+        }}
+        calendarClassName="w-60.5"
+        dayClassName={(date) => (date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth() ? "bg-blue-500 text-white rounded-full" : "")}
+      />
+      <div className="p-1 text-xl bg-gray-100 dark:bg-gray-800 rounded-lg">
+        <p>Events On {selectedDate.toDateString()}:</p>
+      </div>
+    </div>
+  );
+
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const response = await axios.get(`https://nicoindustrial.com/api/user/list`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      const userOptions = response.data.data.list.map((user: any) => ({
+        value: user.id,
+        label: user.name,
+      }));
+      setUsers(userOptions);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleEditClick = (item: FollowUpItem) => {
+    setSelectedReminder(item);
+    setIsEditModalOpen(true);
+    fetchUsers();
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedReminder) return;
+
+    try {
+      // First, make sure we have the correct ID property
+      const reminderId = selectedReminder.id || selectedReminder.generalFollowUpId;
+      if (!reminderId) {
+        throw new Error("No valid ID found for this reminder");
+      }
+
+      const updatedData = {
+        generalFollowUpName: selectedReminder.generalFollowUpName,
+        description: selectedReminder.description,
+        statusNotes: selectedReminder.statusNotes,
+        followUpPerson: { id: selectedReminder.followUpPerson?.id },
+        dueDate: new Date(selectedReminder.dueDate).toISOString(),
+        // Only include these if they exist
+        ...(selectedReminder.createdAt && { createdAt: selectedReminder.createdAt }),
+        ...(selectedReminder.createdBy && { createdBy: { id: selectedReminder.createdBy.id } }),
+        ...(selectedReminder.status && { status: selectedReminder.status }),
+        updatedAt: new Date().toISOString(),
+        updatedBy: { id: userId },
+      };
+
+      const response = await axios.put(`https://nicoindustrial.com/api/generalFollowUp/update/${reminderId}`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      toast.success(response.data.message || "Reminder updated successfully");
+      setIsEditModalOpen(false);
+      fetchFollowUps(currentPage);
+    } catch (error) {
+      console.error("Error updating reminder:", error);
+      alert((error as any).response?.data?.message || "Error updating reminder");
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (selectedReminder) {
+      setSelectedReminder({
+        ...selectedReminder,
+        [name]: value,
+      });
+    }
+  };
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    if (selectedReminder) {
+      setSelectedReminder({
+        ...selectedReminder,
+        [name]: value,
+      });
+    }
+  };
+
+  const handleFollowUpPersonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedUserId = parseInt(e.target.value);
+    const selectedUser = users.find((user) => user.value === selectedUserId);
+
+    if (selectedReminder && selectedUser) {
+      setSelectedReminder({
+        ...selectedReminder,
+        followUpPerson: {
+          ...(selectedReminder.followUpPerson || {}),
+          id: selectedUser.value,
+          name: selectedUser.label,
+          email: selectedReminder.followUpPerson?.email || "",
+          designation: selectedReminder.followUpPerson?.designation || "",
+          mobileNo: selectedReminder.followUpPerson?.mobileNo || "",
+          active: selectedReminder.followUpPerson?.active || false,
+          deleted: selectedReminder.followUpPerson?.deleted || false,
+        },
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 md:gap-4">
-        {/* <!-- Metric Item Start --> */}
-        <div
-          onClick={() => navigate("/inquiry")}
-          className="flex flex-row items-center justify-between cursor-pointer rounded-2xl hover:scale-105 transform duration-200 border border-gray-600 bg-green-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
-          {/* Left Icon */}
-          <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
-            <LuMessageSquareText className="text-white size-6 dark:text-white/90" />
-          </div>
-
-          {/* Text content */}
-          <div className="ml-4 flex-1 text-end">
-            <span className="text-sm text-end text-gray-800 font-bold dark:text-gray-400">Unassign Inquiries</span>
-            <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">100</h4>
-          </div>
-        </div>
-        <div
-          onClick={() => navigate("/inquiry")}
-          className="flex flex-row items-center justify-between cursor-pointer rounded-2xl hover:scale-105 transform duration-200 border border-gray-600 bg-pink-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
-          {/* Left Icon */}
-          <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
-            <IoIosMail className="text-white size-6 dark:text-white/90" />
-          </div>
-
-          {/* Text content */}
-          <div className="ml-4 flex-1 text-end">
-            <span className="text-sm text-end text-gray-800 font-bold dark:text-gray-400">Procurement Inquiries</span>
-            <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
-          </div>
-        </div>
-        <div
-          onClick={() => navigate("/inquiry")}
-          className="flex flex-row items-center justify-between cursor-pointer rounded-2xl hover:scale-105 transform duration-200 border border-gray-600 bg-emerald-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
-          {/* Left Icon */}
-          <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
-            <FaRegCheckCircle className="text-white size-6 dark:text-white/90" />
-          </div>
-
-          {/* Text content */}
-          <div className="ml-4 flex-1 text-end">
-            <span className="text-sm text-end text-gray-800 font-bold dark:text-gray-400">Purchase Inquiries</span>
-            <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
-          </div>
-        </div>
-        <div
-          onClick={() => navigate("/inquiry")}
-          className="flex flex-row items-center justify-between cursor-pointer rounded-2xl hover:scale-105 transform duration-200 border border-gray-600 bg-rose-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
-          {/* Left Icon */}
-          <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
-            <IoMdPeople className="text-white size-6 dark:text-white/90" />
-          </div>
-
-          {/* Text content */}
-          <div className="ml-4 flex-1 text-end">
-            <span className="text-sm text-end text-gray-800 font-bold dark:text-gray-400">Urgent Inquiries</span>
-            <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
-          </div>
-        </div>
-        <div
-          onClick={() => navigate("/inquiry")}
-          className="flex flex-row items-center justify-between transform duration-200 cursor-pointer group rounded-2xl border border-gray-600 hover:scale-105 bg-yellow-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
-          {/* Left Icon */}
-          <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
-            <IoCloseCircleOutline className="text-white size-6 dark:text-white/90" />
-          </div>
-
-          {/* Text content */}
-          <div className="ml-4 flex-1 text-end">
-            <span className="text-sm text-end text-gray-800 font-bold dark:text-gray-400">Tender Inquiries</span>
-            <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
-          </div>
-        </div>
-        <div
-          onClick={() => navigate("/inquiry")}
-          className="flex flex-row items-center justify-between transform duration-200 cursor-pointer group rounded-2xl border border-gray-600 hover:scale-105 bg-purple-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
-          {/* Left Icon */}
-          <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
-            <LuAlarmClock className="text-white size-6 dark:text-white/90" />
-          </div>
-
-          {/* Text content */}
-          <div className="ml-4 flex-1 text-end">
-            <span className="text-sm text-end text-gray-800 font-bold dark:text-gray-400">Reminders</span>
-            <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
-          </div>
-        </div>
-        <div
-          onClick={() => navigate("/inquiry")}
-          className="flex flex-row items-center justify-between transform duration-200 cursor-pointer group rounded-2xl border border-gray-600 hover:scale-105 bg-blue-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
-          {/* Left Icon */}
-          <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
-            <LuMessageSquareText className="text-white size-6 dark:text-white/90" />
-          </div>
-
-          {/* Text content */}
-          <div className="ml-4 flex-1 text-end">
-            <span className="text-sm text-end text-gray-800 font-bold dark:text-gray-400">Rejected Inquiries</span>
-            <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
-          </div>
-        </div>
-        <div
-          onClick={() => navigate("/inquiry")}
-          className="flex flex-row items-center justify-between transform duration-200 cursor-pointer group rounded-2xl border border-gray-600 hover:scale-105 bg-cyan-100 p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 md:py-5">
-          {/* Left Icon */}
-          <div className="flex items-center justify-center w-12 h-12 bg-gray-700 rounded-lg dark:bg-gray-800">
-            <LuMessageSquareText className="text-white size-6 dark:text-white/90" />
-          </div>
-
-          {/* Text content */}
-          <div className="ml-4 flex-1 text-end">
-            <span className="text-sm text-end text-gray-800 font-bold dark:text-gray-400">Assign Inquiries</span>
-            <h4 className="mt-1 text-end font-bold text-gray-800 text-title-sm dark:text-white/90">82</h4>
-          </div>
-        </div>
-        <div className="w-full flex flex-col md:flex-row gap-4 col-span-full">
-          {/* Right Cards */}
-          <div className="w-full md:max-w-sm flex flex-col gap-4">
-            {/* Total Users */}
-            <div className="rounded-2xl border border-gray-600 hover:scale-105 transform duration-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Total Users</h2>
-              <p className="text-3xl font-bold text-gray-800 dark:text-white">1,245</p>
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {metricCards.map((card, i) => (
+          <div key={i} onClick={() => navigate("/inquiry")} className={`flex items-center justify-between cursor-pointer rounded-2xl hover:scale-105 transform duration-200 border border-gray-600 ${card.bg} p-5 dark:border-gray-800 dark:bg-white/[0.03]`}>
+            <div className="w-12 h-12 flex items-center justify-center bg-gray-700 rounded-lg dark:bg-gray-800">{card.icon}</div>
+            <div className="ml-4 text-end">
+              <span className="text-sm font-bold text-gray-800 dark:text-gray-400">{card.title}</span>
+              <h4 className="mt-1 font-bold text-title-sm text-gray-800 dark:text-white/90">{card.count}</h4>
             </div>
+          </div>
+        ))}
+      </div>
 
-            {/* Analytics */}
-            <div
-              onClick={() => navigate("/analytics")}
-              className="rounded-2xl cursor-pointer border border-gray-600 hover:scale-105 transform duration-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">Analytics</h2>
-              </div>
-              <MdOutlineDonutSmall className="text-gray-700 dark:text-white/80" size={50} />
-            </div>
+      {/* Side Info + Table */}
+      <div className="flex flex-col gap-4 w-full">
+        {/* Top Row: Total Users & Analytics */}
+        <div className="flex flex-col md:flex-row gap-10 w-full">
+          {/* Total Users */}
+          <div className="w-full md:w-1/2 rounded-2xl border border-gray-600 bg-white p-6 hover:scale-105 transform duration-200 dark:border-gray-800 dark:bg-white/[0.03] flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Total Users</h2>
+            <p className="text-3xl font-bold text-gray-800 dark:text-white">{totalUsers}</p>
+          </div>
+
+          {/* Analytics */}
+          <div onClick={() => navigate("/analytics")} className="w-full md:w-1/2 rounded-2xl border cursor-pointer border-gray-600 bg-white p-6 hover:scale-105 transform duration-200 flex items-center justify-between dark:border-gray-800 dark:bg-white/[0.03]">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Analytics</h2>
+            <MdOutlineDonutSmall size={50} className="text-gray-700 dark:text-white/80" />
+          </div>
+        </div>
+
+        {/* Bottom Row: Calendar & Follow Ups Table */}
+        <div className="flex flex-col md:flex-row gap-4 w-full">
+          {/* Calendar */}
+          <div className="w-full md:w-1/2 hover:scale-105 transform duration-300">
+            <CalendarWidget />
           </div>
 
           {/* Table Section */}
@@ -174,7 +318,7 @@ export default function EcommerceMetrics() {
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Follow Ups</h2>
             <table className="min-w-full text-sm text-left text-gray-800 dark:text-gray-200">
               <thead className="text-xs uppercase text-gray-700 bg-gray-300 dark:text-gray-400 border-b dark:border-gray-700">
-                <tr>
+                <tr className="text-center">
                   <th className="px-4 py-2">SR</th>
                   <th className="px-4 py-2">Follow Up Name</th>
                   <th className="px-4 py-2">Description</th>
@@ -183,13 +327,26 @@ export default function EcommerceMetrics() {
                 </tr>
               </thead>
               <tbody>
-                {currentItems.map((item) => (
-                  <tr key={item.id} className="dark:border-gray-700 hover:bg-gray-200 transform duration-150">
-                    <td className="px-4 py-2">{item.id}</td>
-                    <td className="px-4 py-2">{item.name}</td>
-                    <td className="px-4 py-2">{item.description}</td>
-                    <td className="px-4 py-2">{item.dueDate}</td>
-                    <td className="px-4 py-2 text-blue-600 hover:scale-105 dark:text-blue-400 cursor-pointer">View</td>
+                {followUps.map((item: FollowUpItem, index: number) => (
+                  <tr key={item.id} className="dark:border-gray-700 hover:bg-gray-200 transform duration-150 text-center">
+                    <td className="px-4 py-2">{(currentPage - 1) * pageSize + index + 1}</td>
+                    <td className="px-4 py-2">{item.generalFollowUpName || "N/A"}</td>
+                    <td className="px-4 py-2">{item.description || "N/A"}</td>
+                    <td className="px-4 py-2">{new Date(item.dueDate).toLocaleDateString()}</td>
+                    <td className="px-4 py-2 text-blue-600 dark:text-blue-400 flex justify-center gap-2">
+                      <div className="cursor-pointer hover:scale-110 hover:text-gray-700">Check</div>
+                      <div className="cursor-pointer hover:scale-110 hover:text-gray-700" onClick={() => handleEditClick(item)}>
+                        Edit
+                      </div>
+                      <div
+                        className="cursor-pointer hover:scale-110 hover:text-gray-700"
+                        onClick={() => {
+                          setSelectedFollowUp(item);
+                          setIsModalOpen(true);
+                        }}>
+                        View
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -201,10 +358,7 @@ export default function EcommerceMetrics() {
                 Prev
               </button>
               {Array.from({ length: totalPages }, (_, i) => (
-                <button
-                  key={i + 1}
-                  onClick={() => handlePageChange(i + 1)}
-                  className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-gray-800 text-white dark:bg-white dark:text-black" : ""}`}>
+                <button key={i + 1} onClick={() => handlePageChange(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-gray-800 text-white dark:bg-white dark:text-black" : ""}`}>
                   {i + 1}
                 </button>
               ))}
@@ -214,9 +368,118 @@ export default function EcommerceMetrics() {
             </div>
           </div>
         </div>
-
-        {/* <!-- Metric Item End --> */}
       </div>
+      {isModalOpen && selectedFollowUp && (
+        <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Reminder Details</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <IoCloseCircleOutline size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">FollowUp Name:</p>
+                <p className="text-base font-medium text-gray-800 dark:text-white">{selectedFollowUp.generalFollowUpName || "N/A"}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Description:</p>
+                <p className="text-base font-medium text-gray-800 dark:text-white">{selectedFollowUp.description || "N/A"}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Due Date:</p>
+                <p className="text-base font-medium text-gray-800 dark:text-white">{new Date(selectedFollowUp.dueDate).toLocaleString()}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Status Notes:</p>
+                <p className="text-base font-medium text-gray-800 dark:text-white">{selectedFollowUp.statusNotes}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Follow Up Person:</p>
+                <p className="text-base font-medium text-gray-800 dark:text-white">{selectedFollowUp.followUpPerson?.name || "N/A"}</p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isEditModalOpen && selectedReminder && (
+        <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Edit Reminder</h3>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <IoCloseCircleOutline size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleFormSubmit}>
+              <div className="space-y-4">
+                {/* FollowUp Name */}
+                <div>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">FollowUp Name:</label>
+                  <input type="text" name="generalFollowUpName" value={selectedReminder.generalFollowUpName || ""} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Description:</label>
+                  <textarea name="description" value={selectedReminder.description || ""} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" rows={3} />
+                </div>
+
+                {/* Due Date and Time */}
+                <div>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Due Date and Time:</label>
+                  <input type="datetime-local" name="dueDate" value={new Date(selectedReminder.dueDate).toISOString().slice(0, 16)} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                </div>
+
+                {/* Status Notes */}
+                <div>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Status Notes:</label>
+                  <textarea name="statusNotes" value={selectedReminder.statusNotes || ""} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" rows={2} />
+                </div>
+
+                {/* Follow Up Person */}
+                <div>
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Follow Up Person:</label>
+                  {loadingUsers ? (
+                    <p>Loading users...</p>
+                  ) : (
+                    <select name="followUpPerson" value={selectedReminder.followUpPerson?.id || ""} onChange={handleFollowUpPersonChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required>
+                      <option value="">Select a person</option>
+                      {users.map((user) => (
+                        <option key={user.value} value={user.value}>
+                          {user.label}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsEditModalOpen(false)} className="px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                  Cancel
+                </button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
