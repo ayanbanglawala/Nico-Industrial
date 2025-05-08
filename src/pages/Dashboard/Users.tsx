@@ -84,11 +84,14 @@ const Users = () => {
           },
         }
       );
-      fetchUsers(currentPage, itemsPerPage, search);
+      // Update the local state immediately for better UX
+      setUsers(users.map((user) => (user.id === id ? { ...user, status: !currentStatus } : user)));
       toast.success(`User ${!currentStatus ? "activated" : "deactivated"} successfully`);
     } catch (error) {
       console.error("Failed to toggle status:", error);
       toast.error("Failed to toggle user status");
+      // Revert the UI if the API call fails
+      fetchUsers(currentPage, itemsPerPage, search);
     }
   };
 
@@ -254,9 +257,7 @@ const Users = () => {
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{user.username}</td>
                 <td className="p-2 text-center">
-                  <button
-                    onClick={() => toggleStatus(user.id, user.status)}
-                    className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out mx-auto ${user.status ? "bg-green-500" : "bg-gray-300 border-1 border-gray-400"}`}>
+                  <button onClick={() => toggleStatus(user.Id || user.id, user.status)} className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out mx-auto ${user.status ? "bg-green-500" : "bg-gray-300 border-1 border-gray-400"}`}>
                     <div className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out ${user.status ? "translate-x-7" : "translate-x-0"}`}></div>
                   </button>
                 </td>
@@ -341,14 +342,7 @@ const Users = () => {
                 <label className="block text-sm font-medium text-gray-700 capitalize">
                   {field} {field !== "password" || !isEditing ? "*" : ""}
                 </label>
-                <input
-                  type={field === "password" ? "password" : "text"}
-                  value={(newUser as any)[field]}
-                  onChange={(e) => setNewUser({ ...newUser, [field]: e.target.value })}
-                  className="border p-2 rounded w-full mt-2"
-                  placeholder={`Enter ${field}`}
-                  required={field !== "password" || !isEditing}
-                />
+                <input type={field === "password" ? "password" : "text"} value={(newUser as any)[field]} onChange={(e) => setNewUser({ ...newUser, [field]: e.target.value })} className="border p-2 rounded w-full mt-2" placeholder={`Enter ${field}`} required={field !== "password" || !isEditing} />
               </div>
             ))}
             <div className="mb-4">

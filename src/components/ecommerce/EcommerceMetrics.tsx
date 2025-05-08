@@ -60,6 +60,7 @@ export default function EcommerceMetrics() {
   const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUpItem | null>(null);
   const [doneModalOpen, setDoneModalOpen] = useState(false);
   const [doneDescription, setDoneDescription] = useState("");
+  const [selectedDateFollowUps, setSelectedDateFollowUps] = useState<FollowUpItem[]>([]);
 
   const navigate = useNavigate();
   const authToken = localStorage.getItem("token");
@@ -145,28 +146,77 @@ export default function EcommerceMetrics() {
     { title: "Assign Inquiries", count: assignInquary, bg: "bg-cyan-100", icon: <LuMessageSquareText className="text-white size-6" /> },
   ];
 
-  const CalendarWidget = () => (
-    <div className="rounded-2xl border text-center border-gray-600 bg-white p-4 pb-0 dark:border-gray-800 dark:bg-white/[0.03]">
-      <div className="justify-between flex ">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Calendar</h2>
-        <p className="text-lg font-medium text-gray-800 dark:text-white">Selected: {selectedDate.toDateString()}</p>
+  const dueDates = followUps.map((item: FollowUpItem) => new Date(item.dueDate).toISOString().split("T")[0]);
+
+  const CalendarWidget = () => {
+    const handleDateClick = (date: Date | null, event?: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>) => {
+      if (date) {
+        setSelectedDate(date);
+        const dateString = date.toISOString().split("T")[0];
+        const filtered = followUps.filter((item: FollowUpItem) => new Date(item.dueDate).toISOString().split("T")[0] === dateString);
+        setSelectedDateFollowUps(filtered);
+      }
+    };
+
+    return (
+      <div className="rounded-2xl border text-center border-gray-600 bg-white p-4 pb-0 dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="justify-between flex">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Calendar</h2>
+          <p className="text-lg font-medium text-gray-800 dark:text-white">Selected: {selectedDate.toLocaleDateString()}</p>
+        </div>
+
+        <DatePicker
+          inline
+          selected={selectedDate}
+          onChange={handleDateClick}
+          calendarClassName="w-60.5"
+          dayClassName={(date) => {
+            const dateString = date.toLocaleDateString("en-CA"); // Outputs YYYY-MM-DD
+            const isDueDate = dueDates.includes(dateString);
+            const isSelected = date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth();
+
+            if (isDueDate && isSelected) {
+              return "bg-blue-600 text-white";
+            } else if (isDueDate) {
+              return "bg-green-200 rounded dark:bg-green-900/50";
+            } else if (isSelected) {
+              return "bg-gray-800 text-white dark:bg-white dark:text-black";
+            } else {
+              return "bg-gray-300 dark:bg-gray-800";
+            }
+          }}
+        />
+
+        {/* Events Section */}
+        <div className="px-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+          <h3 className="font-semibold mb-2">Events on {selectedDate.toLocaleDateString()}:</h3>
+
+          {selectedDateFollowUps.length > 0 ? (
+            <div className=" max-h-60 overflow-y-auto">
+              {selectedDateFollowUps.map((item, index) => (
+                <div
+                  key={index}
+                  className="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => {
+                    setSelectedFollowUp(item);
+                    setIsModalOpen(true);
+                  }}>
+                  <div className="flex justify-between items-start">
+                    <h4 className="font-medium text-gray-800 dark:text-white">Name: {item.generalFollowUpName || "Untitled Follow-up"}</h4>
+                    <span className={`text-xs px-2 py-1 rounded ${item.status === "COMPLETED" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"}`}>Status: {item.status || "PENDING"}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 truncate">Description: {item.description || "No description"}</p>
+                  {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Assigned to: {item.followUpPerson?.name || "Unassigned"}</p> */}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 text-center pb-4">No events scheduled for this date.</p>
+          )}
+        </div>
       </div>
-      <DatePicker
-        inline
-        selected={selectedDate}
-        onChange={(date: Date | null) => {
-          if (date) {
-            setSelectedDate(date);
-          }
-        }}
-        calendarClassName="w-60.5"
-        dayClassName={(date) => (date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth() ? "bg-blue-500 text-white rounded-full" : "")}
-      />
-      <div className="p-1 text-xl bg-gray-100 dark:bg-gray-800 rounded-lg">
-        <p>Events On {selectedDate.toDateString()}:</p>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const fetchUsers = async () => {
     setLoadingUsers(true);
@@ -187,6 +237,19 @@ export default function EcommerceMetrics() {
       setLoadingUsers(false);
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // ... your existing fetch code ...
+
+      // After fetching follow-ups, initialize selected date follow-ups
+      const currentDateString = new Date().toISOString().split("T")[0];
+      const initialFiltered = followUps.filter((item: FollowUpItem) => new Date(item.dueDate).toISOString().split("T")[0] === currentDateString);
+      setSelectedDateFollowUps(initialFiltered);
+    };
+
+    fetchData();
+  }, []);
 
   const handleEditClick = (item: FollowUpItem) => {
     setSelectedReminder(item);

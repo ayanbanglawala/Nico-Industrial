@@ -116,7 +116,7 @@ const FollowUpTable = () => {
   };
 
   const validateForm = () => {
-    return formData.followUpName.trim() !== "" && formData.followUpPerson !== "" && formData.status !== "";
+    return formData.followUpName.trim() !== "" && formData.followUpPerson !== "" && formData.status !== "" && formData.dueDate !== "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -135,6 +135,16 @@ const FollowUpTable = () => {
       return;
     }
 
+    
+    let dueDateObj: Date;
+    
+    if (formData.dueDate.includes("T")) {
+      // Browser gives combined datetime string already
+      dueDateObj = new Date(formData.dueDate);
+    } else {
+      const dueDateTime = `${formData.dueDate}T${formData.dueTime || "00:00"}:00`;
+      dueDateObj = new Date(dueDateTime);
+    }
     // Prepare the data to submit
     const dataToSubmit: FollowUpSubmitData = {
       generalFollowUpName: formData.followUpName,
@@ -142,15 +152,16 @@ const FollowUpTable = () => {
       description: formData.description,
       status: formData.status,
       statusNotes: formData.statusNotes,
-      dueDate: new Date(formData.dueDate + (formData.dueTime ? `T${formData.dueTime}:00` : "T00:00:00")),
+      dueDate: new Date(formData.dueDate),
       createdBy: { id: userId },
     };
-
+    // dueDate: new Date(formData.dueDate + (formData.dueTime ? `T${formData.dueTime}:00` : "T00:00:00")),
+    
     // If editing, include updatedBy field
     if (isEditing && editingFollowUpId) {
       dataToSubmit.updatedBy = { id: userId };
     }
-
+    
     try {
       let response;
       if (isEditing && editingFollowUpId) {
