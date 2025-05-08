@@ -58,6 +58,14 @@ const Inquiry = () => {
   });
   const [editId, setEditId] = useState(null);
 
+  // Sample options for select fields
+  const consumerOptions = ["Consumer 1", "Consumer 2", "Consumer 3", "Consumer 4"];
+  const brandOptions = ["Brand A", "Brand B", "Brand C", "Brand D"];
+  const productOptions = ["Product X", "Product Y", "Product Z"];
+  const consultantOptions = ["Consultant 1", "Consultant 2", "Consultant 3"];
+  const followUpUserOptions = ["User 1", "User 2", "User 3", "User 4"];
+  const followUpQuotationOptions = ["Quotation A", "Quotation B", "Quotation C", "Quotation D"];
+
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -260,25 +268,107 @@ const Inquiry = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-[#00000071]">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-[#00000071] backdrop-blur-xs">
           <div className="bg-white w-full max-w-2xl p-6 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4">{editId ? "Edit" : "Create"} Inquiry</h2>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input name="projectName" value={form.projectName} onChange={handleFormChange} type="text" placeholder="Project Name" className="p-3 border rounded" />
-              <select name="status" value={form.status} onChange={handleFormChange} className="p-3 border rounded">
-                <option value="">Select Status</option>
-                <option value="Open">Open</option>
-                <option value="Closed">Closed</option>
-                <option value="Pending">Pending</option>
-              </select>
-              <input name="description" value={form.description} onChange={handleFormChange} type="text" placeholder="Description" className="p-3 border rounded col-span-2" />
-              <input name="consumer" value={form.consumer} onChange={handleFormChange} type="text" placeholder="Consumer" className="p-3 border rounded" />
-              <input name="brand" value={form.brand} onChange={handleFormChange} type="text" placeholder="Brand" className="p-3 border rounded" />
-              <input name="product" value={form.product} onChange={handleFormChange} type="text" placeholder="Product" className="p-3 border rounded" />
-              <input name="consultant" value={form.consultant} onChange={handleFormChange} type="text" placeholder="Consultant" className="p-3 border rounded" />
-              <input name="followUpQuotation" value={form.followUpQuotation} onChange={handleFormChange} type="text" placeholder="Follow-up Quotation" className="p-3 border rounded" />
-              <input name="followUpUser" value={form.followUpUser} onChange={handleFormChange} type="text" placeholder="Follow-up User" className="p-3 border rounded" />
-              <textarea name="remark" value={form.remark} onChange={handleFormChange} placeholder="Remark" className="p-3 border rounded col-span-2"></textarea>
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Project Name</label>
+                <input name="projectName" value={form.projectName} onChange={handleFormChange} type="text" placeholder="Project Name" className="p-3 border rounded" required />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Status</label>
+                <select name="status" value={form.status} onChange={handleFormChange} className="p-3 border rounded" required>
+                  <option value="">Select Status</option>
+                  <option value="TENDER">TENDER</option>
+                  <option value="PURCHASE">PURCHASE</option>
+                  <option value="PROCUREMENT">PROCUREMENT</option>
+                  <option value="URGENT">URGENT</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col col-span-2">
+                <label className="mb-1 font-medium">Description</label>
+                <input name="description" value={form.description} onChange={handleFormChange} type="text" placeholder="Description" className="p-3 border rounded" />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Consumer</label>
+                <select name="consumer" value={form.consumer} onChange={handleFormChange} className="p-3 border rounded" required>
+                  <option value="">Select Consumer</option>
+                  {consumerOptions.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Brand</label>
+                <select name="brand" value={form.brand} onChange={handleFormChange} className="p-3 border rounded">
+                  <option value="">Select Brand</option>
+                  {brandOptions.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Product</label>
+                <select name="product" value={form.product} onChange={handleFormChange} className="p-3 border rounded" required>
+                  <option value="">Select Product</option>
+                  {productOptions.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Consultant</label>
+                <select name="consultant" value={form.consultant} onChange={handleFormChange} className="p-3 border rounded">
+                  <option value="">Select Consultant</option>
+                  {consultantOptions.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Follow-up Quotation</label>
+                <select name="followUpQuotation" value={form.followUpQuotation} onChange={handleFormChange} className="p-3 border rounded">
+                  <option value="">Select Quotation</option>
+                  {followUpQuotationOptions.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Follow-up User</label>
+                <select name="followUpUser" value={form.followUpUser} onChange={handleFormChange} className="p-3 border rounded">
+                  <option value="">Select User</option>
+                  {followUpUserOptions.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col col-span-2">
+                <label className="mb-1 font-medium">Remark</label>
+                <textarea name="remark" value={form.remark} onChange={handleFormChange} placeholder="Remark" className="p-3 border rounded"></textarea>
+              </div>
 
               <div className="col-span-2 flex justify-end gap-2 mt-4">
                 <button

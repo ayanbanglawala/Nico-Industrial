@@ -435,7 +435,7 @@ export default function EcommerceMetrics() {
                     <td className="px-4 py-2">{(currentPage - 1) * pageSize + index + 1}</td>
                     <td className="px-4 py-2">{item.generalFollowUpName || "N/A"}</td>
                     <td className="px-4 py-2">{item.description || "N/A"}</td>
-                    <td className="px-4 py-2">{new Date(item.dueDate).toLocaleDateString()}</td>
+                    <td className="px-4 py-2">{item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "Not set"}</td>
                     <td className="px-4 py-2 text-blue-600 dark:text-blue-400 flex justify-center gap-2">
                       <div
                         className="cursor-pointer hover:scale-110 hover:text-gray-700"
