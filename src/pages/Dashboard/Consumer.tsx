@@ -273,6 +273,17 @@ const Consumer = () => {
     }
   };
 
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen]);
+
   return (
     <div className="p-4">
       {/* Search + Add */}
@@ -363,7 +374,7 @@ const Consumer = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[#00000071] flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-96">
             <h2 className="text-xl mb-4 font-semibold">{editConsumerId ? "Edit Consumer" : "Create Consumer"}</h2>
             <div className="mb-4">

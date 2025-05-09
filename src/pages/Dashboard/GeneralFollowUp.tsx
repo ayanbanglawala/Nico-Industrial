@@ -135,9 +135,8 @@ const FollowUpTable = () => {
       return;
     }
 
-    
     let dueDateObj: Date;
-    
+
     if (formData.dueDate.includes("T")) {
       // Browser gives combined datetime string already
       dueDateObj = new Date(formData.dueDate);
@@ -156,12 +155,12 @@ const FollowUpTable = () => {
       createdBy: { id: userId },
     };
     // dueDate: new Date(formData.dueDate + (formData.dueTime ? `T${formData.dueTime}:00` : "T00:00:00")),
-    
+
     // If editing, include updatedBy field
     if (isEditing && editingFollowUpId) {
       dataToSubmit.updatedBy = { id: userId };
     }
-    
+
     try {
       let response;
       if (isEditing && editingFollowUpId) {
@@ -224,6 +223,17 @@ const FollowUpTable = () => {
       console.error("Failed to delete follow-up", error);
     }
   };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen]);
 
   return (
     <div className="p-4">
@@ -353,8 +363,8 @@ const FollowUpTable = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex justify-center items-center z-50" onClick={() => setIsModalOpen(false)}>
-          <div className="bg-white p-6 rounded-md w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex justify-center items-center z-50 overflow-y-auto py-4" onClick={() => setIsModalOpen(false)}>
+          <div className="bg-white p-6 rounded-md w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-xl font-bold mb-4">{isEditing ? "Edit Follow-Up" : "Create Follow-Up"}</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">

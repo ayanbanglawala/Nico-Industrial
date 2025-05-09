@@ -1,6 +1,6 @@
 import { FaPlus } from "react-icons/fa";
 import { useRole } from "../../hooks/userole";
-import React from "react";
+import React, { useEffect } from "react";
 
 const RoleComponent = () => {
   const {
@@ -24,6 +24,17 @@ const RoleComponent = () => {
     setItemsPerPage,
     totalRecords,
   } = useRole();
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen]);
 
   return (
     <div className="p-4">

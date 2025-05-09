@@ -219,6 +219,17 @@ const Users = () => {
     }
   };
 
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen]);
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -338,8 +349,8 @@ const Users = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[#00000071] flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-md w-1/3">
+        <div className="fixed inset-0 bg-[#00000071] backdrop-blur-xs bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto py-4">
+          <div className="bg-white p-6 rounded-md w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-4">{isEditing ? "Edit User" : "Create User"}</h2>
             {["name", "email", "password", "designation", "mobile"].map((field) => (
               <div key={field} className="mb-4">

@@ -51,6 +51,19 @@ const Brand = () => {
     fetchBrands();
   }, []);
 
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    // Cleanup function
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen]);
+
   const filtered = brands.filter((brand) => brand.brandName.toLowerCase().includes(search.toLowerCase()));
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -261,8 +274,8 @@ const Brand = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-opacity-50 bg-[#00000071] backdrop-blur-xs flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-md w-96">
+        <div className="fixed inset-0 bg-opacity-50 bg-[#00000071] backdrop-blur-xs flex justify-center items-center z-50 overflow-y-auto">
+          <div className="bg-white p-6 rounded-md w-96 max-h-[80vh] overflow-y-auto">
             <h3 className="text-lg font-medium mb-4">{editingBrand ? "Edit Brand" : "Create New Brand"}</h3>
             <div className="mb-4">
               <label className="block text-sm font-medium">Brand Name</label>

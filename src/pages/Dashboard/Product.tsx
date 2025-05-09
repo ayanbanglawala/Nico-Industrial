@@ -259,6 +259,17 @@ const Product = () => {
     setIsModalOpen(true)
   }
 
+  useEffect(() => {
+      if (isModalOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "auto";
+      }
+      return () => {
+        document.body.style.overflow = "auto";
+      };
+    }, [isModalOpen]);
+
   return (
     <div className="p-4">
       {/* Top Controls */}
