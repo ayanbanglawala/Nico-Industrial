@@ -22,6 +22,14 @@ const Inquiry = () => {
       inquiry: `INQ-2025-00${i + 1}`,
       status: i % 2 === 0 ? "Open" : "Closed",
       winLoss: i % 2 === 0 ? "Pending" : "Won",
+      description: `Description for Project ${i + 1}`,
+      brand: `Brand ${String.fromCharCode(65 + (i % 4))}`,
+      followUpQuotation: `Quotation ${String.fromCharCode(65 + (i % 4))}`,
+      followUpUser: `User ${(i % 3) + 1}`,
+      remark: `Remark for Project ${i + 1}`,
+      createdBy: `Admin`,
+      createdAt: new Date(Date.now() - i * 86400000).toISOString().split("T")[0],
+      updatedAt: new Date(Date.now() - i * 43200000).toISOString().split("T")[0],
     }))
   );
 
@@ -42,8 +50,10 @@ const Inquiry = () => {
   const handlePrev = () => currentPage > 1 && setCurrentPage((p) => p - 1);
   const handleNext = () => currentPage < totalPages && setCurrentPage((p) => p + 1);
 
-  // Modal
-  const [showModal, setShowModal] = useState(false);
+  // Modals
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedInquiry, setSelectedInquiry] = useState<any>(null);
   const [form, setForm] = useState({
     projectName: "",
     status: "",
@@ -84,6 +94,9 @@ const Inquiry = () => {
         id: newId,
         inquiry: `INQ-2025-00${newId}`,
         winLoss: "Pending",
+        createdBy: "Admin",
+        createdAt: new Date().toISOString().split("T")[0],
+        updatedAt: new Date().toISOString().split("T")[0],
         ...form,
       };
       setInquiries((prev) => [...prev, newInquiry]);
@@ -102,7 +115,7 @@ const Inquiry = () => {
       remark: "",
     });
     setEditId(null);
-    setShowModal(false);
+    setShowCreateModal(false);
   };
 
   const handleEdit = (inq: any) => {
@@ -119,7 +132,12 @@ const Inquiry = () => {
       remark: inq.remark || "",
     });
     setEditId(inq.id);
-    setShowModal(true);
+    setShowCreateModal(true);
+  };
+
+  const handleView = (inq: any) => {
+    setSelectedInquiry(inq);
+    setShowViewModal(true);
   };
 
   const handleDelete = (id: number) => {
@@ -190,7 +208,7 @@ const Inquiry = () => {
           <button className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">Export to Excel</button>
         </div>
         <div className="flex gap-2 mt-6 sm:mt-0 w-full justify-end">
-          <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <FaPlus />
             Create Inquiry
           </button>
@@ -207,8 +225,7 @@ const Inquiry = () => {
               <th className="px-4 py-2 border">Consumer</th>
               <th className="px-4 py-2 border">Product</th>
               <th className="px-4 py-2 border">Consultant</th>
-              <th className="px-4 py-2 border">Inquiry</th>
-              <th className="px-4 py-2 border">Status</th>
+              <th className="px-4 py-2 border">Inquiry Status</th>
               <th className="px-4 py-2 border">Win/Loss</th>
               <th className="px-4 py-2 border">Actions</th>
             </tr>
@@ -222,10 +239,24 @@ const Inquiry = () => {
                   <td className="px-4 py-2">{inquiry.consumer}</td>
                   <td className="px-4 py-2">{inquiry.product}</td>
                   <td className="px-4 py-2">{inquiry.consultant}</td>
-                  <td className="px-4 py-2">{inquiry.inquiry}</td>
-                  <td className="px-4 py-2 text-green-600">{inquiry.status}</td>
-                  <td className="px-4 py-2 text-yellow-600">{inquiry.winLoss}</td>
+                  <td className="px-4 py-2">
+                    <select className="p-3 text-sm border rounded-lg">
+                      <option value="ALL">All</option>
+                      <option value="TENDER">TENDER</option>
+                      <option value="PURCHASE">PURCHASE</option>
+                      <option value="PROCUREMENT">PROCUREMENT</option>
+                      <option value="URGENT">URGENT</option>
+                    </select>
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="flex gap-1">
+                      <p className="text-green-600">WIN</p>/<p className="text-red-600">LOSS</p>
+                    </div>
+                  </td>
                   <td className="px-4 py-2 text-center space-x-2">
+                    <button onClick={() => handleView(inquiry)} className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">
+                      View
+                    </button>
                     <button onClick={() => handleEdit(inquiry)} className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
                       Edit
                     </button>
@@ -266,8 +297,8 @@ const Inquiry = () => {
         </div>
       </div>
 
-      {/* Modal */}
-      {showModal && (
+      {/* Create/Edit Modal */}
+      {showCreateModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-[#00000071] backdrop-blur-xs">
           <div className="bg-white w-full max-w-2xl p-6 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4">{editId ? "Edit" : "Create"} Inquiry</h2>
@@ -374,7 +405,7 @@ const Inquiry = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setShowModal(false);
+                    setShowCreateModal(false);
                     setEditId(null);
                   }}
                   className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
@@ -385,6 +416,83 @@ const Inquiry = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {showViewModal && selectedInquiry && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-[#00000071] backdrop-blur-xs">
+          <div className="bg-white w-full max-w-2xl p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Inquiry Details</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div className="flex gap-2">
+                <label className="mb-1 font-medium text-gray-600">Project Name:</label>
+                <p className=" bg-gray-100 rounded">{selectedInquiry.projectName}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <label className="mb-1 font-medium text-gray-600">Inquiry Status:</label>
+                <p className=" bg-gray-100 rounded">{selectedInquiry.status}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <label className="mb-1 font-medium text-gray-600">Consumer Name:</label>
+                <p className=" bg-gray-100 rounded">{selectedInquiry.consumer}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <label className="mb-1 font-medium text-gray-600">Product Name:</label>
+                <p className=" bg-gray-100 rounded">{selectedInquiry.product}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <label className="mb-1 font-medium text-gray-600">Consultant Name:</label>
+                <p className=" bg-gray-100 rounded">{selectedInquiry.consultant}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <label className="mb-1 font-medium text-gray-600">Assigned To:</label>
+                <p className=" bg-gray-100 rounded">{selectedInquiry.followUpUser}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <label className="mb-1 font-medium text-gray-600">Quotation By:</label>
+                <p className=" bg-gray-100 rounded">{selectedInquiry.followUpQuotation}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <label className="mb-1 font-medium text-gray-600">Created By:</label>
+                <p className=" bg-gray-100 rounded">{selectedInquiry.createdBy}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <label className="mb-1 font-medium text-gray-600">Created At:</label>
+                <p className=" bg-gray-100 rounded">{selectedInquiry.createdAt}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <label className="mb-1 font-medium text-gray-600">Last Updated:</label>
+                <p className=" bg-gray-100 rounded">{selectedInquiry.updatedAt}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <label className="mb-1 font-medium text-gray-600">Remark:</label>
+              <p className="bg-gray-100 rounded min-h-20">{selectedInquiry.remark}</p>
+            </div>
+
+            <div className="flex gap-2">
+              <label className="mb-1 font-medium text-gray-600">Description:</label>
+              <p className=" bg-gray-100 rounded min-h-20">{selectedInquiry.description}</p>
+            </div>
+
+            <div className="flex justify-end">
+              <button onClick={() => setShowViewModal(false)} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
