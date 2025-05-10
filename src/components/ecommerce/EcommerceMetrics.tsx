@@ -146,7 +146,7 @@ export default function EcommerceMetrics() {
     { title: "Purchase Inquiries", count: completedInquiriesCount, bg: "bg-emerald-100", icon: <FaRegCheckCircle className="text-white size-6" /> },
     { title: "Urgent Inquiries", count: activeUserCount, bg: "bg-rose-100", icon: <IoMdPeople className="text-white size-6" /> },
     { title: "Tender Inquiries", count: rejectedInquiriesCount, bg: "bg-yellow-100", icon: <IoCloseCircleOutline className="text-white size-6" /> },
-    { title: "Reminders", count: remindersCount, bg: "bg-purple-100", icon: <LuAlarmClock className="text-white size-6" /> },
+    // { title: "Reminders", count: remindersCount, bg: "bg-purple-100", icon: <LuAlarmClock className="text-white size-6" /> },
     { title: "Rejected Inquiries", count: rejectedInquiriesCount, bg: "bg-blue-100", icon: <LuMessageSquareText className="text-white size-6" /> },
     { title: "Assign Inquiries", count: assignInquary, bg: "bg-cyan-100", icon: <LuMessageSquareText className="text-white size-6" /> },
   ];
@@ -401,16 +401,16 @@ export default function EcommerceMetrics() {
         {/* Top Row: Total Users & Analytics */}
         <div className="flex flex-col md:flex-row gap-10 w-full">
           {/* Total Users */}
-          <div className="w-full md:w-1/2 rounded-2xl border border-gray-600 bg-white p-6 hover:scale-105 transform duration-200 dark:border-gray-800 dark:bg-white/[0.03] flex items-center justify-between">
+          {/* <div className="w-full md:w-1/2 rounded-2xl border border-gray-600 bg-white p-6 hover:scale-105 transform duration-200 dark:border-gray-800 dark:bg-white/[0.03] flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Total Users</h2>
             <p className="text-3xl font-bold text-gray-800 dark:text-white">{totalUsers}</p>
-          </div>
+          </div> */}
 
           {/* Analytics */}
-          <div onClick={() => navigate("/analytics")} className="w-full md:w-1/2 rounded-2xl border cursor-pointer border-gray-600 bg-white p-6 hover:scale-105 transform duration-200 flex items-center justify-between dark:border-gray-800 dark:bg-white/[0.03]">
+          {/* <div onClick={() => navigate("/analytics")} className="w-full md:w-1/2 rounded-2xl border cursor-pointer border-gray-600 bg-white p-6 hover:scale-105 transform duration-200 flex items-center justify-between dark:border-gray-800 dark:bg-white/[0.03]">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Analytics</h2>
             <MdOutlineDonutSmall size={50} className="text-gray-700 dark:text-white/80" />
-          </div>
+          </div> */}
         </div>
 
         {/* Bottom Row: Calendar & Follow Ups Table */}

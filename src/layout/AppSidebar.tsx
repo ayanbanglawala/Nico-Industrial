@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router";
 
 // Assume these icons are imported from an icon library
 import { GridIcon, HorizontaLDots, ChevronDownIcon } from "../icons";
+import { BarChart3 } from "lucide-react";
 import { useSidebar } from "../context/SidebarContext";
 import { LuUsers } from "react-icons/lu";
 import { LiaClipboardListSolid } from "react-icons/lia";
@@ -15,59 +16,83 @@ type NavItem = {
   icon: React.ReactNode;
   path?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  requiredRole?: string; // Add this to specify required role
 };
-
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/",
-  },
-  {
-    icon: <LuUsers />,
-    name: "Inquiry",
-    path: "/inquiry",
-  },
-  {
-    icon: <LiaClipboardListSolid />,
-    name: "Product",
-    path: "/product",
-  },
-  {
-    icon: <CiCalendar />,
-    name: "Consumer",
-    path: "/consumer",
-  },
-  {
-    icon: <AiOutlineQuestionCircle />,
-    name: "Consultant",
-    path: "/consultant",
-  },
-  {
-    icon: <MdOutlineFollowTheSigns />,
-    name: "General Follow Up",
-    path: "/general-follow-up",
-  },
-  {
-    icon: <MdOutlineBusiness />,
-    name: "Brand",
-    path: "/brand",
-  },
-  {
-    icon: <MdContacts />,
-    name: "Role",
-    path: "/role",
-  },
-  {
-    icon: <MdOutlinePerson />,
-    name: "Users",
-    path: "/users",
-  },
-];
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+  
+  // Get user role from localStorage
+  const [userRole, setUserRole] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Get role from localStorage when component mounts
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
+  }, []);
+
+  const navItems: NavItem[] = [
+    {
+      icon: <GridIcon />,
+      name: "Dashboard",
+      path: "/",
+    },
+    {
+      icon: <BarChart3 />,
+      name: "Analytics",
+      path: "/analytics",
+    },
+    {
+      icon: <LuUsers />,
+      name: "Inquiry",
+      path: "/inquiry",
+    },
+    {
+      icon: <MdOutlineFollowTheSigns />,
+      name: "General Follow Up",
+      path: "/general-follow-up",
+    },
+    {
+      icon: <CiCalendar />,
+      name: "Consumer",
+      path: "/consumer",
+    },
+    {
+      icon: <AiOutlineQuestionCircle />,
+      name: "Consultant",
+      path: "/consultant",
+    },
+    {
+      icon: <MdOutlineBusiness />,
+      name: "Brand",
+      path: "/brand",
+    },
+    {
+      icon: <LiaClipboardListSolid />,
+      name: "Product",
+      path: "/product",
+    },
+    {
+      icon: <MdContacts />,
+      name: "Role",
+      path: "/role",
+      requiredRole: "Admin" // Only show for admin
+    },
+    {
+      icon: <MdOutlinePerson />,
+      name: "Users",
+      path: "/users",
+      requiredRole: "Admin" // Only show for admin
+    },
+  ];
+
+  // Filter nav items based on user role
+  const filteredNavItems = navItems.filter(item => {
+    if (!item.requiredRole) return true; // Show if no role required
+    if (!userRole) return false; // Hide if no user role
+    return userRole === item.requiredRole; // Show only if roles match
+  });
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main";
@@ -80,7 +105,7 @@ const AppSidebar: React.FC = () => {
 
   useEffect(() => {
     let submenuMatched = false;
-    navItems.forEach((nav, index) => {
+    filteredNavItems.forEach((nav, index) => {
       if (nav.subItems) {
         nav.subItems.forEach((subItem) => {
           if (isActive(subItem.path)) {
@@ -94,7 +119,7 @@ const AppSidebar: React.FC = () => {
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
-  }, [location, isActive]);
+  }, [location, isActive, filteredNavItems]);
 
   useEffect(() => {
     if (openSubmenu !== null) {
@@ -124,9 +149,8 @@ const AppSidebar: React.FC = () => {
           {nav.subItems ? (
             <button
               onClick={() => handleSubmenuToggle(index)}
-              className={`menu-item group ${openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"} cursor-pointer ${
-                !isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
-              }`}>
+              className={`menu-item group ${openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"} cursor-pointer ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
+                }`}>
               <span className={`menu-item-icon-size ${openSubmenu?.index === index ? "menu-item-icon-active" : "menu-item-icon-inactive"}`}>{nav.icon}</span>
               {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
               {(isExpanded || isHovered || isMobileOpen) && (
@@ -181,13 +205,8 @@ const AppSidebar: React.FC = () => {
       <div className={`py-5 flex dark:text-white ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              {/* <img className="dark:hidden" src="/images/logo/logo.svg" alt="Logo" width={150} height={40} /> */}
-              {/* <img className="hidden dark:block" src="/images/logo/logo-dark.svg" alt="Logo" width={150} height={40} /> */}
-              <p>NICO INDUSTRIAL SOLUTION</p>
-            </>
+            <p>NICO INDUSTRIAL SOLUTION</p>
           ) : (
-            // <img src="/images/logo/logo-icon.svg" alt="Logo" width={32} height={32} />
             <p>NIS</p>
           )}
         </Link>
@@ -199,7 +218,7 @@ const AppSidebar: React.FC = () => {
               <h2 className={`mb-4 text-xs dark:text-white uppercase flex leading-[20px] text-black ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
                 {isExpanded || isHovered || isMobileOpen ? "Menu" : <HorizontaLDots className="size-6" />}
               </h2>
-              {renderMenuItems(navItems)}
+              {renderMenuItems(filteredNavItems)}
             </div>
           </div>
         </nav>
