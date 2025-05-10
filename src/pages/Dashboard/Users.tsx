@@ -43,14 +43,14 @@ const Users = () => {
       const totalRecords = res.data?.data?.totalRecords || 0;
       const totalPages = res.data?.data?.totalPages || 1;
 
-      const formattedUsers = userList.map((user: any, index: number) => ({
-        id: user.Id || index + 1,
+      const formattedUsers = userList.map((user: any) => ({
+        id: user.id, // Keep this as is for now
+        backendId: user.Id || user.userId, // Add this to capture the backend's actual ID
         username: user.name,
         email: user.email,
-        designation: user.designation || user.department || "",
-        mobile: user.mobileNo || user.phone || "",
-        role: user.role?.name || user.role || "",
-        password: user.password || "",
+        designation: user.designation,
+        mobile: user.mobileNo,
+        role: user.role?.name,
         status: user.status,
       }));
 
@@ -73,25 +73,22 @@ const Users = () => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const toggleStatus = async (id: number, currentStatus: boolean) => {
+  const toggleStatus = async (userId: number, currentStatus: boolean) => {
     try {
-      await axios.put(
-        `https://nicoindustrial.com/api/user/active/${id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      // Update the local state immediately for better UX
-      setUsers(users.map((user) => (user.id === id ? { ...user, status: !currentStatus } : user)));
-      toast.success(`User ${!currentStatus ? "activated" : "deactivated"} successfully`);
+      // Find the user in our state to get the backend ID
+      const user = users.find((u) => u.id === userId);
+      if (!user) {
+        toast.error("User not found");
+        return;
+      }
+      const response = await axios.put(`https://nicoindustrial.com/api/user/active/${user.backendId || user.id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      // Refresh the list
+      await fetchUsers(currentPage, itemsPerPage, search);
+
+      toast.success(response.data.message);
     } catch (error) {
-      console.error("Failed to toggle status:", error);
-      toast.error("Failed to toggle user status");
-      // Revert the UI if the API call fails
-      fetchUsers(currentPage, itemsPerPage, search);
+      console.error("Toggle error:", error);
+      toast.error("Failed to toggle status");
     }
   };
 
@@ -222,8 +219,19 @@ const Users = () => {
     }
   };
 
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen]);
+
   return (
-    <div className="p-4">
+    <div className="p-4 dark:text-white">
       <div className="flex justify-between items-center mb-4">
         <input
           type="text"
@@ -242,7 +250,7 @@ const Users = () => {
       </div>
 
       <table className="min-w-full border border-gray-200 text-left">
-        <thead className="bg-gray-300">
+        <thead className="bg-gray-300 dark:text-black">
           <tr className="text-center">
             <th className="border p-2">Sr No</th>
             <th className="border p-2">Username</th>
@@ -257,9 +265,16 @@ const Users = () => {
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{user.username}</td>
                 <td className="p-2 text-center">
-                  <button onClick={() => toggleStatus(user.Id || user.id, user.status)} className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out mx-auto ${user.status ? "bg-green-500" : "bg-gray-300 border-1 border-gray-400"}`}>
+                  <button
+                    onClick={() => {
+                      toggleStatus(user.id, user.status);
+                    }}
+                    className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out mx-auto ${user.status ? "bg-green-500" : "bg-gray-300 border-1 border-gray-400"}`}>
                     <div className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out ${user.status ? "translate-x-7" : "translate-x-0"}`}></div>
                   </button>
+                  {/* <button onClick={() => toggleStatus(user.id, user.status)} className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out mx-auto ${user.status ? "bg-green-500" : "bg-gray-300 border-1 border-gray-400"}`}>
+                    <div className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out ${user.status ? "translate-x-7" : "translate-x-0"}`}></div>
+                  </button> */}
                 </td>
                 <td className="border p-2 space-x-2">
                   <button onClick={() => handleModalOpen(user)} className="bg-blue-500 text-white px-2 py-1 rounded">
@@ -334,8 +349,8 @@ const Users = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[#00000071] flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-md w-1/3">
+        <div className="fixed inset-0 bg-[#00000071] backdrop-blur-xs bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto py-4">
+          <div className="bg-white p-6 rounded-md w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-4">{isEditing ? "Edit User" : "Create User"}</h2>
             {["name", "email", "password", "designation", "mobile"].map((field) => (
               <div key={field} className="mb-4">

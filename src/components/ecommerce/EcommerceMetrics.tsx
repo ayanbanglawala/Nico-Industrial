@@ -66,6 +66,11 @@ export default function EcommerceMetrics() {
   const authToken = localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
 
+  const truncateText = (text: string | undefined, maxLength: number) => {
+    if (!text) return "N/A";
+    return text.length <= maxLength ? text : text.slice(0, maxLength) + "...";
+  };
+
   const fetchFollowUps = async (page = 1) => {
     try {
       const currentDate = new Date().toISOString().split("T")[0];
@@ -205,8 +210,7 @@ export default function EcommerceMetrics() {
                     <h4 className="font-medium text-gray-800 dark:text-white">Name: {item.generalFollowUpName || "Untitled Follow-up"}</h4>
                     <span className={`text-xs px-2 py-1 rounded ${item.status === "COMPLETED" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"}`}>Status: {item.status || "PENDING"}</span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 truncate">Description: {item.description || "No description"}</p>
-                  {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Assigned to: {item.followUpPerson?.name || "Unassigned"}</p> */}
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 truncate">Description: {truncateText(item.description, 30) || "No description"}</p> {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Assigned to: {item.followUpPerson?.name || "Unassigned"}</p> */}
                 </div>
               ))}
             </div>
@@ -434,8 +438,7 @@ export default function EcommerceMetrics() {
                   <tr key={item.id} className="dark:border-gray-700 hover:bg-gray-200 transform duration-150 text-center">
                     <td className="px-4 py-2">{(currentPage - 1) * pageSize + index + 1}</td>
                     <td className="px-4 py-2">{item.generalFollowUpName || "N/A"}</td>
-                    <td className="px-4 py-2">{item.description || "N/A"}</td>
-                    <td className="px-4 py-2">{item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "Not set"}</td>
+                    <td className="px-4 py-2">{truncateText(item.description, 40)}</td> <td className="px-4 py-2">{item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "Not set"}</td>
                     <td className="px-4 py-2 text-blue-600 dark:text-blue-400 flex justify-center gap-2">
                       <div
                         className="cursor-pointer hover:scale-110 hover:text-gray-700"

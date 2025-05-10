@@ -42,7 +42,8 @@ const Consumer = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  const consumersPerPage = 10;
+  // const consumersPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const fetchConsumers = async () => {
     setLoading(true);
@@ -53,7 +54,7 @@ const Consumer = () => {
         },
         params: {
           page: currentPage,
-          size: consumersPerPage,
+          size: itemsPerPage,
           search: search,
           filter1: filter1,
           filter2: filter2,
@@ -112,9 +113,9 @@ const Consumer = () => {
 
   const filteredConsumers = consumers.filter((consumer) => consumer.consumerName && consumer.consumerName.toLowerCase().includes(search.toLowerCase()));
 
-  const totalPages = Math.ceil(filteredConsumers.length / consumersPerPage);
-  const startIndex = (currentPage - 1) * consumersPerPage;
-  const endIndex = Math.min(startIndex + consumersPerPage, filteredConsumers.length);
+  const totalPages = Math.ceil(filteredConsumers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredConsumers.length);
   const currentConsumers = filteredConsumers.slice(startIndex, endIndex);
 
   const handlePrev = () => currentPage > 1 && setCurrentPage(currentPage - 1);
@@ -273,8 +274,19 @@ const Consumer = () => {
     }
   };
 
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen]);
+
   return (
-    <div className="p-4">
+    <div className="p-4 dark:text-white">
       {/* Search + Add */}
       <div className="flex justify-between items-center mb-4">
         <input
@@ -296,7 +308,7 @@ const Consumer = () => {
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-300">
+          <thead className="bg-gray-300 dark:text-black">
             <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Name</th>
@@ -358,12 +370,24 @@ const Consumer = () => {
               Next
             </button>
           </div>
+          <select
+          value={itemsPerPage}
+          onChange={(e) => {
+            setItemsPerPage(Number(e.target.value));
+            handlePageClick(1);
+          }}
+          className="border p-1 rounded">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
+        </select>
         </div>
       </div>
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[#00000071] flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-96">
             <h2 className="text-xl mb-4 font-semibold">{editConsumerId ? "Edit Consumer" : "Create Consumer"}</h2>
             <div className="mb-4">

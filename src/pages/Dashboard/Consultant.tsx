@@ -9,7 +9,8 @@ const Consultant = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [consultants, setConsultants] = useState<any[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
-  const consultantsPerPage = 5;
+  // const consultantsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [showModal, setShowModal] = useState(false);
   const [newConsultant, setNewConsultant] = useState({
@@ -38,7 +39,7 @@ const Consultant = () => {
         },
         params: {
           page: currentPage,
-          size: consultantsPerPage,
+          size: itemsPerPage,
           search: search,
           filter1: "",
           filter2: "",
@@ -134,7 +135,7 @@ const Consultant = () => {
     }
   };
 
-  const totalPages = Math.ceil(totalRecords / consultantsPerPage);
+  const totalPages = Math.ceil(totalRecords / itemsPerPage);
 
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -206,8 +207,19 @@ const Consultant = () => {
     }
   };
 
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showModal]);
+
   return (
-    <div className="p-4">
+    <div className="p-4 dark:text-white">
       {/* Top Controls */}
       <div className="flex justify-between items-center mb-4">
         <input
@@ -229,7 +241,7 @@ const Consultant = () => {
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-300">
+          <thead className="bg-gray-300 dark:text-black">
             <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Consultant Name</th>
@@ -245,7 +257,7 @@ const Consultant = () => {
             {consultants.length ? (
               consultants.map((consultant, index) => (
                 <tr className="text-center" key={consultant.id}>
-                  <td className="p-2">{(currentPage - 1) * consultantsPerPage + index + 1}</td>
+                  <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="p-2">{consultant.consultantName}</td>
                   <td className="p-2">{consultant.contactNumber}</td>
                   <td className="p-2">{consultant.contactPerson}</td>
@@ -275,7 +287,7 @@ const Consultant = () => {
         {/* Pagination */}
         <div className="flex justify-between items-center mt-6">
           <p className="text-sm text-gray-600">
-            Showing {(currentPage - 1) * consultantsPerPage + 1} to {Math.min(currentPage * consultantsPerPage, totalRecords)} of {totalRecords} results
+            Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalRecords)} of {totalRecords} results
           </p>
           <div className="flex gap-2">
             <button onClick={handlePrev} disabled={currentPage === 1} className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50">
@@ -290,6 +302,18 @@ const Consultant = () => {
               Next
             </button>
           </div>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              goToPage(1);
+            }}
+            className="border p-1 rounded">
+            <option value={10}>10 per page</option>
+            <option value={25}>25 per page</option>
+            <option value={50}>50 per page</option>
+            <option value={100}>100 per page</option>
+          </select>
         </div>
       </div>
 
@@ -307,42 +331,21 @@ const Consultant = () => {
                 <label htmlFor="consultantName" className="block text-sm font-medium text-gray-700">
                   Consultant Name
                 </label>
-                <input
-                  type="text"
-                  id="consultantName"
-                  name="consultantName"
-                  value={newConsultant.consultantName}
-                  onChange={handleInputChange}
-                  className={`border ${errors.consultantName ? "border-red-500" : "border-gray-300"} p-2 rounded-md w-full`}
-                />
+                <input type="text" id="consultantName" name="consultantName" value={newConsultant.consultantName} onChange={handleInputChange} className={`border ${errors.consultantName ? "border-red-500" : "border-gray-300"} p-2 rounded-md w-full`} />
                 {errors.consultantName && <p className="text-red-500 text-xs mt-1">{errors.consultantName}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700">
                   Contact Person
                 </label>
-                <input
-                  type="text"
-                  id="contactPerson"
-                  name="contactPerson"
-                  value={newConsultant.contactPerson}
-                  onChange={handleInputChange}
-                  className={`border ${errors.contactPerson ? "border-red-500" : "border-gray-300"} p-2 rounded-md w-full`}
-                />
+                <input type="text" id="contactPerson" name="contactPerson" value={newConsultant.contactPerson} onChange={handleInputChange} className={`border ${errors.contactPerson ? "border-red-500" : "border-gray-300"} p-2 rounded-md w-full`} />
                 {errors.contactPerson && <p className="text-red-500 text-xs mt-1">{errors.contactPerson}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700">
                   Contact Number
                 </label>
-                <input
-                  type="text"
-                  id="contactNumber"
-                  name="contactNumber"
-                  value={newConsultant.contactNumber}
-                  onChange={handleInputChange}
-                  className={`border ${errors.contactNumber ? "border-red-500" : "border-gray-300"} p-2 rounded-md w-full`}
-                />
+                <input type="text" id="contactNumber" name="contactNumber" value={newConsultant.contactNumber} onChange={handleInputChange} className={`border ${errors.contactNumber ? "border-red-500" : "border-gray-300"} p-2 rounded-md w-full`} />
                 {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber}</p>}
               </div>
               <div className="flex justify-end gap-2">

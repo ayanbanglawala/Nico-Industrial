@@ -15,7 +15,8 @@ type BrandType = {
 const Brand = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  // const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [brands, setBrands] = useState<BrandType[]>([]);
   const token = localStorage.getItem("token");
@@ -50,6 +51,19 @@ const Brand = () => {
   useEffect(() => {
     fetchBrands();
   }, []);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    // Cleanup function
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen]);
 
   const filtered = brands.filter((brand) => brand.brandName.toLowerCase().includes(search.toLowerCase()));
 
@@ -176,7 +190,7 @@ const Brand = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 dark:text-white">
       <ToastContainer />
       <div className="flex justify-between items-center mb-4">
         <input
@@ -197,7 +211,7 @@ const Brand = () => {
 
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-300">
+          <thead className="bg-gray-300 dark:text-black">
             <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Brand Name</th>
@@ -258,11 +272,23 @@ const Brand = () => {
             Next
           </button>
         </div>
+        <select
+          value={itemsPerPage}
+          onChange={(e) => {
+            setItemsPerPage(Number(e.target.value));
+            goToPage(1);
+          }}
+          className="border p-1 rounded">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
+        </select>
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-opacity-50 bg-[#00000071] backdrop-blur-xs flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-md w-96">
+        <div className="fixed inset-0 bg-opacity-50 bg-[#00000071] backdrop-blur-xs flex justify-center items-center z-50 overflow-y-auto">
+          <div className="bg-white p-6 rounded-md w-96 max-h-[80vh] overflow-y-auto">
             <h3 className="text-lg font-medium mb-4">{editingBrand ? "Edit Brand" : "Create New Brand"}</h3>
             <div className="mb-4">
               <label className="block text-sm font-medium">Brand Name</label>
