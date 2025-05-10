@@ -29,42 +29,45 @@ interface FollowUpSubmitData {
   statusNotes: string;
   dueDate: Date;
   createdBy: { id: string | null };
-  updatedBy?: { id: string | null }; // Make updatedBy optional
+  updatedBy?: { id: string | null };
 }
 
 const FollowUpTable = () => {
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  // const itemsPerPage = 10;
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingFollowUpId, setEditingFollowUpId] = useState<number | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [search, setSearch] = useState("");
+  const [userSearch, setUserSearch] = useState("");
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const currentUserId = localStorage.getItem("userId");
+  const currentUserName = localStorage.getItem("userName");
 
   const [formData, setFormData] = useState({
     followUpName: "",
     followUpPerson: "",
     description: "",
-    status: "",
+    status: "PENDING",
     statusNotes: "",
     dueDate: "",
     dueTime: "",
   });
 
   useEffect(() => {
-      fetchFollowUps();
-    }, [search]);
+    fetchFollowUps();
+  }, [search]);
 
   const fetchFollowUps = async () => {
     try {
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("userId");
       const response = await axios.get(`https://nicoindustrial.com/api/generalFollowUp/getall?userId=${userId}`, {
-        params: { search: search, },
+        params: { search: search },
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.data?.data?.list) {
@@ -84,7 +87,9 @@ const FollowUpTable = () => {
         params: { search },
       });
       if (response.data?.data?.list) {
-        setUsers(response.data.data.list);
+        const usersList = response.data.data.list;
+        setUsers(usersList);
+        setFilteredUsers(usersList);
       }
     } catch (error) {
       console.error("Failed to fetch users", error);
@@ -95,15 +100,17 @@ const FollowUpTable = () => {
 
   useEffect(() => {
     fetchFollowUps();
-    fetchUsers(); // Fetch users when component mounts
+    fetchUsers();
   }, []);
 
-  const handleUserSearch = (searchValue: string) => {
-    if (searchValue.length > 2) {
-      // Only search when user types more than 2 characters
-      fetchUsers(searchValue);
+  useEffect(() => {
+    if (userSearch) {
+      const filtered = users.filter((user) => user.name.toLowerCase().includes(userSearch.toLowerCase()));
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers(users);
     }
-  };
+  }, [userSearch, users]);
 
   const totalPages = Math.ceil(followUps.length / itemsPerPage);
   const paginated = followUps.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -123,7 +130,7 @@ const FollowUpTable = () => {
   };
 
   const validateForm = () => {
-    return formData.followUpName.trim() !== "" && formData.followUpPerson !== "" && formData.status !== "" && formData.dueDate !== "";
+    return formData.followUpName.trim() !== "" && formData.followUpPerson !== "" && formData.dueDate !== "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,7 +138,6 @@ const FollowUpTable = () => {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
 
-    // Validate form
     if (!validateForm()) {
       toast.error("Please fill in all required fields.", {
         position: "top-right",
@@ -143,27 +149,23 @@ const FollowUpTable = () => {
     }
 
     let dueDateObj: Date;
-
     if (formData.dueDate.includes("T")) {
-      // Browser gives combined datetime string already
       dueDateObj = new Date(formData.dueDate);
     } else {
       const dueDateTime = `${formData.dueDate}T${formData.dueTime || "00:00"}:00`;
       dueDateObj = new Date(dueDateTime);
     }
-    // Prepare the data to submit
+
     const dataToSubmit: FollowUpSubmitData = {
       generalFollowUpName: formData.followUpName,
       followUpPerson: { id: Number.parseInt(formData.followUpPerson) },
       description: formData.description,
-      status: formData.status,
+      status: isEditing ? formData.status : "PENDING",
       statusNotes: formData.statusNotes,
       dueDate: new Date(formData.dueDate),
       createdBy: { id: userId },
     };
-    // dueDate: new Date(formData.dueDate + (formData.dueTime ? `T${formData.dueTime}:00` : "T00:00:00")),
 
-    // If editing, include updatedBy field
     if (isEditing && editingFollowUpId) {
       dataToSubmit.updatedBy = { id: userId };
     }
@@ -171,19 +173,16 @@ const FollowUpTable = () => {
     try {
       let response;
       if (isEditing && editingFollowUpId) {
-        // Update existing follow-up
         response = await axios.put(`https://nicoindustrial.com/api/generalFollowUp/update/${editingFollowUpId}`, dataToSubmit, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        // Create new follow-up
         response = await axios.post("https://nicoindustrial.com/api/generalFollowUp/save", dataToSubmit, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
 
-      const successMessage = response.data.message || "Follow-up saved successfully!";
-      toast.success(successMessage, {
+      toast.success(response.data.message || "Follow-up saved successfully!", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -191,12 +190,11 @@ const FollowUpTable = () => {
         style: { backgroundColor: "green" },
       });
 
-      fetchFollowUps(); // Refresh the table
-      setIsModalOpen(false); // Close modal
-      resetForm(); // Reset form fields
+      fetchFollowUps();
+      setIsModalOpen(false);
+      resetForm();
     } catch (error) {
       const errorMessage = (error as any).response?.data?.message || "An error occurred while saving the follow-up.";
-
       toast.error(errorMessage, {
         position: "top-right",
         autoClose: 3000,
@@ -205,6 +203,7 @@ const FollowUpTable = () => {
       });
     }
   };
+
   const resetForm = () => {
     setFormData({
       followUpName: "",
@@ -217,6 +216,7 @@ const FollowUpTable = () => {
     });
     setIsEditing(false);
     setEditingFollowUpId(null);
+    setUserSearch("");
   };
 
   const handleDelete = async (id: number) => {
@@ -242,7 +242,6 @@ const FollowUpTable = () => {
     };
   }, [isModalOpen]);
 
-
   return (
     <div className="p-4 dark:text-white">
       <div className="flex justify-between items-center mb-4">
@@ -258,16 +257,7 @@ const FollowUpTable = () => {
         />
         <button
           onClick={() => {
-            setFormData({
-              followUpName: "",
-              followUpPerson: "",
-              description: "",
-              status: "",
-              statusNotes: "",
-              dueDate: "",
-              dueTime: "",
-            });
-            setIsEditing(false);
+            resetForm();
             setIsModalOpen(true);
           }}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
@@ -275,27 +265,6 @@ const FollowUpTable = () => {
           Create Follow-Up
         </button>
       </div>
-      {/* <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">General FollowUps</h2>
-        <button
-          onClick={() => {
-            setFormData({
-              followUpName: "",
-              followUpPerson: "",
-              description: "",
-              status: "",
-              statusNotes: "",
-              dueDate: "",
-              dueTime: "",
-            });
-            setIsEditing(false);
-            setIsModalOpen(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          <FaPlus />
-          Create Follow-Up
-        </button>
-      </div> */}
 
       <table className="w-full border border-gray-300">
         <thead className="bg-gray-300 dark:text-black">
@@ -320,7 +289,6 @@ const FollowUpTable = () => {
                 <td className="border px-3 py-2 space-x-2">
                   <button
                     onClick={() => {
-                      // Fetch the specific follow-up data before editing
                       const fetchFollowUpForEdit = async (id: number) => {
                         try {
                           const token = localStorage.getItem("token");
@@ -330,14 +298,16 @@ const FollowUpTable = () => {
 
                           const data = response.data.data;
                           if (data) {
+                            const dueDate = new Date(data.dueDate);
+                            const formattedDate = dueDate.toISOString().slice(0, 16);
                             setFormData({
                               followUpName: data.generalFollowUpName || "",
                               followUpPerson: data.followUpPerson?.id?.toString() || "",
                               description: data.description || "",
                               status: data.status || "",
                               statusNotes: data.statusNotes || "",
-                              dueDate: data.dueDate?.split("T")[0] || "",
-                              dueTime: data.dueDate?.split("T")[1]?.substring(0, 5) || "",
+                              dueDate: formattedDate,
+                              dueTime: "",
                             });
                             setIsEditing(true);
                             setEditingFollowUpId(id);
@@ -418,51 +388,78 @@ const FollowUpTable = () => {
             <h2 className="text-xl font-bold mb-4">{isEditing ? "Edit Follow-Up" : "Create Follow-Up"}</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block text-sm font-medium">Follow-Up Name</label>
+                <label className="block text-sm font-medium">Follow-Up Name *</label>
                 <input type="text" name="followUpName" value={formData.followUpName} onChange={handleInputChange} className="border p-2 rounded-md w-full" required />
               </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium">Follow-Up Person</label>
-                <select name="followUpPerson" value={formData.followUpPerson} onChange={handleSelectChange} onFocus={() => fetchUsers()} className="border p-2 rounded-md w-full" required>
-                  <option value="">Select Person</option>
-                  {isLoadingUsers ? (
-                    <option disabled>Loading users...</option>
-                  ) : (
-                    users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.name}
-                      </option>
-                    ))
+              <div className="mb-4 relative">
+                <label className="block text-sm font-medium">Follow-Up Person *</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.followUpPerson === currentUserId ? "Myself" : users.find((u) => u.id.toString() === formData.followUpPerson)?.name || ""}
+                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                    readOnly
+                    className="border p-2 rounded-md w-full cursor-pointer"
+                    placeholder="Select person"
+                  />
+                  {isUserDropdownOpen && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                      <div className="p-2 border-b">
+                        <input type="text" placeholder="Search users..." value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="w-full p-2 border rounded" autoFocus />
+                      </div>
+                      <div className="py-1">
+                        <div
+                          className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${formData.followUpPerson === currentUserId ? "bg-blue-100" : ""}`}
+                          onClick={() => {
+                            setFormData({ ...formData, followUpPerson: currentUserId || "" });
+                            setIsUserDropdownOpen(false);
+                          }}>
+                          Myself
+                        </div>
+                        {filteredUsers
+                          .filter((user) => user.id.toString() !== currentUserId) // Exclude current user from the list
+                          .map((user) => (
+                            <div
+                              key={user.id}
+                              className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${formData.followUpPerson === user.id.toString() ? "bg-blue-100" : ""}`}
+                              onClick={() => {
+                                setFormData({ ...formData, followUpPerson: user.id.toString() });
+                                setIsUserDropdownOpen(false);
+                              }}>
+                              {user.name}
+                            </div>
+                          ))}
+                        {filteredUsers.length === 0 && <div className="px-4 py-2 text-gray-500">No users found</div>}
+                      </div>
+                    </div>
                   )}
-                </select>
+                </div>
               </div>
-
               <div className="mb-4">
                 <label className="block text-sm font-medium">Description</label>
                 <textarea name="description" value={formData.description} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
               </div>
-
               <div className="mb-4">
                 <label className="block text-sm font-medium">Status</label>
-                <select name="status" value={formData.status} onChange={handleSelectChange} className="border p-2 rounded-md w-full">
-                  <option value="">Select Status</option>
-                  <option value="Pending">Pending</option>
-                  <option value="COMPLETED">Done</option>
-                  <option value="Modify">Modify</option>
-                </select>
+                {isEditing ? (
+                  // <select name="status" value={formData.status} onChange={handleSelectChange} className="border p-2 rounded-md w-full">
+                  //   <option value="PENDING">Pending</option>
+                  //   <option value="COMPLETED">Done</option>
+                  //   <option value="MODIFY">Modify</option>
+                  // </select>
+                  <input type="text" value="MODIFY" readOnly className="border p-2 rounded-md w-full bg-gray-100" />
+                ) : (
+                  <input type="text" value="PENDING" readOnly className="border p-2 rounded-md w-full bg-gray-100" />
+                )}
               </div>
-
               <div className="mb-4">
                 <label className="block text-sm font-medium">Status Notes</label>
                 <textarea name="statusNotes" value={formData.statusNotes} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
               </div>
-
               <div className="mb-4">
-                <label className="block text-sm font-medium">Due Date</label>
-                <input type="datetime-local" name="dueDate" value={formData.dueDate} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
+                <label className="block text-sm font-medium">Due Date *</label>
+                <input type="datetime-local" name="dueDate" value={formData.dueDate} onChange={handleInputChange} className="border p-2 rounded-md w-full" required />
               </div>
-
               <div className="flex justify-end gap-4">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded-md">
                   Cancel

@@ -14,6 +14,15 @@ const Users = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [roles, setRoles] = useState<any[]>([]);
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+    designation: "",
+    mobile: "",
+    role: "",
+  });
 
   const [newUser, setNewUser] = useState({
     name: "",
@@ -25,6 +34,57 @@ const Users = () => {
   });
 
   const token = localStorage.getItem("token");
+
+  const validateField = (name: string, value: string) => {
+    let error = "";
+
+    if (!value) {
+      error = "This field is required";
+    } else {
+      switch (name) {
+        case "email":
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            error = "Invalid email format";
+          }
+          break;
+        case "mobile":
+          if (!/^\d{10}$/.test(value)) {
+            error = "Mobile number must be 10 digits";
+          }
+          break;
+        case "password":
+          if (!isEditing && value.length < 3) {
+            error = "Password must be at least 3 characters";
+          }
+          break;
+      }
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: error }));
+    return !error;
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+
+    // Validate all required fields
+    isValid = validateField("name", newUser.name) && isValid;
+    isValid = validateField("email", newUser.email) && isValid;
+    isValid = validateField("designation", newUser.designation) && isValid;
+    isValid = validateField("role", newUser.role) && isValid;
+
+    // Mobile is optional but if provided, must be valid
+    if (newUser.mobile) {
+      isValid = validateField("mobile", newUser.mobile) && isValid;
+    }
+
+    // Password required only for new users
+    if (!isEditing) {
+      isValid = validateField("password", newUser.password) && isValid;
+    }
+
+    return isValid;
+  };
 
   const fetchUsers = async (page: number, size: number, searchQuery: string = "") => {
     try {
@@ -44,8 +104,8 @@ const Users = () => {
       const totalPages = res.data?.data?.totalPages || 1;
 
       const formattedUsers = userList.map((user: any) => ({
-        id: user.id, // Keep this as is for now
-        backendId: user.Id || user.userId, // Add this to capture the backend's actual ID
+        id: user.id,
+        backendId: user.Id || user.userId,
         username: user.name,
         email: user.email,
         designation: user.designation,
@@ -62,10 +122,27 @@ const Users = () => {
       toast.error("Failed to fetch users");
     }
   };
+  const fetchRoles = async () => {
+    try {
+      const response = await axios.get(`https://nicoindustrial.com/api/roles/list`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const rolesData = response.data?.data?.roles || response.data?.data?.list || [];
+      const rolesArray = rolesData.map((role: any) => ({
+        id: role.Id || role.id,
+        name: role.name.trim(),
+      }));
+      setRoles(rolesArray);
+    } catch (error) {
+      console.error("Failed to fetch roles:", error);
+      toast.error("Error fetching roles", { position: "top-right", autoClose: 3000 });
+    }
+  };
 
   useEffect(() => {
     if (token) {
       fetchUsers(currentPage, itemsPerPage, search);
+      fetchRoles();
     }
   }, [token, currentPage, itemsPerPage, search]);
 
@@ -75,16 +152,13 @@ const Users = () => {
 
   const toggleStatus = async (userId: number, currentStatus: boolean) => {
     try {
-      // Find the user in our state to get the backend ID
       const user = users.find((u) => u.id === userId);
       if (!user) {
         toast.error("User not found");
         return;
       }
       const response = await axios.put(`https://nicoindustrial.com/api/user/active/${user.backendId || user.id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
-      // Refresh the list
       await fetchUsers(currentPage, itemsPerPage, search);
-
       toast.success(response.data.message);
     } catch (error) {
       console.error("Toggle error:", error);
@@ -95,7 +169,6 @@ const Users = () => {
   const handleModalOpen = async (user?: any) => {
     if (user) {
       try {
-        // Fetch the full user data from the API
         const response = await axios.get(`https://nicoindustrial.com/api/user/get/${user.id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -107,10 +180,10 @@ const Users = () => {
         setNewUser({
           name: userData.name,
           email: userData.email,
-          password: "", // Password is intentionally left blank for edits
+          password: "",
           designation: userData.designation,
           mobile: userData.mobileNo,
-          role: userData.role?.id || userData.roleId, // Handle both role object and roleId
+          role: userData.role?.id || userData.roleId,
         });
 
         setIsEditing(true);
@@ -121,7 +194,6 @@ const Users = () => {
         toast.error("Error fetching user data", { position: "top-right", autoClose: 3000 });
       }
     } else {
-      // For creating new user
       setNewUser({
         name: "",
         email: "",
@@ -134,6 +206,14 @@ const Users = () => {
       setEditingId(null);
       setIsModalOpen(true);
     }
+    setErrors({
+      name: "",
+      email: "",
+      password: "",
+      designation: "",
+      mobile: "",
+      role: "",
+    });
   };
 
   const handleModalClose = () => {
@@ -148,19 +228,37 @@ const Users = () => {
     });
     setIsEditing(false);
     setEditingId(null);
+    setErrors({
+      name: "",
+      email: "",
+      password: "",
+      designation: "",
+      mobile: "",
+      role: "",
+    });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+
+    // For mobile field, only allow numbers and limit to 10 digits
+    if (name === "mobile") {
+      if (value === "" || (/^\d*$/.test(value) && value.length <= 10)) {
+        setNewUser((prev) => ({ ...prev, [name]: value }));
+      }
+    } else {
+      setNewUser((prev) => ({ ...prev, [name]: value }));
+    }
+
+    // Validate the field as user types
+    if (name !== "password" || !isEditing) {
+      validateField(name, value);
+    }
   };
 
   const handleCreateOrUpdateUser = async () => {
-    const requiredFields = ["name", "email", "designation", "role"];
-    for (let field of requiredFields) {
-      if (!newUser[field as keyof typeof newUser]) {
-        toast.error(`Please fill in the ${field} field.`, { position: "top-right", autoClose: 3000 });
-        return;
-      }
-    }
-
-    if (!isEditing && !newUser.password) {
-      toast.error("Please fill in the password field.", { position: "top-right", autoClose: 3000 });
+    if (!validateForm()) {
+      toast.error("Please fix the errors in the form", { position: "top-right", autoClose: 3000 });
       return;
     }
 
@@ -172,7 +270,7 @@ const Users = () => {
         password: newUser.password || undefined,
         designation: newUser.designation,
         role: { id: newUser.role },
-        mobileNo: newUser.mobile, // This should match your API expectation
+        mobileNo: newUser.mobile,
       };
 
       let response;
@@ -272,9 +370,6 @@ const Users = () => {
                     className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out mx-auto ${user.status ? "bg-green-500" : "bg-gray-300 border-1 border-gray-400"}`}>
                     <div className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out ${user.status ? "translate-x-7" : "translate-x-0"}`}></div>
                   </button>
-                  {/* <button onClick={() => toggleStatus(user.id, user.status)} className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out mx-auto ${user.status ? "bg-green-500" : "bg-gray-300 border-1 border-gray-400"}`}>
-                    <div className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out ${user.status ? "translate-x-7" : "translate-x-0"}`}></div>
-                  </button> */}
                 </td>
                 <td className="border p-2 space-x-2">
                   <button onClick={() => handleModalOpen(user)} className="bg-blue-500 text-white px-2 py-1 rounded">
@@ -357,18 +452,30 @@ const Users = () => {
                 <label className="block text-sm font-medium text-gray-700 capitalize">
                   {field} {field !== "password" || !isEditing ? "*" : ""}
                 </label>
-                <input type={field === "password" ? "password" : "text"} value={(newUser as any)[field]} onChange={(e) => setNewUser({ ...newUser, [field]: e.target.value })} className="border p-2 rounded w-full mt-2" placeholder={`Enter ${field}`} required={field !== "password" || !isEditing} />
+                <input
+                  type={field === "password" ? "password" : "text"}
+                  name={field}
+                  value={(newUser as any)[field]}
+                  onChange={handleInputChange}
+                  onBlur={(e) => validateField(field, e.target.value)}
+                  className={`border p-2 rounded w-full mt-2 ${errors[field as keyof typeof errors] ? "border-red-500" : ""}`}
+                  placeholder={`Enter ${field}`}
+                  required={field !== "password" || !isEditing}
+                />
+                {errors[field as keyof typeof errors] && <p className="text-red-500 text-xs mt-1">{errors[field as keyof typeof errors]}</p>}
               </div>
             ))}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Role *</label>
-              <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })} className="border p-2 rounded w-full mt-2" required>
+              <select name="role" value={newUser.role} onChange={handleInputChange} onBlur={(e) => validateField("role", e.target.value)} className={`border p-2 rounded w-full mt-2 ${errors.role ? "border-red-500" : ""}`} required>
                 <option value="">Select Role</option>
-                <option value="1">User</option>
-                <option value="2">Sales</option>
-                <option value="3">Admin</option>
-                <option value="4">Accounts</option>
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.name}
+                  </option>
+                ))}
               </select>
+              {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
             </div>
             <div className="flex justify-end gap-4">
               <button onClick={handleModalClose} className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400">
