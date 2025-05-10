@@ -57,11 +57,11 @@ const Analytics = () => {
           placeholder="Search User"
           value={searchTerm}
           onChange={handleSearchChange}
-          className="w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[gray]"
+          className="w-64 p-2 border border-black rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[gray]"
         />
 
         {/* Dropdown for User Category */}
-        <select value={selectedCategory} onChange={handleCategoryChange} className="w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[gray]">
+        <select value={selectedCategory} onChange={handleCategoryChange} className="w-64 p-2 border border-black rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[gray]">
           <option value="">Select Category</option>
           <option value="active">Active Users</option>
           <option value="completed">Completed Inquiries</option>
@@ -76,7 +76,7 @@ const Analytics = () => {
         {/* Bar Chart */}
         <div className="flex-1">
           <h3 className="text-center text-2xl font-semibold mb-4">Analytics Bar Chart</h3>
-          <div className="bg-white shadow-md rounded-lg p-4">
+          <div className="border border-black shadow-md rounded-lg p-4">
             <Bar data={barChartData} options={{ responsive: true }} />
           </div>
         </div>
@@ -84,7 +84,7 @@ const Analytics = () => {
         {/* Pie Chart with size adjustments */}
         <div className="flex-1">
           <h3 className="text-center text-2xl font-semibold mb-4">Analytics Pie Chart</h3>
-          <div className="bg-white shadow-md rounded-lg p-4 w-full max-w-sm mx-auto">
+          <div className="border border-black shadow-md rounded-lg p-4 w-full max-w-sm mx-auto">
             {" "}
             {/* Size control for Pie Chart */}
             <Pie data={pieChartData} options={{ responsive: true }} />

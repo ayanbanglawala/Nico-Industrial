@@ -386,8 +386,8 @@ export default function EcommerceMetrics() {
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {metricCards.map((card, i) => (
-          <div key={i} onClick={() => navigate("/inquiry")} className={`flex items-center justify-between cursor-pointer rounded-2xl hover:scale-105 transform duration-200 border border-gray-600 ${card.bg} p-5 dark:border-gray-800 dark:bg-white/[0.03]`}>
-            <div className="w-12 h-12 flex items-center justify-center bg-gray-700 rounded-lg dark:bg-gray-800">{card.icon}</div>
+          <div key={i} onClick={() => navigate("/inquiry")} className={`flex items-center justify-between cursor-pointer rounded-xl hover:scale-105 transform duration-200 border border-gray-600 ${card.bg} p-5 dark:border-gray-800 dark:bg-white/[0.03]`}>
+            <div className="w-12 h-12 flex items-center justify-center bg-gray-700 dark:bg-gray-800">{card.icon}</div>
             <div className="ml-4 text-end">
               <span className="text-sm font-bold text-gray-800 dark:text-gray-400">{card.title}</span>
               <h4 className="mt-1 font-bold text-title-sm text-gray-800 dark:text-white/90">{card.count}</h4>

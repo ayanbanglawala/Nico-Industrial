@@ -297,7 +297,7 @@ const Consumer = () => {
             setSearch(e.target.value);
             setCurrentPage(1);
           }}
-          className="border border-gray-300 p-2 rounded-md w-full max-w-xs"
+          className="border border-black p-2 rounded-md w-full max-w-xs"
         />
         <button onClick={handleCreateConsumer} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
           <FaPlus />
@@ -308,7 +308,7 @@ const Consumer = () => {
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-300 dark:text-black">
+          <thead className="bg-gray-400 dark:text-black">
             <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Name</th>
@@ -322,7 +322,7 @@ const Consumer = () => {
           <tbody>
             {currentConsumers.length ? (
               currentConsumers.map((consumer, index) => (
-                <tr className="text-center" key={consumer.consumerId}>
+                <tr className="text-center bg-gray-300 hover:bg-gray-200" key={consumer.consumerId}>
                   <td className="p-2">{startIndex + index + 1}</td>
                   <td className="p-2">{consumer.consumerName}</td>
                   <td className="p-2">{consumer.emailId}</td>
@@ -355,7 +355,7 @@ const Consumer = () => {
             Showing {startIndex + 1} to {endIndex} of {filteredConsumers.length} results
           </p>
           <div className="flex gap-2">
-            <button onClick={handlePrev} disabled={currentPage === 1} className={`px-3 py-1 border rounded ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
+            <button onClick={handlePrev} disabled={currentPage === 1} className={`px-3 border-black py-1 border rounded ${currentPage === 1 ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
               Previous
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
@@ -363,25 +363,22 @@ const Consumer = () => {
                 {pageNum}
               </button>
             ))}
-            <button
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-1 border rounded ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
+            <button onClick={handleNext} disabled={currentPage === totalPages} className={`px-3 py-1 border border-black rounded ${currentPage === totalPages ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
               Next
             </button>
           </div>
           <select
-          value={itemsPerPage}
-          onChange={(e) => {
-            setItemsPerPage(Number(e.target.value));
-            handlePageClick(1);
-          }}
-          className="border p-1 rounded">
-          <option value={10}>10 per page</option>
-          <option value={25}>25 per page</option>
-          <option value={50}>50 per page</option>
-          <option value={100}>100 per page</option>
-        </select>
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              handlePageClick(1);
+            }}
+            className="border border-black p-1 rounded">
+            <option value={10}>10 per page</option>
+            <option value={25}>25 per page</option>
+            <option value={50}>50 per page</option>
+            <option value={100}>100 per page</option>
+          </select>
         </div>
       </div>
 
@@ -392,47 +389,19 @@ const Consumer = () => {
             <h2 className="text-xl mb-4 font-semibold">{editConsumerId ? "Edit Consumer" : "Create Consumer"}</h2>
             <div className="mb-4">
               <label className="block text-sm text-gray-600 mb-1">Consumer Name *</label>
-              <input
-                type="text"
-                name="consumerName"
-                placeholder="Consumer Name"
-                value={newConsumer.consumerName}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <input type="text" name="consumerName" placeholder="Consumer Name" value={newConsumer.consumerName} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="mb-4">
               <label className="block text-sm text-gray-600 mb-1">Email *</label>
-              <input
-                type="email"
-                name="emailId"
-                placeholder="Email"
-                value={newConsumer.emailId}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <input type="email" name="emailId" placeholder="Email" value={newConsumer.emailId} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="mb-4">
               <label className="block text-sm text-gray-600 mb-1">Address</label>
-              <input
-                type="text"
-                name="address"
-                placeholder="Address"
-                value={newConsumer.address}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <input type="text" name="address" placeholder="Address" value={newConsumer.address} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="mb-4">
               <label className="block text-sm text-gray-600 mb-1">Contact *</label>
-              <input
-                type="text"
-                name="contact"
-                placeholder="Contact"
-                value={newConsumer.contact}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <input type="text" name="contact" placeholder="Contact" value={newConsumer.contact} onChange={handleInputChange} className="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="flex justify-between">
               <button onClick={handleCloseModal} className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400">

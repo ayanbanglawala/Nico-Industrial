@@ -49,10 +49,10 @@ const AppHeader: React.FC = () => {
   }, []);
 
   return (
-    <header className="sticky flex w-full bg-white border-gray-200 z-9 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
+    <header className="sticky flex w-full bg-blue-100 border-black border-b z-9 dark:border-gray-800 dark:bg-gray-900">
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
-          <button className="items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 lg:flex dark:text-gray-400 lg:h-11 lg:w-11 lg:border" onClick={handleToggle} aria-label="Toggle Sidebar">
+          <button className="items-center justify-center w-10 h-10 text-gray-500 border-gray-800 rounded-lg z-99999 dark:border-gray-800 lg:flex dark:text-gray-400 lg:h-11 lg:w-11 lg:border hover:bg-white" onClick={handleToggle} aria-label="Toggle Sidebar">
             {isMobileOpen ? (
               <>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -109,7 +109,7 @@ const AppHeader: React.FC = () => {
           <p
             // to="/signin"
             onClick={Logout}
-            className="flex items-center cursor-pointer gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+            className="flex items-center cursor-pointer gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:border-1 hover:border-black hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
             <svg className="fill-gray-500 group-hover:fill-gray-700 dark:group-hover:fill-gray-300" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 fillRule="evenodd"

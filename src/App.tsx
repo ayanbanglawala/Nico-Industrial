@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -30,6 +30,7 @@ import Analytics from "./pages/Dashboard/Analytics";
 import { ToastContainer } from "react-toastify";
 
 export default function App() {
+  const token = localStorage.getItem("token");
   return (
     <>
     <ToastContainer autoClose={3000} position="top-right" limit={1} hideProgressBar theme="colored" closeOnClick pauseOnHover draggable pauseOnFocusLoss draggablePercent={60} />
@@ -38,16 +39,16 @@ export default function App() {
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
-            <Route index path="/inquiry" element={<Inquiry />} />
-            <Route index path="/product" element={<Product />} />
-            <Route index path="/consumer" element={<Consumer />} />
-            <Route index path="/consultant" element={<Consultant />} />
-            <Route index path="/general-follow-up" element={<GeneralFollowUp />} />
-            <Route index path="/brand" element={<Brand />} />
-            <Route index path="/role" element={<Role />} />
-            <Route index path="/users" element={<Users />} />
-            <Route index path="/analytics" element={<Analytics />} />
+            <Route index path="/" element={!token ? <Navigate to="/signin" /> :<Home />} />
+            <Route index path="/inquiry" element={!token ? <Navigate to="/signin" /> :<Inquiry />} />
+            <Route index path="/product" element={!token ? <Navigate to="/signin" /> :<Product />} />
+            <Route index path="/consumer" element={!token ? <Navigate to="/signin" /> :<Consumer />} />
+            <Route index path="/consultant" element={!token ? <Navigate to="/signin" /> :<Consultant />} />
+            <Route index path="/general-follow-up" element={!token ? <Navigate to="/signin" /> :<GeneralFollowUp />} />
+            <Route index path="/brand" element={!token ? <Navigate to="/signin" /> :<Brand />} />
+            <Route index path="/role" element={!token ? <Navigate to="/signin" /> :<Role />} />
+            <Route index path="/users" element={!token ? <Navigate to="/signin" /> :<Users />} />
+            <Route index path="/analytics" element={!token ? <Navigate to="/signin" /> :<Analytics />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

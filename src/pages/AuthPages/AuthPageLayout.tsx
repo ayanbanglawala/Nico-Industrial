@@ -17,14 +17,14 @@ export default function AuthLayout({
             {/* <!-- ===== Common Grid Shape Start ===== --> */}
             <GridShape />
             <div className="flex flex-col items-center max-w-xs">
-              <Link to="/" className="block mb-4">
+              {/* <Link to="/" className="block mb-4"> */}
                 <img
                   width={400}
                   height={50}
                   src="logo.png"
                   alt="Logo"
                 />
-              </Link>
+              {/* </Link> */}
             </div>
           </div>
         </div>

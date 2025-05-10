@@ -201,7 +201,7 @@ const Brand = () => {
             setSearch(e.target.value);
             setCurrentPage(1);
           }}
-          className="border border-gray-300 p-2 rounded-md w-full max-w-xs"
+          className="border border-black p-2 rounded-md w-full max-w-xs"
         />
         <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" onClick={() => handleModalOpen()}>
           <FaPlus />
@@ -211,7 +211,7 @@ const Brand = () => {
 
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-300 dark:text-black">
+          <thead className="bg-gray-400 dark:text-black">
             <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Brand Name</th>
@@ -221,7 +221,7 @@ const Brand = () => {
           <tbody>
             {paginated.length ? (
               paginated.map((brand, index) => (
-                <tr className="text-center hover:bg-gray-200" key={brand.brandId}>
+                <tr className="text-center hover:bg-gray-200 bg-gray-300" key={brand.brandId}>
                   <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="p-2">{brand.brandName}</td>
                   <td className="p-2 space-x-2">
@@ -250,7 +250,7 @@ const Brand = () => {
           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length} results
         </p>
         <div className="flex gap-2">
-          <button onClick={() => goToPage(currentPage - 1)} className="px-3 py-1 border rounded hover:bg-gray-100" disabled={currentPage === 1}>
+          <button onClick={() => goToPage(currentPage - 1)} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === 1}>
             Previous
           </button>
 
@@ -268,7 +268,7 @@ const Brand = () => {
             </button>
           )}
 
-          <button onClick={() => goToPage(currentPage + 1)} className="px-3 py-1 border rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
+          <button onClick={() => goToPage(currentPage + 1)} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
             Next
           </button>
         </div>
@@ -278,7 +278,7 @@ const Brand = () => {
             setItemsPerPage(Number(e.target.value));
             goToPage(1);
           }}
-          className="border p-1 rounded">
+          className="border border-black p-1 rounded">
           <option value={10}>10 per page</option>
           <option value={25}>25 per page</option>
           <option value={50}>50 per page</option>

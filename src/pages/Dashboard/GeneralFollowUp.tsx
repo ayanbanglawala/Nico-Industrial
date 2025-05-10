@@ -253,7 +253,7 @@ const FollowUpTable = () => {
             setSearch(e.target.value);
             setCurrentPage(1);
           }}
-          className="border border-gray-300 p-2 rounded-md w-full max-w-xs"
+          className="border border-black p-2 rounded-md w-full max-w-xs"
         />
         <button
           onClick={() => {
@@ -267,7 +267,7 @@ const FollowUpTable = () => {
       </div>
 
       <table className="w-full border border-gray-300">
-        <thead className="bg-gray-300 dark:text-black">
+        <thead className="bg-gray-400 dark:text-black">
           <tr className="text-center">
             <th className="border px-3 py-2">Sr No</th>
             <th className="border px-3 py-2">GeneralFollowUp Name</th>
@@ -280,7 +280,7 @@ const FollowUpTable = () => {
         <tbody>
           {paginated.length ? (
             paginated.map((item, index) => (
-              <tr className="text-center hover:bg-gray-200" key={item.generalFollowUpId}>
+              <tr className="text-center bg-gray-300pcon hover:bg-gray-200" key={item.generalFollowUpId}>
                 <td className="border px-3 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="border px-3 py-2">{item.generalFollowUpName}</td>
                 <td className="border px-3 py-2">{item.createdBy?.name}</td>
@@ -349,7 +349,7 @@ const FollowUpTable = () => {
           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, followUps.length)} of {followUps.length} results
         </p>
         <div className="flex gap-2">
-          <button onClick={() => goToPage(currentPage - 1)} className="px-3 py-1 border rounded hover:bg-gray-100" disabled={currentPage === 1}>
+          <button onClick={() => goToPage(currentPage - 1)} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === 1}>
             Previous
           </button>
           {[...Array(totalPages).keys()].slice(0, 3).map((_, i) => (
@@ -363,7 +363,7 @@ const FollowUpTable = () => {
               {totalPages}
             </button>
           )}
-          <button onClick={() => goToPage(currentPage + 1)} className="px-3 py-1 border rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
+          <button onClick={() => goToPage(currentPage + 1)} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
             Next
           </button>
         </div>
@@ -373,7 +373,7 @@ const FollowUpTable = () => {
             setItemsPerPage(Number(e.target.value));
             goToPage(1);
           }}
-          className="border p-1 rounded">
+          className="border border-black p-1 rounded">
           <option value={10}>10 per page</option>
           <option value={25}>25 per page</option>
           <option value={50}>50 per page</option>

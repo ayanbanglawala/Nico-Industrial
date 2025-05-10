@@ -1254,7 +1254,7 @@ const Inquiry: React.FC = () => {
   const [selectedConsultant, setSelectedConsultant] = useState<SelectOption | null>(null);
   const [selectedFollowUpUser, setSelectedFollowUpUser] = useState<SelectOption | null>(null);
 
-  const isModalOpen = showViewModal || showCreateModal || showProductModal || showModalConsumer || showModalConsultant || showUserModal || showWinLossModal || showStatusQuartationChangeModal
+  const isModalOpen = showViewModal || showCreateModal || showProductModal || showModalConsumer || showModalConsultant || showUserModal || showWinLossModal || showStatusQuartationChangeModal;
 
   const [brandOptions, setBrandOptions] = useState<SelectOption[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<SelectOption | null>(null);
@@ -1368,6 +1368,7 @@ const Inquiry: React.FC = () => {
 
   useEffect(() => {
     if (isModalOpen) {
+      fetchFollowUpQuotations()
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
@@ -1377,13 +1378,15 @@ const Inquiry: React.FC = () => {
     };
   }, [isModalOpen]);
 
+  const role = localStorage.getItem("userRole");
+
   return (
-    <div className="max-w-7xl mx-auto p-3 pt-0 rounded-lg shadow-md dark:text-white">
+    <div className="max-w-7xl mx-auto p-3 pt-0 rounded-lg shadow-lg dark:text-white">
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-3">
         <div className="flex flex-col w-full sm:w-1/5">
           <label className="mb-1 font-medium">Filter by Status</label>
-          <select value={selectedStatusFilter} onChange={handleStatusFilterChange} className="p-2 border rounded-lg">
+          <select value={selectedStatusFilter} onChange={handleStatusFilterChange} className="p-2 border border-black rounded-lg">
             <option value="">All</option>
             <option value="TENDER">Tender</option>
             <option value="PURCHASE">Purchase</option>
@@ -1391,68 +1394,80 @@ const Inquiry: React.FC = () => {
             <option value="URGENT">Urgent</option>
           </select>
         </div>
-        <div className="flex flex-col w-full sm:w-1/4 dark:text-black">
-          <label className="mb-1 font-medium dark:text-white">Filter by Quotation</label>
-          <Select
-            name="quotationFilter"
-            value={userOptions.find((option) => option.value === selectedQuotationFilter)}
-            onChange={(selectedOption) => handleQuotationFilterChange(selectedOption ? selectedOption.value : "")}
-            options={[{ value: "", label: "All" }, ...userOptions]}
-            placeholder="Search and Select Quotation"
-            isSearchable
-            isClearable
-            className="basic-select"
-            classNamePrefix="select"
-          />
-        </div>
-        <div className="flex flex-col w-full sm:w-1/4">
-          <label className="mb-1 font-medium">Filter by Follow Up</label>
-          <Select
-            name="followUpUserFilter"
-            value={userOptions.find((option) => option.value === selectedFollowUpUserFilter)}
-            onChange={(selectedOption) => handleFollowUpUserFilterChange(selectedOption ? selectedOption.value : "")}
-            options={[{ value: "", label: "All" }, ...userOptions]}
-            placeholder="Search and Select Follow-Up User"
-            isSearchable
-            isClearable
-            className="basic-select"
-            classNamePrefix="select"
-          />
-        </div>
+        {role === "Admin" ? (
+          <>
+            <div className="flex flex-col w-full sm:w-1/4 dark:text-black">
+              <label className="mb-1 font-medium dark:text-white">Filter by Quotation</label>
+              <Select
+                name="quotationFilter"
+                value={userOptions.find((option) => option.value === selectedQuotationFilter)}
+                onChange={(selectedOption) => handleQuotationFilterChange(selectedOption ? selectedOption.value : "")}
+                options={[{ value: "", label: "All" }, ...userOptions]}
+                placeholder="Search and Select Quotation"
+                isSearchable
+                isClearable
+                className="basic-select border border-black rounded"
+                classNamePrefix="select"
+              />
+            </div>
+            <div className="flex flex-col w-full sm:w-[25.1%]">
+              <label className="mb-1 font-medium">Filter by Follow Up</label>
+              <Select
+                name="followUpUserFilter"
+                value={userOptions.find((option) => option.value === selectedFollowUpUserFilter)}
+                onChange={(selectedOption) => handleFollowUpUserFilterChange(selectedOption ? selectedOption.value : "")}
+                options={[{ value: "", label: "All" }, ...userOptions]}
+                placeholder="Search and Select Follow-Up User"
+                isSearchable
+                isClearable
+                className="basic-select border border-black rounded"
+                classNamePrefix="select"
+              />
+            </div>
+          </>
+        ) : (
+          ""
+        )}
         <div className="flex flex-col w-full sm:w-1/4">
           <label className="mb-1 font-medium">Search</label>
-          <input type="text" placeholder="Search inquiries..." value={search} onChange={(e) => setSearch(e.target.value)} className="p-2 border rounded-lg" />
+          <input type="text" placeholder="Search inquiries..." value={search} onChange={(e) => setSearch(e.target.value)} className="p-2 border border-black rounded-lg" />
         </div>
       </div>
 
       {/* Month/Year + Buttons */}
       <div className="flex flex-wrap sm:flex-nowrap items-end gap-4 mb-6">
-        <div className="flex flex-col w-full sm:w-1/6">
-          <label className="mb-1 font-medium">Month</label>
-          <select value={month} onChange={(e) => setMonth(e.target.value)} className="p-2 border rounded-lg">
-            <option value="">All</option>
-            {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((m, i) => (
-              <option key={i} value={i + 1}>
-                {m}
-              </option>
-            ))}
-          </select>
-        </div>
+        {role === "Admin" ? (
+          <>
+            <div className="flex flex-col w-full sm:w-1/6">
+              <label className="mb-1 font-medium">Month</label>
+              <select value={month} onChange={(e) => setMonth(e.target.value)} className="p-2 border border-black rounded-lg">
+                <option value="">All</option>
+                {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((m, i) => (
+                  <option key={i} value={i + 1}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <div className="flex flex-col w-full sm:w-1/4">
-          <label className="mb-1 font-medium">Year</label>
-          <select value={year} onChange={(e) => setYear(e.target.value)} className="p-2 border rounded-lg">
-            <option value="">All</option>
-            <option>2024</option>
-            <option>2025</option>
-            <option>2026</option>
-          </select>
-        </div>
-        <div className="flex gap-2 mt-6 sm:mt-0 w-full sm:w-[100%]">
-          <button onClick={handleExport} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-            Export to Excel
-          </button>
-        </div>
+            <div className="flex flex-col w-full sm:w-1/4">
+              <label className="mb-1 font-medium">Year</label>
+              <select value={year} onChange={(e) => setYear(e.target.value)} className="p-2 border border-black rounded-lg">
+                <option value="">All</option>
+                <option>2024</option>
+                <option>2025</option>
+                <option>2026</option>
+              </select>
+            </div>
+            <div className="flex gap-2 mt-6 sm:mt-0 w-full sm:w-[100%]">
+              <button onClick={handleExport} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Export to Excel
+              </button>
+            </div>
+          </>
+        ) : (
+          ""
+        )}
         <div className="flex gap-2 mt-6 sm:mt-0 w-full justify-end">
           <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <FaPlus />
@@ -1468,7 +1483,7 @@ const Inquiry: React.FC = () => {
       {/* Table */}
       <div className="overflow-auto">
         <table className="min-w-full bg-white border-gray-300 rounded-lg dark:text-black">
-          <thead className="bg-gray-300">
+          <thead className="bg-gray-400">
             <tr>
               <th className="px-4 py-2 border">Sr No</th>
               <th className="px-4 py-2 border">Project Name</th>
@@ -1574,7 +1589,7 @@ const Inquiry: React.FC = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={9} className="text-center p-4">
+                <td colSpan={9} className="text-center p-4 bg-gray-300">
                   No inquiries found.
                 </td>
               </tr>
@@ -1588,7 +1603,7 @@ const Inquiry: React.FC = () => {
             Showing {tableData.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} to {(currentPage - 1) * pageSize + tableData.length} of {totalData} results
           </p>
           <div className="flex gap-2">
-            <button onClick={handlePrev} className="px-3 py-1 border rounded hover:bg-gray-100" disabled={currentPage === 1}>
+            <button onClick={handlePrev} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === 1}>
               Previous
             </button>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -1602,7 +1617,7 @@ const Inquiry: React.FC = () => {
               }
               return null;
             })}
-            <button onClick={handleNext} className="px-3 py-1 border rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
+            <button onClick={handleNext} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
               Next
             </button>
           </div>

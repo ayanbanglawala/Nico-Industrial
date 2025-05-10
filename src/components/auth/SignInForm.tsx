@@ -85,12 +85,12 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col flex-1 bg-blue-100 border-r border-black dark:bg-transparent">
       <ToastContainer />
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
-        <div>
+        <div className="border border-black p-5 rounded-lg">
           <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">Sign In</h1>
+            <h1 className="mb-2 text-center font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">Sign In</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">Enter your email and password to sign in!</p>
           </div>
           <form onSubmit={handleSubmit}>
@@ -99,14 +99,14 @@ export default function SignInForm() {
                 <Label>
                   Email <span className="text-error-500">*</span>
                 </Label>
-                <Input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="info@gmail.com" />
+                <Input className="border-1 border-black bg-white" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="info@gmail.com" />
               </div>
               <div>
                 <Label>
                   Password <span className="text-error-500">*</span>
                 </Label>
                 <div className="relative">
-                  <Input name="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} placeholder="Enter your password" />
+                  <Input className="border-1 border-black bg-white" name="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} placeholder="Enter your password" />
                   <span onClick={() => setShowPassword(!showPassword)} className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2">
                     {showPassword ? <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" /> : <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />}
                   </span>

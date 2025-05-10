@@ -22,13 +22,13 @@ type NavItem = {
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
-  
+
   // Get user role from localStorage
   const [userRole, setUserRole] = useState<string | null>(null);
-  
+
   useEffect(() => {
     // Get role from localStorage when component mounts
-    const role = localStorage.getItem('userRole');
+    const role = localStorage.getItem("userRole");
     setUserRole(role);
   }, []);
 
@@ -39,11 +39,6 @@ const AppSidebar: React.FC = () => {
       path: "/",
     },
     {
-      icon: <BarChart3 />,
-      name: "Analytics",
-      path: "/analytics",
-    },
-    {
       icon: <LuUsers />,
       name: "Inquiry",
       path: "/inquiry",
@@ -52,6 +47,11 @@ const AppSidebar: React.FC = () => {
       icon: <MdOutlineFollowTheSigns />,
       name: "General Follow Up",
       path: "/general-follow-up",
+    },
+    {
+      icon: <BarChart3 />,
+      name: "Analytics",
+      path: "/analytics",
     },
     {
       icon: <CiCalendar />,
@@ -77,18 +77,18 @@ const AppSidebar: React.FC = () => {
       icon: <MdContacts />,
       name: "Role",
       path: "/role",
-      requiredRole: "Admin" // Only show for admin
+      requiredRole: "Admin", // Only show for admin
     },
     {
       icon: <MdOutlinePerson />,
       name: "Users",
       path: "/users",
-      requiredRole: "Admin" // Only show for admin
+      requiredRole: "Admin", // Only show for admin
     },
   ];
 
   // Filter nav items based on user role
-  const filteredNavItems = navItems.filter(item => {
+  const filteredNavItems = navItems.filter((item) => {
     if (!item.requiredRole) return true; // Show if no role required
     if (!userRole) return false; // Hide if no user role
     return userRole === item.requiredRole; // Show only if roles match
@@ -147,19 +147,14 @@ const AppSidebar: React.FC = () => {
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
-            <button
-              onClick={() => handleSubmenuToggle(index)}
-              className={`menu-item group ${openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"} cursor-pointer ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
-                }`}>
+            <button onClick={() => handleSubmenuToggle(index)} className={`menu-item group ${openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"} cursor-pointer ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}>
               <span className={`menu-item-icon-size ${openSubmenu?.index === index ? "menu-item-icon-active" : "menu-item-icon-inactive"}`}>{nav.icon}</span>
               {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <ChevronDownIcon className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.index === index ? "rotate-180 text-brand-500" : ""}`} />
-              )}
+              {(isExpanded || isHovered || isMobileOpen) && <ChevronDownIcon className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.index === index ? "rotate-180 text-brand-500" : ""}`} />}
             </button>
           ) : (
             nav.path && (
-              <Link to={nav.path} className={`menu-item hover:bg-gray-400 hover:text-white group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"}`}>
+              <Link to={nav.path} className={`menu-item hover:bg-gray-400 hover:text-white group ${isActive(nav.path) ? "menu-item-active border-1 border-black" : "menu-item-inactive"}`}>
                 <span className={`menu-item-icon-size ${isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"} text-gray-600`}>{nav.icon}</span>
                 {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
               </Link>
@@ -196,28 +191,29 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 border-r-1 border-gray-600 dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 border-r-1 border-gray-600 dark:bg-gray-900 dark:border-gray-800 bg-blue-100 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50
         ${isExpanded || isMobileOpen ? "w-[260px]" : isHovered ? "w-[260px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>
-      <div className={`py-5 flex dark:text-white ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
+      <div className={`flex dark:text-white ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <p>NICO INDUSTRIAL SOLUTION</p>
+            <>
+              <img src="logo.png" alt="BrandImage" />
+              {/* <p>NICO INDUSTRIAL SOLUTION</p> */}
+            </>
           ) : (
-            <p>NIS</p>
+            <p className="py-5">NIS</p>
           )}
         </Link>
       </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
-            <div>
-              <h2 className={`mb-4 text-xs dark:text-white uppercase flex leading-[20px] text-black ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
-                {isExpanded || isHovered || isMobileOpen ? "Menu" : <HorizontaLDots className="size-6" />}
-              </h2>
+            <div className="">
+              <h2 className={`mb-4 text-xs dark:text-white uppercase flex leading-[20px] text-black ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>{isExpanded || isHovered || isMobileOpen ? "Menu" : <HorizontaLDots className="size-6" />}</h2>
               {renderMenuItems(filteredNavItems)}
             </div>
           </div>
