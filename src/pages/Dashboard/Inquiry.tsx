@@ -1254,7 +1254,7 @@ const Inquiry: React.FC = () => {
   const [selectedConsultant, setSelectedConsultant] = useState<SelectOption | null>(null);
   const [selectedFollowUpUser, setSelectedFollowUpUser] = useState<SelectOption | null>(null);
 
-  const isModalOpen = showProductModal || showModalConsumer || showModalConsultant || showUserModal;
+  const isModalOpen = showViewModal || showCreateModal || showProductModal || showModalConsumer || showModalConsultant || showUserModal || showWinLossModal || showStatusQuartationChangeModal
 
   const [brandOptions, setBrandOptions] = useState<SelectOption[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<SelectOption | null>(null);
@@ -1367,7 +1367,7 @@ const Inquiry: React.FC = () => {
   };
 
   useEffect(() => {
-    if (showViewModal || showCreateModal || showProductModal || showModalConsumer || showModalConsultant || showUserModal || showWinLossModal || showStatusQuartationChangeModal) {
+    if (isModalOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
@@ -1375,10 +1375,10 @@ const Inquiry: React.FC = () => {
     return () => {
       document.body.style.overflow = "auto";
     };
-  }, [showViewModal, showCreateModal, showProductModal, showModalConsumer, showModalConsultant, showUserModal, showWinLossModal, showStatusQuartationChangeModal]);
+  }, [isModalOpen]);
 
   return (
-    <div className="max-w-7xl mx-auto p-3 pt-0 bg-white rounded-lg shadow-md">
+    <div className="max-w-7xl mx-auto p-3 pt-0 rounded-lg shadow-md dark:text-white">
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-3">
         <div className="flex flex-col w-full sm:w-1/5">
@@ -1391,8 +1391,8 @@ const Inquiry: React.FC = () => {
             <option value="URGENT">Urgent</option>
           </select>
         </div>
-        <div className="flex flex-col w-full sm:w-1/4">
-          <label className="mb-1 font-medium">Filter by Quotation</label>
+        <div className="flex flex-col w-full sm:w-1/4 dark:text-black">
+          <label className="mb-1 font-medium dark:text-white">Filter by Quotation</label>
           <Select
             name="quotationFilter"
             value={userOptions.find((option) => option.value === selectedQuotationFilter)}
@@ -1467,7 +1467,7 @@ const Inquiry: React.FC = () => {
 
       {/* Table */}
       <div className="overflow-auto">
-        <table className="min-w-full bg-white border-gray-300 rounded-lg">
+        <table className="min-w-full bg-white border-gray-300 rounded-lg dark:text-black">
           <thead className="bg-gray-300">
             <tr>
               <th className="px-4 py-2 border">Sr No</th>
@@ -1499,7 +1499,7 @@ const Inquiry: React.FC = () => {
                   </td>
                   <td className="px-4 py-2">
                     {inquiry.isWin === null ? (
-                      <div className="flex gap-1">
+                      <div className="flex justify-center gap-1">
                         <button onClick={() => handleButtonClick(true, inquiry.inquiryId)} className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700">
                           <FontAwesomeIcon icon={faThumbsUp} />
                         </button>
@@ -1517,7 +1517,7 @@ const Inquiry: React.FC = () => {
                       </button>
                     )}
                   </td>
-                  <td className="px-4 py-2 text-center space-x-2">
+                  <td className="px-4 py-2 text-center space-x-1">
                     <button onClick={() => handleView(inquiry)} className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">
                       View
                     </button>

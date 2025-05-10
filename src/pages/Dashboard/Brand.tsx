@@ -15,7 +15,8 @@ type BrandType = {
 const Brand = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  // const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [brands, setBrands] = useState<BrandType[]>([]);
   const token = localStorage.getItem("token");
@@ -189,7 +190,7 @@ const Brand = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 dark:text-white">
       <ToastContainer />
       <div className="flex justify-between items-center mb-4">
         <input
@@ -210,7 +211,7 @@ const Brand = () => {
 
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-300">
+          <thead className="bg-gray-300 dark:text-black">
             <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Brand Name</th>
@@ -271,6 +272,18 @@ const Brand = () => {
             Next
           </button>
         </div>
+        <select
+          value={itemsPerPage}
+          onChange={(e) => {
+            setItemsPerPage(Number(e.target.value));
+            goToPage(1);
+          }}
+          className="border p-1 rounded">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
+        </select>
       </div>
 
       {isModalOpen && (

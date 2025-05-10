@@ -37,7 +37,7 @@ const RoleComponent = () => {
   }, [isModalOpen]);
 
   return (
-    <div className="p-4">
+    <div className="p-4 dark:text-white">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <input
@@ -58,7 +58,7 @@ const RoleComponent = () => {
 
       {/* Table */}
       <table className="min-w-full border border-gray-200 text-left">
-        <thead className="bg-gray-300">
+        <thead className="bg-gray-300 dark:text-black">
           <tr className="text-center">
             <th className="border p-2">Sr No</th>
             <th className="border p-2">Role Name</th>

@@ -231,7 +231,7 @@ const Users = () => {
   }, [isModalOpen]);
 
   return (
-    <div className="p-4">
+    <div className="p-4 dark:text-white">
       <div className="flex justify-between items-center mb-4">
         <input
           type="text"
@@ -250,7 +250,7 @@ const Users = () => {
       </div>
 
       <table className="min-w-full border border-gray-200 text-left">
-        <thead className="bg-gray-300">
+        <thead className="bg-gray-300 dark:text-black">
           <tr className="text-center">
             <th className="border p-2">Sr No</th>
             <th className="border p-2">Username</th>

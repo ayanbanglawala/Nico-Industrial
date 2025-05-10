@@ -35,13 +35,15 @@ interface FollowUpSubmitData {
 const FollowUpTable = () => {
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  // const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingFollowUpId, setEditingFollowUpId] = useState<number | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [search, setSearch] = useState("");
 
   const [formData, setFormData] = useState({
     followUpName: "",
@@ -53,11 +55,16 @@ const FollowUpTable = () => {
     dueTime: "",
   });
 
+  useEffect(() => {
+      fetchFollowUps();
+    }, [search]);
+
   const fetchFollowUps = async () => {
     try {
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("userId");
       const response = await axios.get(`https://nicoindustrial.com/api/generalFollowUp/getall?userId=${userId}`, {
+        params: { search: search, },
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.data?.data?.list) {
@@ -235,10 +242,20 @@ const FollowUpTable = () => {
     };
   }, [isModalOpen]);
 
+
   return (
-    <div className="p-4">
+    <div className="p-4 dark:text-white">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">General FollowUps</h2>
+        <input
+          type="text"
+          placeholder="Search General FollowUps..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="border border-gray-300 p-2 rounded-md w-full max-w-xs"
+        />
         <button
           onClick={() => {
             setFormData({
@@ -258,9 +275,30 @@ const FollowUpTable = () => {
           Create Follow-Up
         </button>
       </div>
+      {/* <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">General FollowUps</h2>
+        <button
+          onClick={() => {
+            setFormData({
+              followUpName: "",
+              followUpPerson: "",
+              description: "",
+              status: "",
+              statusNotes: "",
+              dueDate: "",
+              dueTime: "",
+            });
+            setIsEditing(false);
+            setIsModalOpen(true);
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <FaPlus />
+          Create Follow-Up
+        </button>
+      </div> */}
 
       <table className="w-full border border-gray-300">
-        <thead className="bg-gray-300">
+        <thead className="bg-gray-300 dark:text-black">
           <tr className="text-center">
             <th className="border px-3 py-2">Sr No</th>
             <th className="border px-3 py-2">GeneralFollowUp Name</th>
@@ -359,6 +397,18 @@ const FollowUpTable = () => {
             Next
           </button>
         </div>
+        <select
+          value={itemsPerPage}
+          onChange={(e) => {
+            setItemsPerPage(Number(e.target.value));
+            goToPage(1);
+          }}
+          className="border p-1 rounded">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
+        </select>
       </div>
 
       {/* Modal */}
