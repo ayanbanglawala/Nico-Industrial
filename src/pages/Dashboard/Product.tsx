@@ -353,7 +353,7 @@ const Product = () => {
               Showing {startIndex + 1} to {Math.min(startIndex + productsPerPage, filteredProducts.length)} of {filteredProducts.length} results
             </p>
             <div className="flex gap-2">
-              <button onClick={handlePrev} disabled={currentPage === 1 || isLoading} className={`flex px-3 py-1 border border-black rounded ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
+              <button onClick={handlePrev} disabled={currentPage === 1 || isLoading} className={`flex dark:hover:bg-white dark:hover:!text-black px-3 py-1 border border-black rounded ${currentPage === 1 ? "bg-gray-200 hover:bg-gray-100 dark:border-white dark:bg-black dark:hover:text-white" : "hover:bg-gray-100"}`}>
                 <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
               </button>
               {Array.from({ length: totalPages }, (_, i) => (
@@ -361,7 +361,7 @@ const Product = () => {
                   {i + 1}
                 </button>
               ))}
-              <button onClick={handleNext} disabled={currentPage === totalPages || isLoading} className={`flex px-3 py-1 border border-black rounded ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
+              <button onClick={handleNext} disabled={currentPage === totalPages || isLoading} className={`flex dark:hover:bg-white dark:hover:!text-black px-3 py-1 border border-black rounded ${currentPage === totalPages ? "bg-gray-200 hover:bg-gray-100 dark:hover:text-white dark:border-white dark:bg-black dark:hover:text-black" : "hover:bg-gray-100"}`}>
                 Next<MdOutlineNavigateNext className="text-2xl" />
               </button>
             </div>
@@ -371,12 +371,12 @@ const Product = () => {
                 setProductsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="border border-black p-1 rounded">
-              <option value={10}>10 per page</option>
-              <option value={25}>25 per page</option>
-              <option value={50}>50 per page</option>
-              <option value={100}>100 per page</option>
-            </select>
+             className="border border-black p-1 rounded dark:border-white">
+          <option value={10} className="dark:text-black">10 per page</option>
+          <option value={25} className="dark:text-black">25 per page</option>
+          <option value={50} className="dark:text-black">50 per page</option>
+          <option value={100} className="dark:text-black">100 per page</option>
+        </select>
           </div>
         )}
       </div>

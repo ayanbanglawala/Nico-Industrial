@@ -356,7 +356,7 @@ const Consumer = () => {
             Showing {startIndex + 1} to {endIndex} of {filteredConsumers.length} results
           </p>
           <div className="flex gap-2">
-            <button onClick={handlePrev} disabled={currentPage === 1} className={`flex px-3 border-black py-1 border rounded ${currentPage === 1 ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
+            <button onClick={handlePrev} disabled={currentPage === 1} className={`flex px-3 border-black py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white rounded ${currentPage === 1 ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
               <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
@@ -364,7 +364,7 @@ const Consumer = () => {
                 {pageNum}
               </button>
             ))}
-            <button onClick={handleNext} disabled={currentPage === totalPages} className={`flex px-3 py-1 border border-black rounded ${currentPage === totalPages ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
+            <button onClick={handleNext} disabled={currentPage === totalPages} className={`flex px-3 py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white border-black rounded ${currentPage === totalPages ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
               Next<MdOutlineNavigateNext className="text-2xl" />
             </button>
           </div>
@@ -374,12 +374,12 @@ const Consumer = () => {
               setItemsPerPage(Number(e.target.value));
               handlePageClick(1);
             }}
-            className="border border-black p-1 rounded">
-            <option value={10}>10 per page</option>
-            <option value={25}>25 per page</option>
-            <option value={50}>50 per page</option>
-            <option value={100}>100 per page</option>
-          </select>
+           className="border border-black p-1 rounded dark:border-white">
+          <option value={10} className="dark:text-black">10 per page</option>
+          <option value={25} className="dark:text-black">25 per page</option>
+          <option value={50} className="dark:text-black">50 per page</option>
+          <option value={100} className="dark:text-black">100 per page</option>
+        </select>
         </div>
       </div>
 

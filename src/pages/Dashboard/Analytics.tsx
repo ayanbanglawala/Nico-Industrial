@@ -46,8 +46,8 @@ const Analytics = () => {
   return (
     <div className="p-6">
       {/* Back Arrow Button */}
-      <button onClick={() => navigate("/")} className="flex items-center text-xl text-[#2E073F] mb-6 hover:text-[gray]">
-        <FaArrowLeft size={20} /> <span className="ml-2">Back</span>
+      <button onClick={() => navigate("/")} className=" flex items-center text-xl text-[#2E073F] mb-6 hover:text-[gray]">
+        <FaArrowLeft size={20} className="dark:text-white" /> <span className="ml-2 dark:text-white">Back</span>
       </button>
 
       {/* User Search Bar */}
@@ -57,17 +57,17 @@ const Analytics = () => {
           placeholder="Search User"
           value={searchTerm}
           onChange={handleSearchChange}
-          className="w-64 p-2 border border-black rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[gray]"
+          className="w-64 p-2 border border-black rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[gray] dark:text-white dark:border-white"
         />
 
         {/* Dropdown for User Category */}
-        <select value={selectedCategory} onChange={handleCategoryChange} className="w-64 p-2 border border-black rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[gray]">
-          <option value="">Select Category</option>
-          <option value="active">Active Users</option>
-          <option value="completed">Completed Inquiries</option>
-          <option value="ongoing">Ongoing Inquiries</option>
-          <option value="reminders">Reminders</option>
-          <option value="unassigned">Unassigned Inquiries</option>
+        <select value={selectedCategory} onChange={handleCategoryChange} className="w-64 p-2 border border-black rounded-md shadow-sm dark:text-white dark:border-white focus:outline-none focus:ring-2 focus:ring-[gray]">
+          <option value="" className="dark:bg-black">Select Category</option>
+          <option value="active" className="dark:bg-black">Active Users</option>
+          <option value="completed" className="dark:bg-black">Completed Inquiries</option>
+          <option value="ongoing" className="dark:bg-black">Ongoing Inquiries</option>
+          <option value="reminders" className="dark:bg-black">Reminders</option>
+          <option value="unassigned" className="dark:bg-black">Unassigned Inquiries</option>
         </select>
       </div>
 
@@ -75,7 +75,7 @@ const Analytics = () => {
       <div className="flex gap-8 mb-8">
         {/* Bar Chart */}
         <div className="flex-1">
-          <h3 className="text-center text-2xl font-semibold mb-4">Analytics Bar Chart</h3>
+          <h3 className="text-center text-2xl font-semibold mb-4 dark:text-white">Analytics Bar Chart</h3>
           <div className="border border-black shadow-md rounded-lg p-4">
             <Bar data={barChartData} options={{ responsive: true }} />
           </div>
@@ -83,7 +83,7 @@ const Analytics = () => {
 
         {/* Pie Chart with size adjustments */}
         <div className="flex-1">
-          <h3 className="text-center text-2xl font-semibold mb-4">Analytics Pie Chart</h3>
+          <h3 className="text-center text-2xl font-semibold mb-4 dark:text-white" >Analytics Pie Chart</h3>
           <div className="border border-black shadow-md rounded-lg p-4 w-full max-w-sm mx-auto">
             {" "}
             {/* Size control for Pie Chart */}

@@ -104,7 +104,7 @@ const RoleComponent = () => {
           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalRecords)} of {totalRecords} results
         </p>
         <div className="flex gap-2">
-          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black">
+          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black dark:border-white">
             <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
           </button>
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -131,7 +131,7 @@ const RoleComponent = () => {
               {totalPages}
             </button>
           )}
-          <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100">
+          <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}  className="flex px-3 py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black dark:border-white">
             Next<MdOutlineNavigateNext className="text-2xl" />
           </button>
         </div>
@@ -141,11 +141,11 @@ const RoleComponent = () => {
             setItemsPerPage(Number(e.target.value));
             goToPage(1);
           }}
-          className="border border-black p-1 rounded">
-          <option value={10}>10 per page</option>
-          <option value={25}>25 per page</option>
-          <option value={50}>50 per page</option>
-          <option value={100}>100 per page</option>
+          className="border border-black p-1 rounded dark:border-white">
+          <option value={10} className="dark:text-black">10 per page</option>
+          <option value={25} className="dark:text-black">25 per page</option>
+          <option value={50} className="dark:text-black">50 per page</option>
+          <option value={100} className="dark:text-black">100 per page</option>
         </select>
       </div>
 
