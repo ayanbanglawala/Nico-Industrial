@@ -646,7 +646,7 @@ const Inquiry: React.FC = () => {
     fetchTableData(1, search);
   }, [selectedStatusFilter, selectedQuotationFilter, selectedFollowUpUserFilter, search]);
 
-  const fetchTableData = async (page: number, searchQuery = "") => {
+  const fetchTableData = async (page: number, searchQuery = "", winloss = "", istotal = false) => {
     try {
       const response = await axios.get(`https://nicoindustrial.com/api/inquiry/all`, {
         params: {
@@ -657,6 +657,8 @@ const Inquiry: React.FC = () => {
           "inquiry-status": selectedStatusFilter || status || "",
           QuotationPerson: selectedQuotationFilter || "",
           followUpPerson: selectedFollowUpUserFilter || "",
+          winorloss: winloss,
+          isfortotal: istotal,
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1382,12 +1384,12 @@ const Inquiry: React.FC = () => {
   const role = localStorage.getItem("userRole");
 
   return (
-    <div className="max-w-7xl mx-auto p-3 rounded-lg shadow-2xl dark:text-white">
+    <div className="max-w-7xl mx-auto p-3 rounded-lg dark:text-white">
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-3">
         <div className="flex flex-col w-full sm:w-1/5">
           <label className="mb-1 font-medium">Filter by Status</label>
-          <select value={selectedStatusFilter} onChange={handleStatusFilterChange} className="p-2 border border-black rounded-lg">
+          <select value={selectedStatusFilter} onChange={handleStatusFilterChange} className="p-2 border border-black dark:border-white rounded-lg">
             <option value="">All</option>
             <option value="TENDER">Tender</option>
             <option value="PURCHASE">Purchase</option>
@@ -1431,7 +1433,7 @@ const Inquiry: React.FC = () => {
         )}
         <div className="flex flex-col w-full sm:w-1/4">
           <label className="mb-1 font-medium">Search</label>
-          <input type="text" placeholder="Search inquiries..." value={search} onChange={(e) => setSearch(e.target.value)} className="p-2 border border-black rounded-lg" />
+          <input type="text" placeholder="Search inquiries..." value={search} onChange={(e) => setSearch(e.target.value)} className="p-2 border border-black rounded-lg dark:border-white" />
         </div>
       </div>
 
@@ -1441,7 +1443,7 @@ const Inquiry: React.FC = () => {
           <>
             <div className="flex flex-col w-full sm:w-1/6">
               <label className="mb-1 font-medium">Month</label>
-              <select value={month} onChange={(e) => setMonth(e.target.value)} className="p-2 border border-black rounded-lg">
+              <select value={month} onChange={(e) => setMonth(e.target.value)} className="p-2 border border-black rounded-lg dark:border-white">
                 <option value="">All</option>
                 {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((m, i) => (
                   <option key={i} value={i + 1}>
@@ -1453,7 +1455,7 @@ const Inquiry: React.FC = () => {
 
             <div className="flex flex-col w-full sm:w-1/4">
               <label className="mb-1 font-medium">Year</label>
-              <select value={year} onChange={(e) => setYear(e.target.value)} className="p-2 border border-black rounded-lg">
+              <select value={year} onChange={(e) => setYear(e.target.value)} className="p-2 border border-black rounded-lg dark:border-white">
                 <option value="">All</option>
                 <option>2024</option>
                 <option>2025</option>
@@ -1483,8 +1485,8 @@ const Inquiry: React.FC = () => {
 
       {/* Table */}
       <div className="overflow-auto">
-        <table className="min-w-full bg-white border-gray-300 rounded-lg dark:text-black">
-          <thead className="bg-gray-400">
+        <table className="min-w-full bg-white border border-gray-300 rounded-lg">
+          <thead className="bg-gray-400 dark:bg-black">
             <tr>
               <th className="px-4 py-2 border">Sr No</th>
               <th className="px-4 py-2 border">Project Name</th>
@@ -1499,14 +1501,14 @@ const Inquiry: React.FC = () => {
           <tbody>
             {tableData.length > 0 ? (
               tableData.map((inquiry, index) => (
-                <tr key={inquiry.inquiryId} className="hover:bg-gray-50 text-center">
+                <tr key={inquiry.inquiryId} className="hover:bg-gray-200 bg-gray-300 text-center dark:bg-black dark:hover:bg-gray-800 transform duration-200">
                   <td className="px-4 py-2 text-center">{(currentPage - 1) * pageSize + (index + 1)}</td>
                   <td className="px-4 py-2">{inquiry.projectName}</td>
                   <td className="px-4 py-2">{inquiry.consumer?.consumerName || "N/A"}</td>
                   <td className="px-4 py-2">{inquiry.product?.productName || "N/A"}</td>
                   <td className="px-4 py-2">{inquiry.consultant?.consultantName || "N/A"}</td>
                   <td className="px-4 py-2">
-                    <select className="p-3 text-sm border rounded-lg w-full" value={inquiry.inquiryStatus} onChange={(e) => handleStatusChange(inquiry.inquiryId, e.target.value)}>
+                    <select className="p-2 text-sm border border-black dark:border-white rounded-lg w-full dark:bg-black" value={inquiry.inquiryStatus} onChange={(e) => handleStatusChange(inquiry.inquiryId, e.target.value)}>
                       <option value="TENDER">TENDER</option>
                       <option value="PURCHASE">PURCHASE</option>
                       <option value="PROCUREMENT">PROCUREMENT</option>
@@ -1544,7 +1546,7 @@ const Inquiry: React.FC = () => {
                       Delete
                     </button>
 
-                    {inquiry.followUpQuotation?.id === userId && (
+                    {inquiry.followUpQuotation?.id === userId && inquiry.isWin == null && inquiry.quotationGiven === false && (
                       <button
                         onClick={() => {
                           setQuotationDescription(inquiry.description || "");
@@ -1565,7 +1567,7 @@ const Inquiry: React.FC = () => {
                       </button>
                     )}
 
-                    {inquiry.followUpUser?.id === userId && (
+                    {inquiry.followUpUser?.id === userId && inquiry.isWin == null && inquiry.quotationGiven === true && (
                       <button
                         onClick={() => {
                           setFollowUpDescription(inquiry.description || "");
@@ -1604,7 +1606,7 @@ const Inquiry: React.FC = () => {
             Showing {tableData.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} to {(currentPage - 1) * pageSize + tableData.length} of {totalData} results
           </p>
           <div className="flex gap-2">
-            <button onClick={handlePrev} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === 1}>
+            <button onClick={handlePrev} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black" disabled={currentPage === 1}>
               <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
             </button>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -1618,7 +1620,7 @@ const Inquiry: React.FC = () => {
               }
               return null;
             })}
-            <button onClick={handleNext} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
+            <button onClick={handleNext} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black" disabled={currentPage === totalPages}>
               Next <MdOutlineNavigateNext className="text-2xl" />
             </button>
           </div>
