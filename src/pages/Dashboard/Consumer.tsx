@@ -309,7 +309,7 @@ const Consumer = () => {
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-400 dark:text-black">
+          <thead className="bg-gray-400 dark:text-white dark:bg-black">
             <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Name</th>
@@ -323,7 +323,7 @@ const Consumer = () => {
           <tbody>
             {currentConsumers.length ? (
               currentConsumers.map((consumer, index) => (
-                <tr className="text-center bg-gray-300 hover:bg-gray-200" key={consumer.consumerId}>
+                <tr className="text-center bg-gray-300 hover:bg-gray-200 dark:text-white dark:bg-black" key={consumer.consumerId}>
                   <td className="p-2">{startIndex + index + 1}</td>
                   <td className="p-2">{consumer.consumerName}</td>
                   <td className="p-2">{consumer.emailId}</td>

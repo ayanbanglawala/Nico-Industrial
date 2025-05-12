@@ -181,13 +181,13 @@ export default function EcommerceMetrics() {
             const isSelected = date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth();
 
             if (isDueDate && isSelected) {
-              return "bg-blue-600 text-white";
+              return "bg-blue-600 text-white ";
             } else if (isDueDate) {
-              return "bg-green-200 rounded dark:bg-green-900/50";
+              return "bg-green-200 rounded dark:bg-green-900/50 ";
             } else if (isSelected) {
               return "bg-gray-800 text-white dark:bg-white dark:text-black";
             } else {
-              return "bg-gray-300 rounded dark:bg-gray-800";
+              return "bg-gray-300 rounded dark:bg-gray-800 ";
             }
           }}
         />

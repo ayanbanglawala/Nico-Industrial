@@ -212,7 +212,7 @@ const Brand = () => {
 
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-400 dark:text-black">
+          <thead className="bg-gray-400 dark:text-white dark:bg-black">
             <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Brand Name</th>
@@ -222,7 +222,7 @@ const Brand = () => {
           <tbody>
             {paginated.length ? (
               paginated.map((brand, index) => (
-                <tr className="text-center hover:bg-gray-200 bg-gray-300" key={brand.brandId}>
+                <tr className="text-center hover:bg-gray-200 bg-gray-300 dark:text-white dark:bg-black" key={brand.brandId}>
                   <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="p-2">{brand.brandName}</td>
                   <td className="p-2 space-x-2">

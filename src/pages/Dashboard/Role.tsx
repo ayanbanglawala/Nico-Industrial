@@ -59,7 +59,7 @@ const RoleComponent = () => {
 
       {/* Table */}
       <table className="min-w-full border border-gray-200 text-left">
-        <thead className="bg-gray-400 dark:text-black">
+        <thead className="bg-gray-400 dark:text-white dark:bg-black">
           <tr className="text-center">
             <th className="border p-2">Sr No</th>
             <th className="border p-2">Role Name</th>
@@ -75,7 +75,7 @@ const RoleComponent = () => {
             </tr>
           ) : roles.length ? (
             roles.map((role, index) => (
-              <tr className="text-center hover:bg-gray-200 bg-gray-300" key={role.Id}>
+              <tr className="text-center hover:bg-gray-200 bg-gray-300 dark:text-white dark:bg-black  dark:hover:bg-gray-800 transform duration-200" key={role.Id}>
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{role.name}</td>
                 <td className="p-2 space-x-2">
@@ -104,7 +104,7 @@ const RoleComponent = () => {
           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalRecords)} of {totalRecords} results
         </p>
         <div className="flex gap-2">
-          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100">
+          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black">
             <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
           </button>
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {

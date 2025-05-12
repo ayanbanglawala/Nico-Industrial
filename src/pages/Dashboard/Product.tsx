@@ -299,7 +299,7 @@ const Product = () => {
       {/* Product Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-400 dark:text-black">
+          <thead className="bg-gray-400 dark:text-white dark:bg-black">
             <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Product Name</th>
@@ -319,7 +319,7 @@ const Product = () => {
               </tr>
             ) : currentProducts.length ? (
               currentProducts.map((product, index) => (
-                <tr className="text-center bg-gray-300 hover:bg-gray-200" key={product.id}>
+                <tr className="text-center bg-gray-300 hover:bg-gray-200 dark:text-white dark:bg-black" key={product.id}>
                   <td className="p-2">{startIndex + index + 1}</td>
                   <td className="p-2">{product.name}</td>
                   <td className="p-2">₹{product.price}</td>

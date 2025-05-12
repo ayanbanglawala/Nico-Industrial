@@ -268,7 +268,7 @@ const FollowUpTable = () => {
       </div>
 
       <table className="w-full border border-gray-300">
-        <thead className="bg-gray-400 dark:text-black">
+        <thead className="bg-gray-400 dark:text-white dark:bg-black">
           <tr className="text-center">
             <th className="border px-3 py-2">Sr No</th>
             <th className="border px-3 py-2">GeneralFollowUp Name</th>
@@ -281,7 +281,7 @@ const FollowUpTable = () => {
         <tbody>
           {paginated.length ? (
             paginated.map((item, index) => (
-              <tr className="text-center bg-gray-300pcon hover:bg-gray-200 bg-gray-300" key={item.generalFollowUpId}>
+              <tr className="text-center bg-gray-300pcon hover:bg-gray-200 bg-gray-300 dark:text-white dark:bg-black" key={item.generalFollowUpId}>
                 <td className="border px-3 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="border px-3 py-2">{item.generalFollowUpName}</td>
                 <td className="border px-3 py-2">{item.createdBy?.name}</td>
