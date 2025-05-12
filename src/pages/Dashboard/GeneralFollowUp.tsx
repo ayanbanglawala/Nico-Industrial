@@ -267,27 +267,27 @@ const FollowUpTable = () => {
         </button>
       </div>
 
-      <table className="w-full border border-gray-300">
-        <thead className="bg-gray-400 dark:text-white dark:bg-black">
+      <table className="w-full">
+        <thead className="bg-[#38487c] border border-gray-500 text-white dark:text-white dark:bg-black">
           <tr className="text-center">
-            <th className="border px-3 py-2">Sr No</th>
-            <th className="border px-3 py-2">GeneralFollowUp Name</th>
-            <th className="border px-3 py-2">Created By</th>
-            <th className="border px-3 py-2">Description</th>
-            <th className="border px-3 py-2">Updated By</th>
-            <th className="border px-3 py-2">Actions</th>
+            <th className="px-3 py-2">Sr No</th>
+            <th className="px-3 py-2">GeneralFollowUp Name</th>
+            <th className="px-3 py-2">Created By</th>
+            <th className="px-3 py-2">Description</th>
+            <th className="px-3 py-2">Updated By</th>
+            <th className="px-3 py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
           {paginated.length ? (
             paginated.map((item, index) => (
-              <tr className="text-center bg-gray-300pcon hover:bg-gray-200 bg-gray-300 dark:text-white dark:bg-black" key={item.generalFollowUpId}>
-                <td className="border px-3 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                <td className="border px-3 py-2">{item.generalFollowUpName}</td>
-                <td className="border px-3 py-2">{item.createdBy?.name}</td>
-                <td className="border px-3 py-2">{item.description}</td>
-                <td className="border px-3 py-2">{item.updatedBy?.name || "—"}</td>
-                <td className="border px-3 py-2 space-x-2">
+              <tr className="text-center transform duration-200 hover:bg-gray-200 dark:hover:bg-gray-800 bg-white dark:text-white dark:bg-black" key={item.generalFollowUpId}>
+                <td className="px-3 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                <td className="px-3 py-2">{item.generalFollowUpName}</td>
+                <td className="px-3 py-2">{item.createdBy?.name}</td>
+                <td className="px-3 py-2">{item.description}</td>
+                <td className="px-3 py-2">{item.updatedBy?.name || "—"}</td>
+                <td className="px-3 py-2 space-x-2">
                   <button
                     onClick={() => {
                       const fetchFollowUpForEdit = async (id: number) => {
@@ -374,11 +374,11 @@ const FollowUpTable = () => {
             setItemsPerPage(Number(e.target.value));
             goToPage(1);
           }}
-          className="border border-black p-1 rounded dark:border-white">
-          <option value={10} className="dark:text-black">10 per page</option>
-          <option value={25} className="dark:text-black">25 per page</option>
-          <option value={50} className="dark:text-black">50 per page</option>
-          <option value={100} className="dark:text-black">100 per page</option>
+          className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
         </select>
       </div>
 

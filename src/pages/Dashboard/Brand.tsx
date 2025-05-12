@@ -212,7 +212,7 @@ const Brand = () => {
 
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-400 dark:text-white dark:bg-black">
+          <thead className="bg-[#38487c] text-white dark:text-white dark:bg-black">
             <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Brand Name</th>
@@ -222,7 +222,7 @@ const Brand = () => {
           <tbody>
             {paginated.length ? (
               paginated.map((brand, index) => (
-                <tr className="text-center hover:bg-gray-200 bg-gray-300 dark:text-white dark:bg-black" key={brand.brandId}>
+                <tr className="text-center hover:bg-gray-200 bg-white transform duration-200 dark:text-white dark:bg-black" key={brand.brandId}>
                   <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="p-2">{brand.brandName}</td>
                   <td className="p-2 space-x-2">
@@ -279,11 +279,11 @@ const Brand = () => {
             setItemsPerPage(Number(e.target.value));
             goToPage(1);
           }}
-         className="border border-black p-1 rounded dark:border-white">
-          <option value={10} className="dark:text-black">10 per page</option>
-          <option value={25} className="dark:text-black">25 per page</option>
-          <option value={50} className="dark:text-black">50 per page</option>
-          <option value={100} className="dark:text-black">100 per page</option>
+         className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
         </select>
       </div>
 

@@ -85,24 +85,24 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="flex flex-col flex-1 bg-blue-100 border-r border-black dark:bg-transparent">
+    <div className="flex flex-col flex-1 bg-[#38487c] border-r border-black dark:bg-transparent">
       <ToastContainer />
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div className="border border-black p-5 rounded-lg">
           <div className="mb-5 text-center sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">Sign In</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Enter your email and password to sign in!</p>
+            <h1 className="mb-2 font-semibold text-white text-title-sm dark:text-white/90 sm:text-title-md">Sign In</h1>
+            <p className="text-sm text-white dark:text-gray-400">Enter your email and password to sign in!</p>
           </div>
           <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <div>
-                <Label>
+                <Label className="text-white">
                   Email <span className="text-error-500">*</span>
                 </Label>
                 <Input className="border-1 border-black bg-white" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="info@gmail.com" />
               </div>
               <div>
-                <Label>
+                <Label className="text-white">
                   Password <span className="text-error-500">*</span>
                 </Label>
                 <div className="relative">
@@ -113,12 +113,12 @@ export default function SignInForm() {
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <Link to="/reset-password" className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400">
+                <Link to="/reset-password" className="text-sm text-white hover:text-brand-600 dark:text-brand-400">
                   Forgot password?
                 </Link>
               </div>
               <div>
-                <Button {...({ type: "submit" } as any)} className="w-full" size="sm">
+                <Button {...({ type: "submit" } as any)} className="w-full !text-[#38487c] bg-white border border-black hover:!bg-[#38487c] hover:!text-white" size="sm">
                   Sign in
                 </Button>
               </div>

@@ -147,15 +147,15 @@ const AppSidebar: React.FC = () => {
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
-            <button onClick={() => handleSubmenuToggle(index)} className={`menu-item group ${openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"} cursor-pointer ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}>
+            <button onClick={() => handleSubmenuToggle(index)} className={`menu-item group text-white ${openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"} cursor-pointer ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}>
               <span className={`menu-item-icon-size ${openSubmenu?.index === index ? "menu-item-icon-active" : "menu-item-icon-inactive"}`}>{nav.icon}</span>
               {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
               {(isExpanded || isHovered || isMobileOpen) && <ChevronDownIcon className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.index === index ? "rotate-180 text-brand-500" : ""}`} />}
             </button>
           ) : (
             nav.path && (
-              <Link to={nav.path} className={`menu-item hover:bg-gray-400 hover:text-white group ${isActive(nav.path) ? "menu-item-active border-1 border-black" : "menu-item-inactive"}`}>
-                <span className={`menu-item-icon-size ${isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"} text-gray-600`}>{nav.icon}</span>
+              <Link to={nav.path} className={`menu-item text-white hover:text-black group ${isActive(nav.path) ? "menu-item-active border-1 border-black bg-white !text-black dark:!text-white" : "menu-item-inactive"}`}>
+                <span className={`menu-item-icon-size hover:!text-white text-white dark:text-white dark:hover:!text-black ${isActive(nav.path) ? "menu-item-icon-active !text-black dark:!text-white dark:hover:!text-black" : "menu-item-icon-inactive"}`}>{nav.icon}</span>
                 {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
               </Link>
             )
@@ -191,13 +191,13 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 border-r-1 border-gray-400 dark:bg-gray-900 dark:border-gray-800 bg-blue-100 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 border-r-1 border-gray-400 dark:bg-gray-900 dark:border-gray-800 bg-[#38487c] text-gray-900 h-screen transition-all duration-300 ease-in-out z-50
         ${isExpanded || isMobileOpen ? "w-[260px]" : isHovered ? "w-[260px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>
-      <div className={`flex dark:text-white ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
+      <div className={`flex dark:text-white text-white ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
@@ -213,7 +213,7 @@ const AppSidebar: React.FC = () => {
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div className="">
-              <h2 className={`mb-4 text-xs dark:text-white uppercase flex leading-[20px] text-black ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>{isExpanded || isHovered || isMobileOpen ? "Menu" : <HorizontaLDots className="size-6" />}</h2>
+              <h2 className={`mb-4 text-xs dark:text-white text-white uppercase flex leading-[20px] ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>{isExpanded || isHovered || isMobileOpen ? "" : <HorizontaLDots className="size-6" />}</h2>
               {renderMenuItems(filteredNavItems)}
             </div>
           </div>

@@ -51,13 +51,13 @@ const AppHeader: React.FC = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 flex w-full bg-blue-100 backdrop-blur-md border-b border-gray-400 shadow-xl dark:border-gray-700 dark:bg-gray-900/80 z-50">
+    <header className="sticky top-0 flex w-full bg-[#38487c] backdrop-blur-md border-b border-gray-400 shadow-xl dark:border-gray-700 dark:bg-gray-900/80 z-50">
       <div className="flex items-center justify-between w-full px-4 py-3 sm:px-6">
         {/* Left section - sidebar toggle and title */}
         <div className="flex items-center space-x-4">
           <button
             onClick={handleToggle}
-            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-lg text-white hover:bg-[#38487c] border border-white dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
             aria-label="Toggle Sidebar"
           >
             {isMobileOpen ? (
@@ -92,7 +92,7 @@ const AppHeader: React.FC = () => {
               </svg>
             )}
           </button>
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
+          <h1 className="text-xl font-semibold text-white dark:text-white">
             Dashboard
           </h1>
         </div>
@@ -111,11 +111,11 @@ const AppHeader: React.FC = () => {
               <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium">
                 {userInitial}
               </div>
-              <span className="hidden md:inline-block font-medium text-gray-700 dark:text-gray-200">
+              <span className="hidden md:inline-block font-medium text-white dark:text-gray-200">
                 {username}
               </span>
               <svg
-                className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform ${
+                className={`w-4 h-4 text-white dark:text-gray-400 transition-transform ${
                   isApplicationMenuOpen ? "transform rotate-180" : ""
                 }`}
                 fill="none"

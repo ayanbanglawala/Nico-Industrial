@@ -59,7 +59,7 @@ const RoleComponent = () => {
 
       {/* Table */}
       <table className="min-w-full border border-gray-200 text-left">
-        <thead className="bg-gray-400 dark:text-white dark:bg-black">
+        <thead className="bg-[#38487c] text-white dark:text-white dark:bg-black">
           <tr className="text-center">
             <th className="border p-2">Sr No</th>
             <th className="border p-2">Role Name</th>
@@ -75,7 +75,7 @@ const RoleComponent = () => {
             </tr>
           ) : roles.length ? (
             roles.map((role, index) => (
-              <tr className="text-center hover:bg-gray-200 bg-gray-300 dark:text-white dark:bg-black  dark:hover:bg-gray-800 transform duration-200" key={role.Id}>
+              <tr className="text-center hover:bg-gray-200 bg-white dark:text-white dark:bg-black  dark:hover:bg-gray-800 transform duration-200" key={role.Id}>
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{role.name}</td>
                 <td className="p-2 space-x-2">
@@ -141,11 +141,11 @@ const RoleComponent = () => {
             setItemsPerPage(Number(e.target.value));
             goToPage(1);
           }}
-          className="border border-black p-1 rounded dark:border-white">
-          <option value={10} className="dark:text-black">10 per page</option>
-          <option value={25} className="dark:text-black">25 per page</option>
-          <option value={50} className="dark:text-black">50 per page</option>
-          <option value={100} className="dark:text-black">100 per page</option>
+          className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
         </select>
       </div>
 

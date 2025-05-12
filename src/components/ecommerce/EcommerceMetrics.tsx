@@ -140,14 +140,90 @@ export default function EcommerceMetrics() {
   };
 
   const metricCards = [
-    { title: "Unassign Inquiries", count: inquiries, bg: "bg-green-100", icon: <LuMessageSquareText className="text-white size-6" /> },
-    { title: "Procurement Inquiries", count: ongoingInquiriesCount, bg: "bg-pink-100", icon: <IoIosMail className="text-white size-6" /> },
-    { title: "Purchase Inquiries", count: completedInquiriesCount, bg: "bg-emerald-100", icon: <FaRegCheckCircle className="text-white size-6" /> },
-    { title: "Urgent Inquiries", count: activeUserCount, bg: "bg-rose-100", icon: <IoMdPeople className="text-white size-6" /> },
-    { title: "Tender Inquiries", count: rejectedInquiriesCount, bg: "bg-yellow-100", icon: <IoCloseCircleOutline className="text-white size-6" /> },
-    // { title: "Reminders", count: remindersCount, bg: "bg-purple-100", icon: <LuAlarmClock className="text-white size-6" /> },
-    { title: "Rejected Inquiries", count: rejectedInquiriesCount, bg: "bg-blue-100", icon: <LuMessageSquareText className="text-white size-6" /> },
-    { title: "Assign Inquiries", count: assignInquary, bg: "bg-cyan-100", icon: <LuMessageSquareText className="text-white size-6" /> },
+    {
+      title: "Unassign Inquiries",
+      count: inquiries,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      ),
+      color: "bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400",
+      onClick: () => navigate("/inquiry"),
+    },
+    {
+      title: "Procurement Inquiries",
+      count: ongoingInquiriesCount,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+          <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+        </svg>
+      ),
+      color: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/15 dark:text-pink-400",
+      onClick: () => navigate("/inquiry"),
+    },
+    {
+      title: "Purchase Inquiries",
+      count: completedInquiriesCount,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      ),
+      color: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
+      onClick: () => navigate("/inquiry"),
+    },
+    {
+      title: "Urgent Inquiries",
+      count: activeUserCount,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      ),
+      color: "bg-rose-500/10 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400",
+      onClick: () => navigate("/inquiry"),
+    },
+    {
+      title: "Tender Inquiries",
+      count: rejectedInquiriesCount,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="m15 9-6 6"></path>
+          <path d="m9 9 6 6"></path>
+        </svg>
+      ),
+      color: "bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/15 dark:text-yellow-400",
+      onClick: () => navigate("/inquiry"),
+    },
+    {
+      title: "Rejected Inquiries",
+      count: rejectedInquiriesCount,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      ),
+      color: "bg-blue-500/10 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400",
+      onClick: () => navigate("/inquiry"),
+    },
+    // {
+    //   title: "Assign Inquiries",
+    //   count: assignInquary,
+    //   icon: (
+    //     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+    //       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    //     </svg>
+    //   ),
+    //   color: "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/15 dark:text-cyan-400",
+    //   onClick: () => navigate("/inquiry"),
+    // },
   ];
 
   const dueDates = followUps.map((item: FollowUpItem) => new Date(item.dueDate).toLocaleDateString("en-CA").split("T")[0]);
@@ -177,7 +253,7 @@ export default function EcommerceMetrics() {
         setLoadingEvents(false);
       }
     };
-    
+
     useEffect(() => {
       fetchCalendarEvents();
     }, [selectedDate.getMonth()]);
@@ -195,7 +271,7 @@ export default function EcommerceMetrics() {
     const allDueDates = [...followUps.map((item: FollowUpItem) => new Date(item.dueDate).toLocaleDateString("en-CA").split("T")[0]), ...Object.keys(calendarEvents)];
 
     return (
-      <div className="rounded-2xl border text-center border-gray-600 bg-white p-4 pb-0 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="rounded-2xl text-center bg-white p-4 pb-0 dark:border-gray-800 dark:bg-black">
         <div className="justify-between flex">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Calendar</h2>
           <p className=" font-medium text-gray-800 dark:text-white">{selectedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
@@ -205,27 +281,26 @@ export default function EcommerceMetrics() {
           inline
           selected={selectedDate}
           onChange={handleDateClick}
-          calendarClassName="w-60.5"
+          calendarClassName="w-60.5 dark:!bg-black"
           dayClassName={(date) => {
             const dateString = date.toLocaleDateString("en-CA").split("T")[0];
             const isDueDate = allDueDates.includes(dateString);
             const isSelected = date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth();
-
             if (isDueDate && isSelected) {
-              return "bg-blue-600 text-white";
+              return "bg-blue-600 text-white dark:!text-white";
             } else if (isDueDate) {
-              return "bg-green-200 rounded dark:bg-green-900/50";
+              return "bg-green-200 rounded dark:bg-green-900 dark:!text-white";
             } else if (isSelected) {
-              return "bg-gray-800 text-white dark:bg-white dark:text-black";
+              return "bg-gray-800 text-white dark:bg-white dark:!text-white";
             } else {
-              return "bg-gray-300 rounded dark:bg-gray-800 ";
+              return "bg-gray-300 rounded dark:bg-gray-800 dark:!text-white";
             }
           }}
         />
 
         {/* Events Section */}
-        <div className="px-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-          <h3 className="font-semibold mb-2">Events on {selectedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}:</h3>
+        <div className="px-2 dark:bg-black rounded-lg">
+          <h3 className="font-semibold mb-2 dark:text-white">Events on {selectedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}:</h3>
           {selectedDateFollowUps.length > 0 ? (
             <div className="max-h-60 overflow-y-auto">
               {selectedDateFollowUps.map((item, index) => (
@@ -407,35 +482,37 @@ export default function EcommerceMetrics() {
   };
 
   useEffect(() => {
-      if (isModalOpen || isEditModalOpen || doneModalOpen) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "auto";
-      }
-      return () => {
-        document.body.style.overflow = "auto";
-      };
-    }, [isModalOpen, isEditModalOpen, doneModalOpen]);
+    if (isModalOpen || isEditModalOpen || doneModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen, isEditModalOpen, doneModalOpen]);
 
   return (
     <div className="flex flex-col gap-6">
       {/* Top Section: 3 Cards + Calendar */}
       <div className="flex flex-col md:flex-row gap-4 w-full">
         {/* 3 Cards */}
-        <div className="w-full md:w-3/4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="w-full md:w-3/4 grid grid-cols-2 sm:grid-cols-3 gap-4">
           {metricCards.map((card, i) => (
-            <div key={i} onClick={() => navigate("/inquiry")} className={`flex items-center justify-between cursor-pointer rounded-xl shadow-xl hover:scale-105 transform duration-200 border border-gray-600 ${card.bg} p-5 dark:border-gray-800 dark:bg-white/[0.03]`}>
-              <div className="w-12 h-12 flex items-center justify-center bg-gray-700 dark:bg-gray-800">{card.icon}</div>
-              <div className="ml-4 text-end">
-                <span className="text-sm font-bold text-gray-800 dark:text-gray-400">{card.title}</span>
-                <h4 className="mt-1 font-bold text-title-sm text-gray-800 dark:text-white/90">{card.count}</h4>
+            <div key={i} onClick={() => navigate("/inquiry")} className={`group cursor-pointer rounded-xl border border-gray-200 bg-white p-4 h-[120px] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-gray-700 dark:bg-gray-800`}>
+              <div className="flex items-center justify-between">
+                <div className={`flex h-12 w-12 items-center justify-center rounded-full ${card.color} transition-all duration-300 group-hover:scale-110`}>{card.icon}</div>
+                <div className="text-right">
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.title}</span>
+                  <h4 className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{card.count}</h4>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
         {/* Calendar */}
-        <div className="w-full shadow-xl md:w-1/4 hover:scale-105 transform duration-300">
+        <div className="w-full shadow-xl md:w-1/4 hover:scale-105 rounded-2xl border border-gray-500 transform duration-300">
           <CalendarWidget />
         </div>
       </div>
@@ -444,7 +521,7 @@ export default function EcommerceMetrics() {
       <div className="w-full overflow-auto shadow-xl rounded-2xl border border-gray-600 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Follow Ups</h2>
         <table className="min-w-full text-sm text-left text-gray-800 dark:text-gray-200">
-          <thead className="text-xs uppercase text-gray-700 bg-gray-400 dark:text-gray-400 border-b dark:border-gray-700">
+          <thead className="text-xs uppercase text-white bg-[#38487c] dark:text-gray-400 dark:bg-black border dark:border-gray-500">
             <tr className="text-center">
               <th className="px-4 py-2">SR</th>
               <th className="px-4 py-2">Follow Up Name</th>
@@ -455,7 +532,7 @@ export default function EcommerceMetrics() {
           </thead>
           <tbody>
             {followUps.map((item: FollowUpItem, index: number) => (
-              <tr key={item.id} className="dark:border-gray-700 hover:bg-gray-200 bg-gray-300 transform duration-150 text-center">
+              <tr key={item.id} className=" dark:hover:bg-gray-800 transform duration-200 hover:bg-gray-200 bg-white dark:bg-black text-center">
                 <td className="px-4 py-2">{(currentPage - 1) * pageSize + index + 1}</td>
                 <td className="px-4 py-2">{item.generalFollowUpName || "N/A"}</td>
                 <td className="px-4 py-2">{truncateText(item.description, 40)}</td>
@@ -489,7 +566,7 @@ export default function EcommerceMetrics() {
 
         {/* Pagination Controls */}
         <div className="mt-4 flex justify-end gap-2 text-sm">
-          <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 flex py-1 border rounded disabled:opacity-50">
+          <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 flex py-1 border rounded dark:text-white border-black dark:border-white">
             <MdOutlineNavigateNext className="text-xl rotate-180" /> Prev
           </button>
           {Array.from({ length: totalPages }, (_, i) => (
@@ -497,7 +574,7 @@ export default function EcommerceMetrics() {
               {i + 1}
             </button>
           ))}
-          <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 flex py-1 border rounded disabled:opacity-50">
+          <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 flex py-1 border rounded dark:text-white border-black dark:border-white">
             Next <MdOutlineNavigateNext className="text-xl" />
           </button>
         </div>

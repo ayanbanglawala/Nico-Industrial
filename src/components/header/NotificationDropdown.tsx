@@ -47,9 +47,7 @@ export default function NotificationDropdown() {
 
   return (
     <div className="relative">
-      <button
-        className="relative flex items-center justify-center text-gray-500 transition-colors bg-white border border-black rounded-full dropdown-toggle hover:text-gray-700 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
-        onClick={handleClick}>
+      <button className="relative flex items-center justify-center text-gray-500 transition-colors bg-white border border-black rounded-full dropdown-toggle hover:text-gray-700 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
         <span className={`absolute text-white justify-center -right-4 -top-1 z-10 h-7 w-7 rounded-full bg-orange-400 ${!notifying ? "hidden" : "flex"}`}>
           <p className="mt-0.5">{notification}</p>
           <span className="absolute inline-flex w-full h-full bg-orange-400 rounded-full opacity-75 animate-ping"></span>

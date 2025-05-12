@@ -242,7 +242,7 @@ const Consultant = () => {
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
-          <thead className="bg-gray-400 dark:text-white dark:bg-black">
+          <thead className="bg-[#38487c] text-white dark:text-white dark:bg-black">
             <tr className="text-center">
               <th className="border p-2">Sr No</th>
               <th className="border p-2">Consultant Name</th>
@@ -257,7 +257,7 @@ const Consultant = () => {
           <tbody>
             {consultants.length ? (
               consultants.map((consultant, index) => (
-                <tr className="text-center bg-gray-300 hover:bg-gray-200 dark:text-white dark:bg-black" key={consultant.id}>
+                <tr className="text-center bg-white transform duration-200 hover:bg-gray-200 dark:text-white dark:bg-black" key={consultant.id}>
                   <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="p-2">{consultant.consultantName}</td>
                   <td className="p-2">{consultant.contactNumber}</td>
@@ -309,11 +309,11 @@ const Consultant = () => {
               setItemsPerPage(Number(e.target.value));
               goToPage(1);
             }}
-            className="border border-black p-1 rounded dark:border-white">
-          <option value={10} className="dark:text-black">10 per page</option>
-          <option value={25} className="dark:text-black">25 per page</option>
-          <option value={50} className="dark:text-black">50 per page</option>
-          <option value={100} className="dark:text-black">100 per page</option>
+            className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
         </select>
         </div>
       </div>

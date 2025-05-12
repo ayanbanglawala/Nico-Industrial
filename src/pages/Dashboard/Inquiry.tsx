@@ -1485,23 +1485,23 @@ const Inquiry: React.FC = () => {
 
       {/* Table */}
       <div className="overflow-auto">
-        <table className="min-w-full bg-white border border-gray-300 rounded-lg">
-          <thead className="bg-gray-400 dark:bg-black">
-            <tr>
-              <th className="px-4 py-2 border">Sr No</th>
-              <th className="px-4 py-2 border">Project Name</th>
-              <th className="px-4 py-2 border">Consumer</th>
-              <th className="px-4 py-2 border">Product</th>
-              <th className="px-4 py-2 border">Consultant</th>
-              <th className="px-4 py-2 border">Inquiry Status</th>
-              <th className="px-4 py-2 border">Win/Loss</th>
-              <th className="px-4 py-2 border">Actions</th>
+        <table className="min-w-full bg-white rounded-lg">
+          <thead className="bg-[#38487c] text-white dark:bg-black">
+            <tr className="border border-gray-500">
+              <th className="px-4 py-2">Sr No</th>
+              <th className="px-4 py-2">Project Name</th>
+              <th className="px-4 py-2">Consumer</th>
+              <th className="px-4 py-2">Product</th>
+              <th className="px-4 py-2">Consultant</th>
+              <th className="px-4 py-2">Inquiry Status</th>
+              <th className="px-4 py-2">Win/Loss</th>
+              <th className="px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {tableData.length > 0 ? (
               tableData.map((inquiry, index) => (
-                <tr key={inquiry.inquiryId} className="hover:bg-gray-200 bg-gray-300 text-center dark:bg-black dark:hover:bg-gray-800 transform duration-200">
+                <tr key={inquiry.inquiryId} className="hover:bg-gray-200 bg-white text-center dark:bg-black dark:hover:bg-gray-800 transform duration-200">
                   <td className="px-4 py-2 text-center">{(currentPage - 1) * pageSize + (index + 1)}</td>
                   <td className="px-4 py-2">{inquiry.projectName}</td>
                   <td className="px-4 py-2">{inquiry.consumer?.consumerName || "N/A"}</td>
@@ -1624,6 +1624,18 @@ const Inquiry: React.FC = () => {
               Next <MdOutlineNavigateNext className="text-2xl" />
             </button>
           </div>
+          <select
+          value={pageSize}
+          onChange={(e) => {
+            setPageSize(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+          className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+          <option value={10}>10 per page</option>
+        <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
+        </select>
         </div>
       </div>
 
