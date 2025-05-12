@@ -10,6 +10,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import Select from "react-select";
+import { MdOutlineNavigateNext } from "react-icons/md";
 
 // Define TypeScript interfaces
 interface Consumer {
@@ -1381,7 +1382,7 @@ const Inquiry: React.FC = () => {
   const role = localStorage.getItem("userRole");
 
   return (
-    <div className="max-w-7xl mx-auto p-3 pt-0 rounded-lg shadow-lg dark:text-white">
+    <div className="max-w-7xl mx-auto p-3 rounded-lg shadow-2xl dark:text-white">
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-3">
         <div className="flex flex-col w-full sm:w-1/5">
@@ -1603,8 +1604,8 @@ const Inquiry: React.FC = () => {
             Showing {tableData.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} to {(currentPage - 1) * pageSize + tableData.length} of {totalData} results
           </p>
           <div className="flex gap-2">
-            <button onClick={handlePrev} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === 1}>
-              Previous
+            <button onClick={handlePrev} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === 1}>
+              <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
             </button>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const pageNum = currentPage > 3 ? currentPage - 3 + i + 1 : i + 1;
@@ -1617,8 +1618,8 @@ const Inquiry: React.FC = () => {
               }
               return null;
             })}
-            <button onClick={handleNext} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
-              Next
+            <button onClick={handleNext} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
+              Next <MdOutlineNavigateNext className="text-2xl" />
             </button>
           </div>
         </div>

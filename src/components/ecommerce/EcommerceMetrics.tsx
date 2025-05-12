@@ -5,7 +5,7 @@ import { IoIosMail } from "react-icons/io";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { IoMdPeople } from "react-icons/io";
 import { IoCloseCircleOutline } from "react-icons/io5";
-import { MdOutlineDonutSmall } from "react-icons/md";
+import { MdOutlineDonutSmall, MdOutlineNavigateNext } from "react-icons/md";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -167,7 +167,7 @@ export default function EcommerceMetrics() {
       <div className="rounded-2xl border text-center border-gray-600 bg-white p-4 pb-0 dark:border-gray-800 dark:bg-white/[0.03]">
         <div className="justify-between flex">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Calendar</h2>
-          <p className="text-lg font-medium text-gray-800 dark:text-white">Selected: {selectedDate.toLocaleDateString()}</p>
+          <p className=" font-medium text-gray-800 dark:text-white">{selectedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
         </div>
 
         <DatePicker
@@ -187,15 +187,14 @@ export default function EcommerceMetrics() {
             } else if (isSelected) {
               return "bg-gray-800 text-white dark:bg-white dark:text-black";
             } else {
-              return "bg-gray-300 dark:bg-gray-800";
+              return "bg-gray-300 rounded dark:bg-gray-800";
             }
           }}
         />
 
         {/* Events Section */}
-        <div className="px-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-          <h3 className="font-semibold mb-2">Events on {selectedDate.toLocaleDateString()}:</h3>
-
+        <div className="px-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+          <h3 className="font-semibold mb-2">Events on {selectedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}:</h3>
           {selectedDateFollowUps.length > 0 ? (
             <div className=" max-h-60 overflow-y-auto">
               {selectedDateFollowUps.map((item, index) => (
@@ -210,7 +209,7 @@ export default function EcommerceMetrics() {
                     <h4 className="font-medium text-gray-800 dark:text-white">Name: {item.generalFollowUpName || "Untitled Follow-up"}</h4>
                     <span className={`text-xs px-2 py-1 rounded ${item.status === "COMPLETED" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"}`}>Status: {item.status || "PENDING"}</span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 truncate">Description: {truncateText(item.description, 30) || "No description"}</p> {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Assigned to: {item.followUpPerson?.name || "Unassigned"}</p> */}
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 truncate">Description: {truncateText(item.description, 30) || "No description"}</p>
                 </div>
               ))}
             </div>
@@ -244,8 +243,6 @@ export default function EcommerceMetrics() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // ... your existing fetch code ...
-
       // After fetching follow-ups, initialize selected date follow-ups
       const currentDateString = new Date().toISOString().split("T")[0];
       const initialFiltered = followUps.filter((item: FollowUpItem) => new Date(item.dueDate).toISOString().split("T")[0] === currentDateString);
@@ -267,7 +264,6 @@ export default function EcommerceMetrics() {
     if (!selectedReminder) return;
 
     try {
-      // First, make sure we have the correct ID property
       const reminderId = selectedReminder.id || selectedReminder.generalFollowUpId;
       if (!reminderId) {
         throw new Error("No valid ID found for this reminder");
@@ -279,7 +275,6 @@ export default function EcommerceMetrics() {
         statusNotes: selectedReminder.statusNotes,
         followUpPerson: { id: selectedReminder.followUpPerson?.id },
         dueDate: new Date(selectedReminder.dueDate).toISOString(),
-        // Only include these if they exist
         ...(selectedReminder.createdAt && { createdAt: selectedReminder.createdAt }),
         ...(selectedReminder.createdBy && { createdBy: { id: selectedReminder.createdBy.id } }),
         ...(selectedReminder.status && { status: selectedReminder.status }),
@@ -347,7 +342,6 @@ export default function EcommerceMetrics() {
     e.preventDefault();
     if (!selectedReminder) return;
 
-    // Add null check at the start
     if (!selectedReminder) {
       console.error("No reminder selected");
       alert("No reminder selected");
@@ -359,7 +353,7 @@ export default function EcommerceMetrics() {
       const updatedData = {
         description: doneDescription || "Marked as completed",
         updatedBy: {
-          id: userId || "", // Add fallback for userId
+          id: userId || "",
         },
         status: "COMPLETED",
       };
@@ -370,7 +364,6 @@ export default function EcommerceMetrics() {
         },
       });
 
-      // alert(response.data.message || "Follow-up marked as done successfully");
       toast.success(response.data.message || "Follow-up marked as done successfully");
       setDoneModalOpen(false);
       setDoneDescription("");
@@ -383,105 +376,91 @@ export default function EcommerceMetrics() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        {metricCards.map((card, i) => (
-          <div key={i} onClick={() => navigate("/inquiry")} className={`flex items-center justify-between cursor-pointer rounded-xl hover:scale-105 transform duration-200 border border-gray-600 ${card.bg} p-5 dark:border-gray-800 dark:bg-white/[0.03]`}>
-            <div className="w-12 h-12 flex items-center justify-center bg-gray-700 dark:bg-gray-800">{card.icon}</div>
-            <div className="ml-4 text-end">
-              <span className="text-sm font-bold text-gray-800 dark:text-gray-400">{card.title}</span>
-              <h4 className="mt-1 font-bold text-title-sm text-gray-800 dark:text-white/90">{card.count}</h4>
+      {/* Top Section: 3 Cards + Calendar */}
+      <div className="flex flex-col md:flex-row gap-4 w-full">
+        {/* 3 Cards */}
+        <div className="w-full md:w-3/4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {metricCards.map((card, i) => (
+            <div key={i} onClick={() => navigate("/inquiry")} className={`flex items-center justify-between cursor-pointer rounded-xl shadow-xl hover:scale-105 transform duration-200 border border-gray-600 ${card.bg} p-5 dark:border-gray-800 dark:bg-white/[0.03]`}>
+              <div className="w-12 h-12 flex items-center justify-center bg-gray-700 dark:bg-gray-800">{card.icon}</div>
+              <div className="ml-4 text-end">
+                <span className="text-sm font-bold text-gray-800 dark:text-gray-400">{card.title}</span>
+                <h4 className="mt-1 font-bold text-title-sm text-gray-800 dark:text-white/90">{card.count}</h4>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Side Info + Table */}
-      <div className="flex flex-col gap-4 w-full">
-        {/* Top Row: Total Users & Analytics */}
-        <div className="flex flex-col md:flex-row gap-10 w-full">
-          {/* Total Users */}
-          {/* <div className="w-full md:w-1/2 rounded-2xl border border-gray-600 bg-white p-6 hover:scale-105 transform duration-200 dark:border-gray-800 dark:bg-white/[0.03] flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Total Users</h2>
-            <p className="text-3xl font-bold text-gray-800 dark:text-white">{totalUsers}</p>
-          </div> */}
-
-          {/* Analytics */}
-          {/* <div onClick={() => navigate("/analytics")} className="w-full md:w-1/2 rounded-2xl border cursor-pointer border-gray-600 bg-white p-6 hover:scale-105 transform duration-200 flex items-center justify-between dark:border-gray-800 dark:bg-white/[0.03]">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Analytics</h2>
-            <MdOutlineDonutSmall size={50} className="text-gray-700 dark:text-white/80" />
-          </div> */}
+          ))}
         </div>
 
-        {/* Bottom Row: Calendar & Follow Ups Table */}
-        <div className="flex flex-col md:flex-row gap-4 w-full">
-          {/* Calendar */}
-          <div className="w-full md:w-1/2 hover:scale-105 transform duration-300">
-            <CalendarWidget />
-          </div>
-
-          {/* Table Section */}
-          <div className="w-full overflow-auto rounded-2xl border border-gray-600 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Follow Ups</h2>
-            <table className="min-w-full text-sm text-left text-gray-800 dark:text-gray-200">
-              <thead className="text-xs uppercase text-gray-700 bg-gray-300 dark:text-gray-400 border-b dark:border-gray-700">
-                <tr className="text-center">
-                  <th className="px-4 py-2">SR</th>
-                  <th className="px-4 py-2">Follow Up Name</th>
-                  <th className="px-4 py-2">Description</th>
-                  <th className="px-4 py-2">Due Date</th>
-                  <th className="px-4 py-2">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {followUps.map((item: FollowUpItem, index: number) => (
-                  <tr key={item.id} className="dark:border-gray-700 hover:bg-gray-200 transform duration-150 text-center">
-                    <td className="px-4 py-2">{(currentPage - 1) * pageSize + index + 1}</td>
-                    <td className="px-4 py-2">{item.generalFollowUpName || "N/A"}</td>
-                    <td className="px-4 py-2">{truncateText(item.description, 40)}</td> <td className="px-4 py-2">{item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "Not set"}</td>
-                    <td className="px-4 py-2 text-blue-600 dark:text-blue-400 flex justify-center gap-2">
-                      <div
-                        className="cursor-pointer hover:scale-110 hover:text-gray-700"
-                        onClick={() => {
-                          setSelectedReminder(item);
-                          setDoneModalOpen(true);
-                        }}>
-                        Check
-                      </div>
-                      <div className="cursor-pointer hover:scale-110 hover:text-gray-700" onClick={() => handleEditClick(item)}>
-                        Edit
-                      </div>
-                      <div
-                        className="cursor-pointer hover:scale-110 hover:text-gray-700"
-                        onClick={() => {
-                          setSelectedFollowUp(item);
-                          setIsModalOpen(true);
-                        }}>
-                        View
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {/* Pagination Controls */}
-            <div className="mt-4 flex justify-end gap-2 text-sm">
-              <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 border rounded disabled:opacity-50">
-                Prev
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <button key={i + 1} onClick={() => handlePageChange(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-gray-800 text-white dark:bg-white dark:text-black" : ""}`}>
-                  {i + 1}
-                </button>
-              ))}
-              <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 border rounded disabled:opacity-50">
-                Next
-              </button>
-            </div>
-          </div>
+        {/* Calendar */}
+        <div className="w-full shadow-xl md:w-1/4 hover:scale-105 transform duration-300">
+          <CalendarWidget />
         </div>
       </div>
+
+      {/* Table Section */}
+      <div className="w-full overflow-auto shadow-xl rounded-2xl border border-gray-600 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Follow Ups</h2>
+        <table className="min-w-full text-sm text-left text-gray-800 dark:text-gray-200">
+          <thead className="text-xs uppercase text-gray-700 bg-gray-300 dark:text-gray-400 border-b dark:border-gray-700">
+            <tr className="text-center">
+              <th className="px-4 py-2">SR</th>
+              <th className="px-4 py-2">Follow Up Name</th>
+              <th className="px-4 py-2">Description</th>
+              <th className="px-4 py-2">Due Date</th>
+              <th className="px-4 py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {followUps.map((item: FollowUpItem, index: number) => (
+              <tr key={item.id} className="dark:border-gray-700 hover:bg-gray-200 transform duration-150 text-center">
+                <td className="px-4 py-2">{(currentPage - 1) * pageSize + index + 1}</td>
+                <td className="px-4 py-2">{item.generalFollowUpName || "N/A"}</td>
+                <td className="px-4 py-2">{truncateText(item.description, 40)}</td>
+                {/* <td className="px-4 py-2">{item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "Not set"}</td> */}
+                <td className="px-4 py-2">{item.dueDate ? new Date(item.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Not set"}</td>
+                <td className="px-4 py-2 text-blue-600 dark:text-blue-400 flex justify-center gap-2">
+                  <div
+                    className="cursor-pointer hover:scale-110 hover:text-gray-700"
+                    onClick={() => {
+                      setSelectedReminder(item);
+                      setDoneModalOpen(true);
+                    }}>
+                    Check
+                  </div>
+                  <div className="cursor-pointer hover:scale-110 hover:text-gray-700" onClick={() => handleEditClick(item)}>
+                    Edit
+                  </div>
+                  <div
+                    className="cursor-pointer hover:scale-110 hover:text-gray-700"
+                    onClick={() => {
+                      setSelectedFollowUp(item);
+                      setIsModalOpen(true);
+                    }}>
+                    View
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Pagination Controls */}
+        <div className="mt-4 flex justify-end gap-2 text-sm">
+          <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 flex py-1 border rounded disabled:opacity-50">
+            <MdOutlineNavigateNext className="text-xl rotate-180" /> Prev
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button key={i + 1} onClick={() => handlePageChange(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-gray-800 text-white dark:bg-white dark:text-black" : ""}`}>
+              {i + 1}
+            </button>
+          ))}
+          <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 flex py-1 border rounded disabled:opacity-50">
+            Next <MdOutlineNavigateNext className="text-xl" />
+          </button>
+        </div>
+      </div>
+
+      {/* Modals */}
       {isModalOpen && selectedFollowUp && (
         <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
@@ -505,7 +484,8 @@ export default function EcommerceMetrics() {
 
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-300">Due Date:</p>
-                <p className="text-base font-medium text-gray-800 dark:text-white">{new Date(selectedFollowUp.dueDate).toLocaleString()}</p>
+                {/* <p className="text-base font-medium text-gray-800 dark:text-white">{new Date(selectedFollowUp.dueDate).toLocaleString()}</p> */}
+                <p className="text-base font-medium text-gray-800 dark:text-white">{new Date(selectedFollowUp.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
               </div>
 
               <div>
@@ -527,6 +507,7 @@ export default function EcommerceMetrics() {
           </div>
         </div>
       )}
+
       {isEditModalOpen && selectedReminder && (
         <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
@@ -539,31 +520,26 @@ export default function EcommerceMetrics() {
 
             <form onSubmit={handleFormSubmit}>
               <div className="space-y-4">
-                {/* FollowUp Name */}
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">FollowUp Name:</label>
                   <input type="text" name="generalFollowUpName" value={selectedReminder.generalFollowUpName || ""} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
                 </div>
 
-                {/* Description */}
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Description:</label>
                   <textarea name="description" value={selectedReminder.description || ""} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" rows={3} />
                 </div>
 
-                {/* Due Date and Time */}
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Due Date and Time:</label>
                   <input type="datetime-local" name="dueDate" value={new Date(selectedReminder.dueDate).toISOString().slice(0, 16)} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
                 </div>
 
-                {/* Status Notes */}
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Status Notes:</label>
                   <textarea name="statusNotes" value={selectedReminder.statusNotes || ""} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" rows={2} />
                 </div>
 
-                {/* Follow Up Person */}
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Follow Up Person:</label>
                   {loadingUsers ? (
@@ -593,7 +569,7 @@ export default function EcommerceMetrics() {
           </div>
         </div>
       )}
-      {/* Mark as Done Modal */}
+
       {doneModalOpen && selectedReminder && (
         <div className="fixed inset-0 bg-[#00000071] bg-opacity-50 backdrop-blur-xs flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">

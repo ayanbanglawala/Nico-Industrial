@@ -6,6 +6,7 @@ import axios from "axios";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { MdOutlineNavigateNext } from "react-icons/md";
 
 type Brand = {
   brandId: number;
@@ -352,16 +353,16 @@ const Product = () => {
               Showing {startIndex + 1} to {Math.min(startIndex + productsPerPage, filteredProducts.length)} of {filteredProducts.length} results
             </p>
             <div className="flex gap-2">
-              <button onClick={handlePrev} disabled={currentPage === 1 || isLoading} className={`px-3 py-1 border border-black rounded ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
-                Previous
+              <button onClick={handlePrev} disabled={currentPage === 1 || isLoading} className={`flex px-3 py-1 border border-black rounded ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
+                <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
               </button>
               {Array.from({ length: totalPages }, (_, i) => (
                 <button key={i + 1} onClick={() => setCurrentPage(i + 1)} disabled={isLoading} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
                   {i + 1}
                 </button>
               ))}
-              <button onClick={handleNext} disabled={currentPage === totalPages || isLoading} className={`px-3 py-1 border border-black rounded ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
-                Next
+              <button onClick={handleNext} disabled={currentPage === totalPages || isLoading} className={`flex px-3 py-1 border border-black rounded ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "hover:bg-gray-100"}`}>
+                Next<MdOutlineNavigateNext className="text-2xl" />
               </button>
             </div>
             <select

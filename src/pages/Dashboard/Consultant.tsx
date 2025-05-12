@@ -3,6 +3,7 @@ import axios from "axios";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { MdOutlineNavigateNext } from "react-icons/md";
 
 const Consultant = () => {
   const [search, setSearch] = useState("");
@@ -290,16 +291,16 @@ const Consultant = () => {
             Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalRecords)} of {totalRecords} results
           </p>
           <div className="flex gap-2">
-            <button onClick={handlePrev} disabled={currentPage === 1} className="px-3 py-1 border border-black rounded hover:bg-gray-100 ">
-              Previous
+            <button onClick={handlePrev} disabled={currentPage === 1} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100 ">
+              <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
             </button>
             {Array.from({ length: totalPages }, (_, i) => (
               <button key={i + 1} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
                 {i + 1}
               </button>
             ))}
-            <button onClick={handleNext} disabled={currentPage === totalPages} className="px-3 py-1 border border-black rounded hover:bg-gray-100 ">
-              Next
+            <button onClick={handleNext} disabled={currentPage === totalPages} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100 ">
+              Next<MdOutlineNavigateNext className="text-2xl" />
             </button>
           </div>
           <select

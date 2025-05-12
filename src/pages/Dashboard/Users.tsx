@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { MdOutlineNavigateNext } from "react-icons/md";
 
 const Users = () => {
   const [search, setSearch] = useState("");
@@ -398,8 +399,8 @@ const Users = () => {
           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalRecords)} of {totalRecords} results
         </p>
         <div className="flex gap-2">
-          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 border border-black rounded hover:bg-gray-100">
-            Previous
+          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100">
+            <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
           </button>
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
             let pageNum;
@@ -425,8 +426,8 @@ const Users = () => {
               {totalPages}
             </button>
           )}
-          <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 border border-black rounded hover:bg-gray-100">
-            Next
+          <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100">
+            Next<MdOutlineNavigateNext className="text-2xl" />
           </button>
         </div>
         <select

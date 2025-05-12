@@ -3,6 +3,7 @@ import axios from "axios";
 import { FaPlus } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { MdOutlineNavigateNext } from "react-icons/md";
 
 type BrandType = {
   brandId: number;
@@ -250,8 +251,8 @@ const Brand = () => {
           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length} results
         </p>
         <div className="flex gap-2">
-          <button onClick={() => goToPage(currentPage - 1)} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === 1}>
-            Previous
+          <button onClick={() => goToPage(currentPage - 1)} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === 1}>
+            <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
           </button>
 
           {[...Array(totalPages).keys()].slice(0, 3).map((_, i) => (
@@ -268,8 +269,8 @@ const Brand = () => {
             </button>
           )}
 
-          <button onClick={() => goToPage(currentPage + 1)} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
-            Next
+          <button onClick={() => goToPage(currentPage + 1)} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
+            Next<MdOutlineNavigateNext className="text-2xl" />
           </button>
         </div>
         <select

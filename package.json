@@ -27,6 +27,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^16.5.0",
     "flatpickr": "^4.6.13",
+    "framer-motion": "^12.10.5",
     "lucide-react": "^0.506.0",
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",

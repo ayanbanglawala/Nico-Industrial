@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { MdOutlineNavigateNext } from "react-icons/md";
 
 interface User {
   id: number;
@@ -280,7 +281,7 @@ const FollowUpTable = () => {
         <tbody>
           {paginated.length ? (
             paginated.map((item, index) => (
-              <tr className="text-center bg-gray-300pcon hover:bg-gray-200" key={item.generalFollowUpId}>
+              <tr className="text-center bg-gray-300pcon hover:bg-gray-200 bg-gray-300" key={item.generalFollowUpId}>
                 <td className="border px-3 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="border px-3 py-2">{item.generalFollowUpName}</td>
                 <td className="border px-3 py-2">{item.createdBy?.name}</td>
@@ -349,8 +350,8 @@ const FollowUpTable = () => {
           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, followUps.length)} of {followUps.length} results
         </p>
         <div className="flex gap-2">
-          <button onClick={() => goToPage(currentPage - 1)} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === 1}>
-            Previous
+          <button onClick={() => goToPage(currentPage - 1)} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === 1}>
+            <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
           </button>
           {[...Array(totalPages).keys()].slice(0, 3).map((_, i) => (
             <button key={i + 1} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
@@ -363,8 +364,8 @@ const FollowUpTable = () => {
               {totalPages}
             </button>
           )}
-          <button onClick={() => goToPage(currentPage + 1)} className="px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
-            Next
+          <button onClick={() => goToPage(currentPage + 1)} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100" disabled={currentPage === totalPages}>
+            Next<MdOutlineNavigateNext className="text-2xl" />
           </button>
         </div>
         <select
