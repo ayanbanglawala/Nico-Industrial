@@ -18,4 +18,9 @@ export default defineConfig({
     port: 5173, // You can change this to any port you want, e.g., 3000
     host: true, // This allows access from other devices in the network
   },
+  esbuild: {
+    loader: "tsx",
+    include: /src\/.*\.[tj]sx?$/,
+    exclude: [],
+  },
 });
