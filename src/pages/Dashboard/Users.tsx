@@ -67,7 +67,7 @@ const Users = () => {
 
   const validateForm = () => {
     let isValid = true;
-
+    setLoading(false)
     // Validate all required fields
     isValid = validateField("name", newUser.name) && isValid;
     isValid = validateField("email", newUser.email) && isValid;
@@ -152,6 +152,8 @@ const Users = () => {
   };
 
   const toggleStatus = async (userId: number, currentStatus: boolean) => {
+    console.log(currentStatus);
+    
     try {
       const user = users.find((u) => u.id === userId);
       if (!user) {

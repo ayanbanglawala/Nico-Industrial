@@ -11,6 +11,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import Select from "react-select";
 import { MdOutlineNavigateNext } from "react-icons/md";
+import { FaEye } from "react-icons/fa";
+import { FaPenAlt } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
 
 // Define TypeScript interfaces
 interface Consumer {
@@ -101,6 +104,7 @@ const Inquiry: React.FC = () => {
   const [totalData, setTotalData] = useState<number>(0);
   const [followUpUserData, setFollowUpUserData] = useState<Array<{ id: string | number; active: boolean }>>([]);
   const [followUpQuotationData, setFollowUpQuotationData] = useState<Array<{ id: string | number; active: boolean }>>([]);
+console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
 
   const location = useLocation();
   const { status } = (location.state as LocationState) || {};
@@ -173,7 +177,7 @@ const Inquiry: React.FC = () => {
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
 
   const navigate = useNavigate();
-  const userRole = localStorage.getItem("userRole");
+  // const userRole = localStorage.getItem("userRole");
   const [quotationDescription, setQuotationDescription] = useState<string>("");
   const [followUpDescription, setFollowUpDescription] = useState<string>("");
 
@@ -271,9 +275,9 @@ const Inquiry: React.FC = () => {
     }
   };
 
-  const handleDetailsClick = (id: string | number) => {
-    navigate(`/inquiry/${id}`);
-  };
+  // const handleDetailsClick = (id: string | number) => {
+  //   navigate(`/inquiry/${id}`);
+  // };
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const debounceSearch = (fetchFunction: (inputValue: string) => void, inputValue: string, setIsLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
@@ -331,6 +335,7 @@ const Inquiry: React.FC = () => {
   });
 
   const handleConsumerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditingId(null);
     const { name, value } = e.target;
     setFormDataConsumer({ ...formDataConsumer, [name]: value });
   };
@@ -689,7 +694,7 @@ const Inquiry: React.FC = () => {
 
   const fetchDropdownOptions = async () => {
     try {
-      const [consumers, products, consultants, users] = await Promise.all([
+      const [consumers, consultants, users] = await Promise.all([
         axios.get(`https://nicoindustrial.com/api/consumer/all`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -913,7 +918,10 @@ const Inquiry: React.FC = () => {
     }
   };
 
-  const handleView = (inquiry: Inquiry) => {
+  const handleView = (inquiry: any) => {
+    console.log("Viewing inquiry:", inquiry.inquiryId);
+
+    navigate(`/inquiry/${inquiry.inquiryId}`);
     setSelectedInquiry(inquiry);
     setShowViewModal(true);
   };
@@ -924,11 +932,6 @@ const Inquiry: React.FC = () => {
   const [consultantOptions, setConsultantOptions] = useState<Consultant[]>([]);
   const [userOptions, setUserOptions] = useState<SelectOption[]>([]);
 
-  // Dropdown refs for scroll tracking
-  const consumerDropdownRef = useRef<HTMLDivElement>(null);
-  const productDropdownRef = useRef<HTMLDivElement>(null);
-  const consultantDropdownRef = useRef<HTMLDivElement>(null);
-  const userDropdownRef = useRef<HTMLDivElement>(null);
 
   // Initial load of data
   useEffect(() => {
@@ -982,6 +985,8 @@ const Inquiry: React.FC = () => {
         value: consumer.consumerId,
         label: consumer.consumerName,
       }));
+      console.log(consumers);
+      
       setConsumerOptions(response.data.data.consumers);
     } catch (error) {
       console.error("Error fetching consumers:", error);
@@ -990,9 +995,9 @@ const Inquiry: React.FC = () => {
     }
   };
 
-  const handleSearch = (fetchFunc: (inputValue: string) => void, inputValue: string) => {
-    fetchFunc(inputValue);
-  };
+  // const handleSearch = (fetchFunc: (inputValue: string) => void, inputValue: string) => {
+  //   fetchFunc(inputValue);
+  // };
 
   const [showStatusChangeModal, setShowStatusChangeModal] = useState<boolean>(false);
 
@@ -1018,44 +1023,44 @@ const Inquiry: React.FC = () => {
     }
   };
 
-  const submitStatusChange = async () => {
-    if (!isFollowUpUser && !quotationDescription) {
-      setStatusChangeError("Description is required.");
-      return;
-    }
-    if (!description) {
-      setStatusChangeError("Description is required.");
-      return;
-    }
+  // const submitStatusChange = async () => {
+  //   if (!isFollowUpUser && !quotationDescription) {
+  //     setStatusChangeError("Description is required.");
+  //     return;
+  //   }
+  //   if (!description) {
+  //     setStatusChangeError("Description is required.");
+  //     return;
+  //   }
 
-    try {
-      const response = await axios.put(
-        `https://nicoindustrial.com/api/inquiry/update/${statusChangeData.inquiryId}`,
-        {
-          ...statusChangeData,
-          inquiryStatus: statusChangeData.inquiryStatus,
-          description,
-          updatedBy: userId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  //   try {
+  //     const response = await axios.put(
+  //       `https://nicoindustrial.com/api/inquiry/update/${statusChangeData.inquiryId}`,
+  //       {
+  //         ...statusChangeData,
+  //         inquiryStatus: statusChangeData.inquiryStatus,
+  //         description,
+  //         updatedBy: userId,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      setSuccessMessage(response.data.message);
-      setShowStatusChangeModal(false);
-      setDescription("");
+  //     setSuccessMessage(response.data.message);
+  //     setShowStatusChangeModal(false);
+  //     setDescription("");
 
-      setTableData((prevData) => prevData.map((inquiry) => (inquiry.inquiryId === statusChangeData.inquiryId ? { ...inquiry, inquiryStatus: statusChangeData.inquiryStatus } : inquiry)));
+  //     setTableData((prevData) => prevData.map((inquiry) => (inquiry.inquiryId === statusChangeData.inquiryId ? { ...inquiry, inquiryStatus: statusChangeData.inquiryStatus } : inquiry)));
 
-      setTimeout(() => setSuccessMessage(""), 2000);
-    } catch (error) {
-      setErrorMessage("Failed to update status. Please try again.");
-      setTimeout(() => setErrorMessage(""), 3000);
-    }
-  };
+  //     setTimeout(() => setSuccessMessage(""), 2000);
+  //   } catch (error) {
+  //     setErrorMessage("Failed to update status. Please try again.");
+  //     setTimeout(() => setErrorMessage(""), 3000);
+  //   }
+  // };
 
   const submitStatusDropdownChange = async () => {
     const { inquiryId, inquiryStatus, projectName, description, consumer, product, consultant, followUpUser, followUpQuotation, remark, updatedBy } = statusChangeData;
@@ -1124,6 +1129,8 @@ const Inquiry: React.FC = () => {
         value: product.productId,
         label: product.productName,
       }));
+      console.log(products);
+      
       // setProductOptions(products);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -1132,17 +1139,17 @@ const Inquiry: React.FC = () => {
     }
   };
 
-  const handleProductDropdownOpen = () => {
-    if (productOptions.length === 0) {
-      fetchProducts();
-    }
-  };
+  // const handleProductDropdownOpen = () => {
+  //   if (productOptions.length === 0) {
+  //     fetchProducts();
+  //   }
+  // };
 
-  const handleConsultantDropdownOpen = () => {
-    if (consultantOptions.length === 0) {
-      fetchConsultants();
-    }
-  };
+  // const handleConsultantDropdownOpen = () => {
+  //   if (consultantOptions.length === 0) {
+  //     fetchConsultants();
+  //   }
+  // };
 
   // Fetch consultants
   const fetchConsultants = async (inputValue = "") => {
@@ -1160,6 +1167,8 @@ const Inquiry: React.FC = () => {
         value: consultant.consultantId,
         label: consultant.consultantName,
       }));
+      console.log(consultants);
+      
       setConsultantOptions(response.data.data.Consultants);
     } catch (error) {
       console.error("Error fetching consultants:", error);
@@ -1371,7 +1380,7 @@ const Inquiry: React.FC = () => {
 
   useEffect(() => {
     if (isModalOpen) {
-      fetchFollowUpQuotations()
+      fetchFollowUpQuotations();
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
@@ -1536,14 +1545,14 @@ const Inquiry: React.FC = () => {
                     )}
                   </td>
                   <td className="px-4 py-2 text-center space-x-1">
-                    <button onClick={() => handleView(inquiry)} className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">
-                      View
+                    <button onClick={() => handleView(inquiry)} className="px-3 py-[8px] bg-gray-500 text-white rounded hover:bg-gray-600">
+                      <FaEye />
                     </button>
-                    <button onClick={() => handleEdit(inquiry)} className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-                      Edit
+                    <button onClick={() => handleEdit(inquiry)} className="px-3 py-[8px] bg-blue-500 text-white rounded hover:bg-blue-600">
+                      <FaPenAlt />
                     </button>
-                    <button onClick={() => handleDelete(inquiry.inquiryId)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-                      Delete
+                    <button onClick={() => handleDelete(inquiry.inquiryId)} className="px-3 py-[8px] bg-red-500 text-white rounded hover:bg-red-600">
+                      <MdDelete />
                     </button>
 
                     {inquiry.followUpQuotation?.id === userId && inquiry.isWin == null && inquiry.quotationGiven === false && (
@@ -1574,11 +1583,11 @@ const Inquiry: React.FC = () => {
                           setStatusChangeData({
                             inquiryId: inquiry.inquiryId,
                             followUpQuotationId: null,
-                            followUpUserId: inquiry.followUpUser.id,
+                            followUpUserId: inquiry.followUpUser.id || "",
                           });
                           setSelectedFollowUpUser({
-                            value: inquiry.followUpUser.id,
-                            label: inquiry.followUpUser.name,
+                            value: inquiry.followUpUser.id || "",
+                            label: inquiry.followUpUser.name || "",
                           });
                           setIsFollowUpUser(true);
                           setshowStatusQuartationChangeModal(true);
@@ -1607,7 +1616,8 @@ const Inquiry: React.FC = () => {
           </p>
           <div className="flex gap-2">
             <button onClick={handlePrev} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black" disabled={currentPage === 1}>
-              <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
+              <MdOutlineNavigateNext className="text-2xl rotate-180" />
+              Previous
             </button>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const pageNum = currentPage > 3 ? currentPage - 3 + i + 1 : i + 1;
@@ -1625,17 +1635,17 @@ const Inquiry: React.FC = () => {
             </button>
           </div>
           <select
-          value={pageSize}
-          onChange={(e) => {
-            setPageSize(Number(e.target.value));
-            setCurrentPage(1);
-          }}
-          className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
-          <option value={10}>10 per page</option>
-        <option value={25}>25 per page</option>
-          <option value={50}>50 per page</option>
-          <option value={100}>100 per page</option>
-        </select>
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+            <option value={10}>10 per page</option>
+            <option value={25}>25 per page</option>
+            <option value={50}>50 per page</option>
+            <option value={100}>100 per page</option>
+          </select>
         </div>
       </div>
 

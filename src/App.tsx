@@ -28,6 +28,7 @@ import Users from "./pages/Dashboard/Users";
 import Role from "./pages/Dashboard/Role";
 import Analytics from "./pages/Dashboard/Analytics";
 import { ToastContainer } from "react-toastify";
+import InquiryView from "./pages/Dashboard/InquiryView";
 
 export default function App() {
   const token = localStorage.getItem("token");
@@ -49,6 +50,7 @@ export default function App() {
             <Route index path="/role" element={!token ? <Navigate to="/signin" /> :<Role />} />
             <Route index path="/users" element={!token ? <Navigate to="/signin" /> :<Users />} />
             <Route index path="/analytics" element={!token ? <Navigate to="/signin" /> :<Analytics />} />
+            <Route path="/inquiry/:inquiryId" element={<InquiryView />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

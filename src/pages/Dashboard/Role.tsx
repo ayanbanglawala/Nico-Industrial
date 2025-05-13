@@ -1,6 +1,6 @@
 import { FaPlus } from "react-icons/fa";
 import { useRole } from "../../hooks/userole";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { MdOutlineNavigateNext } from "react-icons/md";
 
 const RoleComponent = () => {
@@ -10,7 +10,7 @@ const RoleComponent = () => {
     setSearch,
     currentPage,
     goToPage,
-    totalPages,
+  totalPages,
     isLoading,
     isModalOpen,
     roleName,

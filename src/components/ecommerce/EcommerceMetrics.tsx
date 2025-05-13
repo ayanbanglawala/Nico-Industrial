@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { LuMessageSquareText, LuAlarmClock } from "react-icons/lu";
-import { IoIosMail } from "react-icons/io";
-import { FaRegCheckCircle } from "react-icons/fa";
-import { IoMdPeople } from "react-icons/io";
 import { IoCloseCircleOutline } from "react-icons/io5";
-import { MdOutlineDonutSmall, MdOutlineNavigateNext } from "react-icons/md";
+import { MdOutlineNavigateNext } from "react-icons/md";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -60,6 +56,7 @@ export default function EcommerceMetrics() {
   const [doneModalOpen, setDoneModalOpen] = useState(false);
   const [doneDescription, setDoneDescription] = useState("");
   const [selectedDateFollowUps, setSelectedDateFollowUps] = useState<FollowUpItem[]>([]);
+console.log(loading, assignInquary, totalUsers, followUpPersonName, remindersCount, error);
 
   const navigate = useNavigate();
   const authToken = localStorage.getItem("token");
@@ -231,6 +228,7 @@ export default function EcommerceMetrics() {
   const CalendarWidget = () => {
     const [calendarEvents, setCalendarEvents] = useState<{ [date: string]: any[] }>({});
     const [loadingEvents, setLoadingEvents] = useState(false);
+console.log(dueDates, loadingEvents);
 
     // Fetch calendar events when month changes
     const fetchCalendarEvents = async () => {
@@ -414,15 +412,6 @@ export default function EcommerceMetrics() {
     }
   };
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    if (selectedReminder) {
-      setSelectedReminder({
-        ...selectedReminder,
-        [name]: value,
-      });
-    }
-  };
 
   const handleFollowUpPersonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedUserId = parseInt(e.target.value);
