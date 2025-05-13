@@ -104,7 +104,6 @@ const Inquiry: React.FC = () => {
   const [totalData, setTotalData] = useState<number>(0);
   const [followUpUserData, setFollowUpUserData] = useState<Array<{ id: string | number; active: boolean }>>([]);
   const [followUpQuotationData, setFollowUpQuotationData] = useState<Array<{ id: string | number; active: boolean }>>([]);
-console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
 
   const location = useLocation();
   const { status } = (location.state as LocationState) || {};
@@ -177,7 +176,7 @@ console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
 
   const navigate = useNavigate();
-  // const userRole = localStorage.getItem("userRole");
+  const userRole = localStorage.getItem("userRole");
   const [quotationDescription, setQuotationDescription] = useState<string>("");
   const [followUpDescription, setFollowUpDescription] = useState<string>("");
 
@@ -275,9 +274,9 @@ console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
     }
   };
 
-  // const handleDetailsClick = (id: string | number) => {
-  //   navigate(`/inquiry/${id}`);
-  // };
+  const handleDetailsClick = (id: string | number) => {
+    navigate(`/inquiry/${id}`);
+  };
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const debounceSearch = (fetchFunction: (inputValue: string) => void, inputValue: string, setIsLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
@@ -335,7 +334,6 @@ console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
   });
 
   const handleConsumerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditingId(null);
     const { name, value } = e.target;
     setFormDataConsumer({ ...formDataConsumer, [name]: value });
   };
@@ -694,7 +692,7 @@ console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
 
   const fetchDropdownOptions = async () => {
     try {
-      const [consumers, consultants, users] = await Promise.all([
+      const [consumers, products, consultants, users] = await Promise.all([
         axios.get(`https://nicoindustrial.com/api/consumer/all`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -932,6 +930,11 @@ console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
   const [consultantOptions, setConsultantOptions] = useState<Consultant[]>([]);
   const [userOptions, setUserOptions] = useState<SelectOption[]>([]);
 
+  // Dropdown refs for scroll tracking
+  const consumerDropdownRef = useRef<HTMLDivElement>(null);
+  const productDropdownRef = useRef<HTMLDivElement>(null);
+  const consultantDropdownRef = useRef<HTMLDivElement>(null);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
 
   // Initial load of data
   useEffect(() => {
@@ -985,8 +988,6 @@ console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
         value: consumer.consumerId,
         label: consumer.consumerName,
       }));
-      console.log(consumers);
-      
       setConsumerOptions(response.data.data.consumers);
     } catch (error) {
       console.error("Error fetching consumers:", error);
@@ -995,9 +996,9 @@ console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
     }
   };
 
-  // const handleSearch = (fetchFunc: (inputValue: string) => void, inputValue: string) => {
-  //   fetchFunc(inputValue);
-  // };
+  const handleSearch = (fetchFunc: (inputValue: string) => void, inputValue: string) => {
+    fetchFunc(inputValue);
+  };
 
   const [showStatusChangeModal, setShowStatusChangeModal] = useState<boolean>(false);
 
@@ -1023,44 +1024,44 @@ console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
     }
   };
 
-  // const submitStatusChange = async () => {
-  //   if (!isFollowUpUser && !quotationDescription) {
-  //     setStatusChangeError("Description is required.");
-  //     return;
-  //   }
-  //   if (!description) {
-  //     setStatusChangeError("Description is required.");
-  //     return;
-  //   }
+  const submitStatusChange = async () => {
+    if (!isFollowUpUser && !quotationDescription) {
+      setStatusChangeError("Description is required.");
+      return;
+    }
+    if (!description) {
+      setStatusChangeError("Description is required.");
+      return;
+    }
 
-  //   try {
-  //     const response = await axios.put(
-  //       `https://nicoindustrial.com/api/inquiry/update/${statusChangeData.inquiryId}`,
-  //       {
-  //         ...statusChangeData,
-  //         inquiryStatus: statusChangeData.inquiryStatus,
-  //         description,
-  //         updatedBy: userId,
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
+    try {
+      const response = await axios.put(
+        `https://nicoindustrial.com/api/inquiry/update/${statusChangeData.inquiryId}`,
+        {
+          ...statusChangeData,
+          inquiryStatus: statusChangeData.inquiryStatus,
+          description,
+          updatedBy: userId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-  //     setSuccessMessage(response.data.message);
-  //     setShowStatusChangeModal(false);
-  //     setDescription("");
+      setSuccessMessage(response.data.message);
+      setShowStatusChangeModal(false);
+      setDescription("");
 
-  //     setTableData((prevData) => prevData.map((inquiry) => (inquiry.inquiryId === statusChangeData.inquiryId ? { ...inquiry, inquiryStatus: statusChangeData.inquiryStatus } : inquiry)));
+      setTableData((prevData) => prevData.map((inquiry) => (inquiry.inquiryId === statusChangeData.inquiryId ? { ...inquiry, inquiryStatus: statusChangeData.inquiryStatus } : inquiry)));
 
-  //     setTimeout(() => setSuccessMessage(""), 2000);
-  //   } catch (error) {
-  //     setErrorMessage("Failed to update status. Please try again.");
-  //     setTimeout(() => setErrorMessage(""), 3000);
-  //   }
-  // };
+      setTimeout(() => setSuccessMessage(""), 2000);
+    } catch (error) {
+      setErrorMessage("Failed to update status. Please try again.");
+      setTimeout(() => setErrorMessage(""), 3000);
+    }
+  };
 
   const submitStatusDropdownChange = async () => {
     const { inquiryId, inquiryStatus, projectName, description, consumer, product, consultant, followUpUser, followUpQuotation, remark, updatedBy } = statusChangeData;
@@ -1129,8 +1130,6 @@ console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
         value: product.productId,
         label: product.productName,
       }));
-      console.log(products);
-      
       // setProductOptions(products);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -1163,12 +1162,10 @@ console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
           search: inputValue,
         },
       });
-      const consultants = response.data.data.Consultants.map((consultant: Consultant) => ({
-        value: consultant.consultantId,
-        label: consultant.consultantName,
-      }));
-      console.log(consultants);
-      
+      // const consultants = response.data.data.Consultants.map((consultant: Consultant) => ({
+      //   value: consultant.consultantId,
+      //   label: consultant.consultantName,
+      // }));
       setConsultantOptions(response.data.data.Consultants);
     } catch (error) {
       console.error("Error fetching consultants:", error);
@@ -1583,11 +1580,11 @@ console.log("followUpQuotationData", followUpQuotationData, followUpUserData);
                           setStatusChangeData({
                             inquiryId: inquiry.inquiryId,
                             followUpQuotationId: null,
-                            followUpUserId: inquiry.followUpUser.id || "",
+                            followUpUserId: inquiry.followUpUser.id,
                           });
                           setSelectedFollowUpUser({
-                            value: inquiry.followUpUser.id || "",
-                            label: inquiry.followUpUser.name || "",
+                            value: inquiry.followUpUser.id,
+                            label: inquiry.followUpUser.name,
                           });
                           setIsFollowUpUser(true);
                           setshowStatusQuartationChangeModal(true);
