@@ -1,7 +1,7 @@
-import { FaPlus } from "react-icons/fa";
+import { FaPenAlt, FaPlus } from "react-icons/fa";
 import { useRole } from "../../hooks/userole";
 import { useEffect } from "react";
-import { MdOutlineNavigateNext } from "react-icons/md";
+import { MdDelete, MdOutlineNavigateNext } from "react-icons/md";
 
 const RoleComponent = () => {
   const {
@@ -51,7 +51,7 @@ const RoleComponent = () => {
           }}
           className="border border-black p-2 rounded w-full max-w-xs"
         />
-        <button onClick={() => handleModalOpen()} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <button onClick={() => handleModalOpen()} className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
           <FaPlus />
           Create Role
         </button>
@@ -79,11 +79,11 @@ const RoleComponent = () => {
                 <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="p-2">{role.name}</td>
                 <td className="p-2 space-x-2">
-                  <button onClick={() => handleModalOpen(role)} className="bg-blue-500 text-white px-2 py-1 rounded">
-                    Edit
+                  <button onClick={() => handleModalOpen(role)} className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 text-xl rounded">
+                    <FaPenAlt />
                   </button>
-                  <button onClick={() => handleDeleteRole(role.Id)} className="bg-red-600 text-white px-2 py-1 rounded">
-                    Delete
+                  <button onClick={() => handleDeleteRole(role.Id)} className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xl rounded">
+                    <MdDelete />
                   </button>
                 </td>
               </tr>
@@ -120,7 +120,7 @@ const RoleComponent = () => {
             }
 
             return (
-              <button key={pageNum} onClick={() => goToPage(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
+              <button key={pageNum} onClick={() => goToPage(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
                 {pageNum}
               </button>
             );

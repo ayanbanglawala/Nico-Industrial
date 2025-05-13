@@ -48,11 +48,11 @@ const AppSidebar: React.FC = () => {
       name: "General Follow Up",
       path: "/general-follow-up",
     },
-    {
-      icon: <BarChart3 />,
-      name: "Analytics",
-      path: "/analytics",
-    },
+    // {
+    //   icon: <BarChart3 />,
+    //   name: "Analytics",
+    //   path: "/analytics",
+    // },
     {
       icon: <CiCalendar />,
       name: "Consumer",
@@ -191,7 +191,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 border-r-1 border-gray-400 dark:bg-gray-900 dark:border-gray-800 bg-[#38487c] text-gray-900 h-screen transition-all duration-300 ease-in-out z-50
+      className={`fixed mt-16 flex flex-col pt-5 lg:mt-0 top-0 px-5 left-0 border-r-1 border-gray-400 dark:bg-gray-900 dark:border-gray-800 bg-[#38487c] text-gray-900 h-screen transition-all duration-300 ease-in-out z-50
         ${isExpanded || isMobileOpen ? "w-[260px]" : isHovered ? "w-[260px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}

@@ -1,9 +1,9 @@
 import type React from "react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaPlus } from "react-icons/fa";
+import { FaPenAlt, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { MdOutlineNavigateNext } from "react-icons/md";
+import { MdDelete, MdOutlineNavigateNext } from "react-icons/md";
 
 interface User {
   id: number;
@@ -261,7 +261,7 @@ const FollowUpTable = () => {
             resetForm();
             setIsModalOpen(true);
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
           <FaPlus />
           Create Follow-Up
         </button>
@@ -325,11 +325,11 @@ const FollowUpTable = () => {
 
                       fetchFollowUpForEdit(item.generalFollowUpId);
                     }}
-                    className="bg-blue-500 text-white px-2 py-1 rounded">
-                    Edit
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xl">
+                    <FaPenAlt />
                   </button>
-                  <button onClick={() => handleDelete(item.generalFollowUpId)} className="bg-red-500 text-white px-2 py-1 rounded">
-                    Delete
+                  <button onClick={() => handleDelete(item.generalFollowUpId)} className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xl">
+                    <MdDelete />
                   </button>
                 </td>
               </tr>

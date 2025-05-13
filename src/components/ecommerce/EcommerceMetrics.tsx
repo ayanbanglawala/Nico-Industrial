@@ -56,7 +56,7 @@ export default function EcommerceMetrics() {
   const [doneModalOpen, setDoneModalOpen] = useState(false);
   const [doneDescription, setDoneDescription] = useState("");
   const [selectedDateFollowUps, setSelectedDateFollowUps] = useState<FollowUpItem[]>([]);
-console.log(loading, assignInquary, totalUsers, followUpPersonName, remindersCount, error);
+  console.log(loading, assignInquary, totalUsers, followUpPersonName, remindersCount, error);
 
   const navigate = useNavigate();
   const authToken = localStorage.getItem("token");
@@ -210,17 +210,17 @@ console.log(loading, assignInquary, totalUsers, followUpPersonName, remindersCou
       color: "bg-blue-500/10 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400",
       onClick: () => navigate("/inquiry"),
     },
-    // {
-    //   title: "Assign Inquiries",
-    //   count: assignInquary,
-    //   icon: (
-    //     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-    //       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-    //     </svg>
-    //   ),
-    //   color: "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/15 dark:text-cyan-400",
-    //   onClick: () => navigate("/inquiry"),
-    // },
+    {
+      title: "Assign Inquiries",
+      count: assignInquary,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      ),
+      color: "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/15 dark:text-cyan-400",
+      onClick: () => navigate("/inquiry"),
+    },
   ];
 
   const dueDates = followUps.map((item: FollowUpItem) => new Date(item.dueDate).toLocaleDateString("en-CA").split("T")[0]);
@@ -228,7 +228,7 @@ console.log(loading, assignInquary, totalUsers, followUpPersonName, remindersCou
   const CalendarWidget = () => {
     const [calendarEvents, setCalendarEvents] = useState<{ [date: string]: any[] }>({});
     const [loadingEvents, setLoadingEvents] = useState(false);
-console.log(dueDates, loadingEvents);
+    console.log(dueDates, loadingEvents);
 
     // Fetch calendar events when month changes
     const fetchCalendarEvents = async () => {
@@ -412,7 +412,6 @@ console.log(dueDates, loadingEvents);
     }
   };
 
-
   const handleFollowUpPersonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedUserId = parseInt(e.target.value);
     const selectedUser = users.find((user) => user.value === selectedUserId);
@@ -488,7 +487,7 @@ console.log(dueDates, loadingEvents);
         {/* 3 Cards */}
         <div className="w-full md:w-3/4 grid grid-cols-2 sm:grid-cols-3 gap-4">
           {metricCards.map((card, i) => (
-            <div key={i} onClick={() => navigate("/inquiry")} className={`group cursor-pointer rounded-xl border border-gray-200 bg-white p-4 h-[120px] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-gray-700 dark:bg-gray-800`}>
+            <div key={i} onClick={() => navigate("/inquiry")} className={`group cursor-pointer h-[110px] rounded-xl border border-gray-300 bg-white p-4 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-gray-700 dark:bg-gray-800`}>
               <div className="flex items-center justify-between">
                 <div className={`flex h-12 w-12 items-center justify-center rounded-full ${card.color} transition-all duration-300 group-hover:scale-110`}>{card.icon}</div>
                 <div className="text-right">
@@ -499,7 +498,6 @@ console.log(dueDates, loadingEvents);
             </div>
           ))}
         </div>
-
         {/* Calendar */}
         <div className="w-full shadow-xl md:w-1/4 hover:scale-105 rounded-2xl border border-gray-500 transform duration-300">
           <CalendarWidget />

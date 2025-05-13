@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaPlus } from "react-icons/fa";
+import { FaPenAlt, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MdOutlineNavigateNext } from "react-icons/md";
+import { MdDelete, MdOutlineNavigateNext } from "react-icons/md";
 
 interface CreatedByType {
   id: number;
@@ -300,7 +300,7 @@ const Consumer = () => {
           }}
           className="border border-black p-2 rounded-md w-full max-w-xs"
         />
-        <button onClick={handleCreateConsumer} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <button onClick={handleCreateConsumer} className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
           <FaPlus />
           Create Consumer
         </button>
@@ -331,11 +331,11 @@ const Consumer = () => {
                   <td className="p-2">{consumer.contact}</td>
                   <td className="p-2">{consumer.createdBy?.name || "N/A"}</td>
                   <td className="p-2 space-x-2">
-                    <button onClick={() => handleEdit(consumer)} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
-                      Edit
+                    <button onClick={() => handleEdit(consumer)} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xl">
+                      <FaPenAlt />
                     </button>
-                    <button onClick={() => handleDelete(consumer.consumerId)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
-                      Delete
+                    <button onClick={() => handleDelete(consumer.consumerId)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xl">
+                      <MdDelete />
                     </button>
                   </td>
                 </tr>
@@ -360,7 +360,7 @@ const Consumer = () => {
               <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-              <button key={pageNum} onClick={() => handlePageClick(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
+              <button key={pageNum} onClick={() => handlePageClick(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
                 {pageNum}
               </button>
             ))}
