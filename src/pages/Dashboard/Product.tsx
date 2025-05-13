@@ -3,10 +3,10 @@
 import type React from "react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaPlus } from "react-icons/fa";
+import { FaPenAlt, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MdOutlineNavigateNext } from "react-icons/md";
+import { MdDelete, MdOutlineNavigateNext } from "react-icons/md";
 
 type Brand = {
   brandId: number;
@@ -290,7 +290,7 @@ const Product = () => {
             resetForm(); // Use the reset function here
             setIsModalOpen(true);
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
           <FaPlus />
           Create Product
         </button>
@@ -327,11 +327,11 @@ const Product = () => {
                   <td className="p-2">{product.createdBy}</td>
                   <td className="p-2">{product.createdAt}</td>
                   <td className="p-2 space-x-2">
-                    <button onClick={() => handleEditProduct(product)} className="bg-blue-500 text-white px-2 py-1 rounded" disabled={isLoading}>
-                      Edit
+                    <button onClick={() => handleEditProduct(product)} className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 text-xl rounded" disabled={isLoading}>
+                      <FaPenAlt />
                     </button>
-                    <button onClick={() => handleDeleteProduct(product.id)} className="bg-red-600 text-white px-2 py-1 rounded" disabled={isLoading}>
-                      Delete
+                    <button onClick={() => handleDeleteProduct(product.id)} className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xl rounded" disabled={isLoading}>
+                      <MdDelete />
                     </button>
                   </td>
                 </tr>
@@ -357,7 +357,7 @@ const Product = () => {
                 <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
               </button>
               {Array.from({ length: totalPages }, (_, i) => (
-                <button key={i + 1} onClick={() => setCurrentPage(i + 1)} disabled={isLoading} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
+                <button key={i + 1} onClick={() => setCurrentPage(i + 1)} disabled={isLoading} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
                   {i + 1}
                 </button>
               ))}

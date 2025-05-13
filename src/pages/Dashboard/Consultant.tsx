@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaPlus } from "react-icons/fa";
+import { FaPenAlt, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MdOutlineNavigateNext } from "react-icons/md";
+import { MdDelete, MdOutlineNavigateNext } from "react-icons/md";
 
 const Consultant = () => {
   const [search, setSearch] = useState("");
@@ -233,7 +233,7 @@ const Consultant = () => {
           }}
           className="border border-black p-2 rounded-md w-full max-w-xs"
         />
-        <button onClick={handleModalOpen} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <button onClick={handleModalOpen} className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
           <FaPlus />
           Create Consultant
         </button>
@@ -265,12 +265,12 @@ const Consultant = () => {
                   <td className="p-2">{consultant.createdAt}</td>
                   <td className="p-2">{consultant.updatedAt}</td>
                   <td className="p-2">{consultant.createdBy}</td>
-                  <td className="p-2">
-                    <button className="bg-blue-500 text-white px-2 py-1 rounded mr-2" onClick={() => handleEdit(consultant)}>
-                      Edit
+                  <td className="p-2 flex justify-center gap-2">
+                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xl" onClick={() => handleEdit(consultant)}>
+                      <FaPenAlt />
                     </button>
-                    <button className="bg-red-600 text-white px-2 py-1 rounded" onClick={() => handleDelete(consultant.id)}>
-                      Delete
+                    <button className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xl" onClick={() => handleDelete(consultant.id)}>
+                      <MdDelete />
                     </button>
                   </td>
                 </tr>
@@ -295,7 +295,7 @@ const Consultant = () => {
               <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
             </button>
             {Array.from({ length: totalPages }, (_, i) => (
-              <button key={i + 1} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
+              <button key={i + 1} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
                 {i + 1}
               </button>
             ))}

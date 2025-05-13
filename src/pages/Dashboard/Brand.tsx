@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaPlus } from "react-icons/fa";
+import { FaPenAlt, FaPlus } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MdOutlineNavigateNext } from "react-icons/md";
+import { MdDelete, MdOutlineNavigateNext } from "react-icons/md";
 
 type BrandType = {
   brandId: number;
@@ -204,7 +204,7 @@ const Brand = () => {
           }}
           className="border border-black p-2 rounded-md w-full max-w-xs"
         />
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" onClick={() => handleModalOpen()}>
+        <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" onClick={() => handleModalOpen()}>
           <FaPlus />
           Create Brand
         </button>
@@ -226,11 +226,11 @@ const Brand = () => {
                   <td className="p-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="p-2">{brand.brandName}</td>
                   <td className="p-2 space-x-2">
-                    <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => handleModalOpen(brand)}>
-                      Edit
+                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xl" onClick={() => handleModalOpen(brand)}>
+                      <FaPenAlt />
                     </button>
-                    <button className="bg-red-600 text-white px-2 py-1 rounded" onClick={() => handleDelete(brand.brandId)}>
-                      Delete
+                    <button className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xl" onClick={() => handleDelete(brand.brandId)}>
+                      <MdDelete />
                     </button>
                   </td>
                 </tr>
@@ -256,7 +256,7 @@ const Brand = () => {
           </button>
 
           {[...Array(totalPages).keys()].slice(0, 3).map((_, i) => (
-            <button key={i + 1} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
+            <button key={i + 1} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
               {i + 1}
             </button>
           ))}

@@ -921,7 +921,7 @@ const Inquiry: React.FC = () => {
 
     navigate(`/inquiry/${inquiry.inquiryId}`);
     setSelectedInquiry(inquiry);
-    setShowViewModal(true);
+    // setShowViewModal(true);
   };
 
   // State for storing dropdown options
@@ -1469,7 +1469,7 @@ const Inquiry: React.FC = () => {
               </select>
             </div>
             <div className="flex gap-2 mt-6 sm:mt-0 w-full sm:w-[100%]">
-              <button onClick={handleExport} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+              <button onClick={handleExport} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
                 Export to Excel
               </button>
             </div>
@@ -1478,7 +1478,7 @@ const Inquiry: React.FC = () => {
           ""
         )}
         <div className="flex gap-2 mt-6 sm:mt-0 w-full justify-end">
-          <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
             <FaPlus />
             Create Inquiry
           </button>
@@ -1524,19 +1524,19 @@ const Inquiry: React.FC = () => {
                   <td className="px-4 py-2">
                     {inquiry.isWin === null ? (
                       <div className="flex justify-center gap-1">
-                        <button onClick={() => handleButtonClick(true, inquiry.inquiryId)} className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+                        <button onClick={() => handleButtonClick(true, inquiry.inquiryId)} className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">
                           <FontAwesomeIcon icon={faThumbsUp} />
                         </button>
-                        <button onClick={() => handleButtonClick(false, inquiry.inquiryId)} className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                        <button onClick={() => handleButtonClick(false, inquiry.inquiryId)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
                           <FontAwesomeIcon icon={faThumbsDown} />
                         </button>
                       </div>
                     ) : inquiry.isWin ? (
-                      <button onClick={() => handleButtonClick(true, inquiry.inquiryId)} className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+                      <button onClick={() => handleButtonClick(true, inquiry.inquiryId)} className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">
                         <FontAwesomeIcon icon={faThumbsUp} />
                       </button>
                     ) : (
-                      <button onClick={() => handleButtonClick(false, inquiry.inquiryId)} className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                      <button onClick={() => handleButtonClick(false, inquiry.inquiryId)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
                         <FontAwesomeIcon icon={faThumbsDown} />
                       </button>
                     )}
@@ -1620,7 +1620,7 @@ const Inquiry: React.FC = () => {
               const pageNum = currentPage > 3 ? currentPage - 3 + i + 1 : i + 1;
               if (pageNum <= totalPages) {
                 return (
-                  <button key={i} onClick={() => setCurrentPage(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
+                  <button key={i} onClick={() => setCurrentPage(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
                     {pageNum}
                   </button>
                 );
