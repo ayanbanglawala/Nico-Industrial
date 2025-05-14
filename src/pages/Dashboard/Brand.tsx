@@ -172,21 +172,22 @@ const Brand = () => {
       console.warn("Attempted to delete with invalid ID:", brandId);
       return;
     }
-
-    try {
-      const response = await axios.delete(`https://nicoindustrial.com/api/brand/delete/${brandId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.data) {
-        toast.success(response.data.message || "Brand deleted successfully!");
-        setBrands((prevBrands) => prevBrands.filter((brand) => brand.brandId !== brandId));
+    if (window.confirm("Are you sure you want to delete this brand?")) {
+      try {
+        const response = await axios.delete(`https://nicoindustrial.com/api/brand/delete/${brandId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.data) {
+          toast.success(response.data.message || "Brand deleted successfully!");
+          setBrands((prevBrands) => prevBrands.filter((brand) => brand.brandId !== brandId));
+        }
+      } catch (error) {
+        toast.error("Error deleting brand. Please try again.");
+        console.error("Error deleting brand:", error);
       }
-    } catch (error) {
-      toast.error("Error deleting brand. Please try again.");
-      console.error("Error deleting brand:", error);
     }
   };
 
@@ -252,7 +253,8 @@ const Brand = () => {
         </p>
         <div className="flex gap-2">
           <button onClick={() => goToPage(currentPage - 1)} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black dark:border-white" disabled={currentPage === 1}>
-            <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
+            <MdOutlineNavigateNext className="text-2xl rotate-180" />
+            Previous
           </button>
 
           {[...Array(totalPages).keys()].slice(0, 3).map((_, i) => (
@@ -269,8 +271,9 @@ const Brand = () => {
             </button>
           )}
 
-          <button onClick={() => goToPage(currentPage + 1)}  className="flex px-3 py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black dark:border-white" disabled={currentPage === totalPages}>
-            Next<MdOutlineNavigateNext className="text-2xl" />
+          <button onClick={() => goToPage(currentPage + 1)} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black dark:border-white" disabled={currentPage === totalPages}>
+            Next
+            <MdOutlineNavigateNext className="text-2xl" />
           </button>
         </div>
         <select
@@ -279,7 +282,7 @@ const Brand = () => {
             setItemsPerPage(Number(e.target.value));
             goToPage(1);
           }}
-         className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+          className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
           <option value={10}>10 per page</option>
           <option value={25}>25 per page</option>
           <option value={50}>50 per page</option>

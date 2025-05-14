@@ -221,14 +221,16 @@ const FollowUpTable = () => {
   };
 
   const handleDelete = async (id: number) => {
-    const token = localStorage.getItem("token");
-    try {
-      await axios.delete(`https://nicoindustrial.com/api/generalFollowUp/delete/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      fetchFollowUps();
-    } catch (error) {
-      console.error("Failed to delete follow-up", error);
+    if (window.confirm("Are you sure you want to delete this follow-up?")) {
+      const token = localStorage.getItem("token");
+      try {
+        await axios.delete(`https://nicoindustrial.com/api/generalFollowUp/delete/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        fetchFollowUps();
+      } catch (error) {
+        console.error("Failed to delete follow-up", error);
+      }
     }
   };
 

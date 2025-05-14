@@ -248,7 +248,6 @@ const Consumer = () => {
 
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this consumer?")) return;
-
     try {
       const response = await axios.delete(`https://nicoindustrial.com/api/consumer/delete/${id}`, {
         headers: {
@@ -308,16 +307,16 @@ const Consumer = () => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200 text-left">
+        <table className="min-w-full text-left">
           <thead className="bg-[#38487c] text-white dark:text-white dark:bg-black">
-            <tr className="text-center">
-              <th className="border p-2">Sr No</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Email</th>
-              <th className="border p-2">Address</th>
-              <th className="border p-2">Contact</th>
-              <th className="border p-2">Created By</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-center border border-gray-400">
+              <th className="p-2">Sr No</th>
+              <th className="p-2">Name</th>
+              <th className="p-2">Email</th>
+              <th className="p-2">Address</th>
+              <th className="p-2">Contact</th>
+              <th className="p-2">Created By</th>
+              <th className="p-2">Actions</th>
             </tr>
           </thead>
           <tbody>

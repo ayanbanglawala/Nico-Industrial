@@ -155,7 +155,7 @@ const AppSidebar: React.FC = () => {
           ) : (
             nav.path && (
               <Link to={nav.path} className={`menu-item text-white hover:text-black group ${isActive(nav.path) ? "menu-item-active border-1 border-black bg-white !text-black dark:!text-white" : "menu-item-inactive"}`}>
-                <span className={`menu-item-icon-size hover:!text-white text-white dark:text-white dark:hover:!text-black ${isActive(nav.path) ? "menu-item-icon-active !text-black dark:!text-white dark:hover:!text-black" : "menu-item-icon-inactive"}`}>{nav.icon}</span>
+                <span className={`menu-item-icon-size  text-white dark:text-white ${isActive(nav.path) ? "menu-item-icon-active !text-black dark:!text-white" : "menu-item-icon-inactive"}`}>{nav.icon}</span>
                 {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
               </Link>
             )

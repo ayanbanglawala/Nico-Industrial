@@ -2,9 +2,9 @@
 
 import type React from "react";
 import { useState, useEffect, useRef } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaFileInvoice, FaPlus, FaUserCheck } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserCheck, faFileInvoice, faThumbsUp, faThumbsDown } from "@fortawesome/free-solid-svg-icons";
+import { faThumbsUp, faThumbsDown } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -58,7 +58,7 @@ interface Inquiry {
   inquiryStatus: string;
   description?: string;
   consumer?: Consumer;
-  product?: Product;
+  products?: Product;
   brand?: Brand;
   consultant?: Consultant;
   followUpUser?: User;
@@ -69,20 +69,22 @@ interface Inquiry {
   updatedAt?: string;
   updatedBy?: User;
   isWin?: boolean | null;
+  estimatePrice?: number; // Added estimatePrice field
 }
 
 interface FormData {
   projectName: string;
   inquiryStatus: string;
   consumerId: string | number;
-  brandId?: string | number;
-  productId: string | number;
+  brandIds?: (string | number)[]; // Changed from brandId to brandIds array
+  productIds: (string | number)[]; // Changed from productId to productIds array
   consultantId: string | number;
   remark: string;
   createdBy?: string | number;
   followUpUser: string | number;
   followUpQuotation: string | number;
   description: string;
+  estimatePrice?: number; // Added estimatePrice field
 }
 
 interface SelectOption {
@@ -147,17 +149,22 @@ const Inquiry: React.FC = () => {
       });
   };
 
+  const [selectedBrands, setSelectedBrands] = useState<SelectOption[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>([]);
+
   const [formData, setFormData] = useState<FormData>({
     projectName: "",
     inquiryStatus: "",
     consumerId: "",
-    productId: "",
+    productIds: [], // Changed to array
     consultantId: "",
     remark: "",
     createdBy: userId,
     followUpUser: "",
     followUpQuotation: "",
     description: "",
+    brandIds: [], // Changed to array
+    estimatePrice: 0, // Added estimatePrice with default value
   });
 
   const [formDataProduct, setformDataProduct] = useState<any>({});
@@ -345,8 +352,8 @@ const Inquiry: React.FC = () => {
     if (!formData.inquiryStatus) newErrors.inquiryStatus = "Inquiry Status is required.";
     if (!formData.description.trim()) newErrors.description = "Description is required.";
     if (!formData.consumerId) newErrors.consumerId = "Consumer is required.";
-    if (!formData.brandId) newErrors.brandId = "Brand is required.";
-    if (!formData.productId) newErrors.productId = "Product is required.";
+    if (!formData.brandIds || formData.brandIds.length === 0) newErrors.brandIds = "At least one Brand is required.";
+    if (!formData.productIds || formData.productIds.length === 0) newErrors.productIds = "At least one Product is required.";
     if (!formData.consultantId) newErrors.consultantId = "Consultant is required.";
     if (!formData.followUpQuotation) newErrors.followUpQuotation = "Follow-up Quotation is required.";
     if (!formData.followUpUser) newErrors.followUpUser = "Follow-up User is required.";
@@ -667,6 +674,7 @@ const Inquiry: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+      console.log(response);
 
       const inquiryContent = response.data.data.inquiries.content;
       const userData = inquiryContent.map((inquiry: Inquiry) => ({
@@ -781,14 +789,20 @@ const Inquiry: React.FC = () => {
       projectName: "",
       inquiryStatus: "",
       consumerId: "",
-      productId: "",
+      productIds: [],
       consultantId: "",
       remark: "",
       createdBy: userId,
       followUpUser: "",
       followUpQuotation: "",
       description: "",
+      brandIds: [],
+      estimatePrice: 0,
     });
+    setSelectedConsumer(null);
+    setSelectedBrands([]);
+    setSelectedProducts([]);
+    setSelectedConsultant(null);
     setSelectedFollowUpUser(null);
     setSelectedFollowUpQuotation(null);
     setErrors({});
@@ -799,17 +813,22 @@ const Inquiry: React.FC = () => {
   const handleEdit = (inquiry: Inquiry) => {
     setSelectedInquiryId(inquiry.inquiryId);
 
+    // Extract brand and product IDs if they exist
+    const brandId = inquiry.product?.brand ? inquiry.product.brand.brandId : "";
+    const productId = inquiry.product ? inquiry.product.productId : "";
+
     setFormData({
       projectName: inquiry.projectName,
       inquiryStatus: inquiry.inquiryStatus,
       consumerId: inquiry.consumer ? inquiry.consumer.consumerId : "",
-      brandId: inquiry.product?.brand ? inquiry.product.brand.brandId : "",
-      productId: inquiry.product ? inquiry.product.productId : "",
+      brandIds: brandId ? [brandId] : [],
+      productIds: productId ? [productId] : [],
       consultantId: inquiry.consultant ? inquiry.consultant.consultantId : "",
       remark: inquiry.remark || "",
       followUpUser: inquiry.followUpUser ? inquiry.followUpUser.id : "",
       followUpQuotation: inquiry.followUpQuotation ? inquiry.followUpQuotation.id : "",
       description: inquiry.description || "",
+      estimatePrice: inquiry.estimatePrice || 0,
     });
 
     setSelectedConsumer(
@@ -821,27 +840,28 @@ const Inquiry: React.FC = () => {
         : null
     );
 
-    setSelectedBrand(
+    // Set selected brands as array
+    setSelectedBrands(
       inquiry.product?.brand
-        ? {
-            value: inquiry.product.brand.brandId,
-            label: inquiry.product.brand.brandName,
-          }
-        : null
+        ? [
+            {
+              value: inquiry.product.brand.brandId,
+              label: inquiry.product.brand.brandName,
+            },
+          ]
+        : []
     );
 
-    setFormData((prevState) => ({
-      ...prevState,
-      brandId: inquiry.product?.brand ? inquiry.product.brand.brandId : "",
-    }));
-
-    setSelectedProduct(
+    // Set selected products as array
+    setSelectedProducts(
       inquiry.product
-        ? {
-            value: inquiry.product.productId,
-            label: inquiry.product.productName,
-          }
-        : null
+        ? [
+            {
+              value: inquiry.product.productId,
+              label: inquiry.product.productName,
+            },
+          ]
+        : []
     );
 
     setSelectedConsultant(
@@ -1300,9 +1320,71 @@ const Inquiry: React.FC = () => {
     if (!brandId) return;
     setIsLoadingProducts(true);
     try {
-      const response = await axios.get(`https://nicoindustrial.com/api/product/listByBrand/${brandId}`, {
+      const response = await axios.get(`https://nicoindustrial.com/api/product/listByBrands`, {
         headers: {
           Authorization: `Bearer ${token}`,
+        },
+        params: {
+          brandIds: brandId,
+        },
+      });
+      console.log(response.data);
+      const products = response.data.data.map((product: Product) => ({
+        value: product.productId,
+        label: `${product.productName}${product.price ? ` - $${product.price}` : ""}`,
+      }));
+      setProductOptions(products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  };
+
+  // Handle brand change for multiple select
+  const handleBrandChange = (selectedOptions: readonly SelectOption[]) => {
+    const options = selectedOptions as SelectOption[];
+    setSelectedBrands(options);
+    setFormData({
+      ...formData,
+      brandIds: options.map((option) => option.value),
+    });
+
+    // If brands change, fetch products for all selected brands
+    if (options.length > 0) {
+      const brandIds = options.map((option) => option.value).join(",");
+      fetchProductsByBrands(brandIds);
+    } else {
+      setSelectedProducts([]);
+      setProductOptions([]);
+      setFormData((prev) => ({
+        ...prev,
+        productIds: [],
+      }));
+    }
+  };
+
+  // Handle product change for multiple select
+  const handleProductChange = (selectedOptions: readonly SelectOption[]) => {
+    const options = selectedOptions as SelectOption[];
+    setSelectedProducts(options);
+    setFormData({
+      ...formData,
+      productIds: options.map((option) => option.value),
+    });
+  };
+
+  // Update fetchProductsByBrand to handle multiple brands
+  const fetchProductsByBrands = async (brandIds: string | number) => {
+    if (!brandIds) return;
+    setIsLoadingProducts(true);
+    try {
+      const response = await axios.get(`https://nicoindustrial.com/api/product/listByBrands`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          brandIds: brandIds,
         },
       });
       const products = response.data.data.map((product: Product) => ({
@@ -1318,24 +1400,24 @@ const Inquiry: React.FC = () => {
   };
 
   // Handle brand change
-  const handleBrandChange = (selectedOption: SelectOption | null) => {
-    setSelectedBrand(selectedOption);
-    setFormData({
-      ...formData,
-      brandId: selectedOption ? selectedOption.value : "",
-    });
-    setSelectedProduct(null);
-    fetchProductsByBrand(selectedOption ? selectedOption.value : "");
-  };
+  // const handleBrandChange = (selectedOption: SelectOption | null) => {
+  //   setSelectedBrand(selectedOption);
+  //   setFormData({
+  //     ...formData,
+  //     brandId: selectedOption ? selectedOption.value : "",
+  //   });
+  //   setSelectedProduct(null);
+  //   fetchProductsByBrand(selectedOption ? selectedOption.value : "");
+  // };
 
   // Handle product change
-  const handleProductChange = (selectedOption: SelectOption | null) => {
-    setSelectedProduct(selectedOption);
-    setFormData({
-      ...formData,
-      productId: selectedOption ? selectedOption.value : "",
-    });
-  };
+  // const handleProductChange = (selectedOption: SelectOption | null) => {
+  //   setSelectedProduct(selectedOption);
+  //   setFormData({
+  //     ...formData,
+  //     productId: selectedOption ? selectedOption.value : "",
+  //   });
+  // };
 
   // Handle brand search
   const handleBrandSearch = (inputValue: string) => {
@@ -1478,7 +1560,11 @@ const Inquiry: React.FC = () => {
           ""
         )}
         <div className="flex gap-2 mt-6 sm:mt-0 w-full justify-end">
-          <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+          <button
+            onClick={() => {
+              setShowCreateModal(true), resetForm();
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
             <FaPlus />
             Create Inquiry
           </button>
@@ -1511,7 +1597,8 @@ const Inquiry: React.FC = () => {
                   <td className="px-4 py-2 text-center">{(currentPage - 1) * pageSize + (index + 1)}</td>
                   <td className="px-4 py-2">{inquiry.projectName}</td>
                   <td className="px-4 py-2">{inquiry.consumer?.consumerName || "N/A"}</td>
-                  <td className="px-4 py-2">{inquiry.product?.productName || "N/A"}</td>
+                  {/* <td className="px-4 py-2">{inquiry.products?.productName || "N/A"}</td> */}
+                  <td className="px-4 py-2">{inquiry.products && inquiry.products.length > 0 ? inquiry.products.map((p) => p.productName).join(", ") : "N/A"}</td>
                   <td className="px-4 py-2">{inquiry.consultant?.consultantName || "N/A"}</td>
                   <td className="px-4 py-2">
                     <select className="p-2 text-sm border border-black dark:border-white rounded-lg w-full dark:bg-black" value={inquiry.inquiryStatus} onChange={(e) => handleStatusChange(inquiry.inquiryId, e.target.value)}>
@@ -1542,13 +1629,13 @@ const Inquiry: React.FC = () => {
                     )}
                   </td>
                   <td className="px-4 py-2 text-center space-x-1">
-                    <button onClick={() => handleView(inquiry)} className="px-3 py-[8px] bg-gray-500 text-white rounded hover:bg-gray-600">
+                    <button onClick={() => handleView(inquiry)} className="p-2 bg-gray-500 text-white rounded hover:bg-gray-600">
                       <FaEye />
                     </button>
-                    <button onClick={() => handleEdit(inquiry)} className="px-3 py-[8px] bg-blue-500 text-white rounded hover:bg-blue-600">
+                    <button onClick={() => handleEdit(inquiry)} className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                       <FaPenAlt />
                     </button>
-                    <button onClick={() => handleDelete(inquiry.inquiryId)} className="px-3 py-[8px] bg-red-500 text-white rounded hover:bg-red-600">
+                    <button onClick={() => handleDelete(inquiry.inquiryId)} className="p-2 bg-red-500 text-white rounded hover:bg-red-600">
                       <MdDelete />
                     </button>
 
@@ -1568,8 +1655,8 @@ const Inquiry: React.FC = () => {
                           setIsFollowUpUser(false);
                           setshowStatusQuartationChangeModal(true);
                         }}
-                        className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600">
-                        <FontAwesomeIcon icon={faFileInvoice} />
+                        className="p-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                        <FaFileInvoice />
                       </button>
                     )}
 
@@ -1589,8 +1676,8 @@ const Inquiry: React.FC = () => {
                           setIsFollowUpUser(true);
                           setshowStatusQuartationChangeModal(true);
                         }}
-                        className="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600">
-                        <FontAwesomeIcon icon={faUserCheck} />
+                        className="p-2 bg-indigo-500 text-white rounded hover:bg-indigo-600">
+                        <FaUserCheck />
                       </button>
                     )}
                   </td>
@@ -1705,28 +1792,53 @@ const Inquiry: React.FC = () => {
                 {errors.consumerId && <div className="text-red-500 text-sm mt-1">{errors.consumerId}</div>}
               </div>
 
+              {/* Brand multi-select */}
               <div className="flex flex-col">
-                <label className="mb-1 font-medium">Brand</label>
-                <Select name="brandId" value={selectedBrand} onChange={handleBrandChange} onInputChange={handleBrandSearch} options={brandOptions} placeholder="Search and Select Brand" isLoading={isLoadingBrands} isClearable className="basic-select" classNamePrefix="select" />
-                {errors.brandId && <div className="text-red-500 text-sm mt-1">{errors.brandId}</div>}
-              </div>
-
-              <div className="flex flex-col">
-                <label className="mb-1 font-medium">Product</label>
+                <label className="mb-1 font-medium">Brand(s)</label>
                 <Select
-                  name="productId"
-                  value={selectedProduct}
-                  onChange={handleProductChange}
-                  onInputChange={handleProductSearch}
-                  options={productOptions}
-                  placeholder="Search and Select Product"
-                  isLoading={isLoadingProducts}
-                  isClearable
-                  isDisabled={!selectedBrand}
+                  name="brandIds"
+                  value={selectedBrands}
+                  onChange={handleBrandChange}
+                  onInputChange={handleBrandSearch}
+                  options={brandOptions}
+                  placeholder="Search and Select Brands"
+                  isLoading={isLoadingBrands}
+                  isMulti
+                  className="basic-select"
+                  classNamePrefix="select"
+                  options={brandOptions}
+                  placeholder="Search and Select Brands"
+                  isLoading={isLoadingBrands}
+                  isMulti
                   className="basic-select"
                   classNamePrefix="select"
                 />
-                {errors.productId && <div className="text-red-500 text-sm mt-1">{errors.productId}</div>}
+                {errors.brandIds && <div className="text-red-500 text-sm mt-1">{errors.brandIds}</div>}
+              </div>
+
+              {/* Product multi-select */}
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Product(s)</label>
+                <Select
+                  name="productIds"
+                  value={selectedProducts}
+                  onChange={handleProductChange}
+                  onInputChange={handleProductSearch}
+                  options={productOptions}
+                  placeholder="Search and Select Products"
+                  isLoading={isLoadingProducts}
+                  isMulti
+                  isDisabled={selectedBrands.length === 0}
+                  className="basic-select"
+                  classNamePrefix="select"
+                />
+                {errors.productIds && <div className="text-red-500 text-sm mt-1">{errors.productIds}</div>}
+              </div>
+
+              {/* Add estimatePrice field */}
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Estimated Price</label>
+                <input type="number" name="estimatePrice" value={formData.estimatePrice} onChange={handleFormChange} placeholder="Enter estimated price" className="p-3 border rounded" />
               </div>
 
               <div className="flex flex-col">
@@ -1827,6 +1939,7 @@ const Inquiry: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setShowCreateModal(false);
+                    resetForm();
                     setEditMode(false);
                     setSelectedInquiryId(null);
                   }}
@@ -1866,7 +1979,7 @@ const Inquiry: React.FC = () => {
 
               <div className="flex gap-2">
                 <label className="mb-1 font-medium text-gray-600">Product Name:</label>
-                <p className="bg-gray-100 rounded">{selectedInquiry.product?.productName || "N/A"}</p>
+                <p className="bg-gray-100 rounded">{selectedInquiry.products?.productName || "N/A"}</p>
               </div>
 
               <div className="flex gap-2">
