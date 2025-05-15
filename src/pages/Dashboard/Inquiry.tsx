@@ -813,16 +813,17 @@ const Inquiry: React.FC = () => {
   const handleEdit = (inquiry: Inquiry) => {
     setSelectedInquiryId(inquiry.inquiryId);
 
-    // Extract brand and product IDs if they exist
-    const brandId = inquiry.product?.brand ? inquiry.product.brand.brandId : "";
-    const productId = inquiry.product ? inquiry.product.productId : "";
+    // Extract brand and product IDs from the products array
+    const brandIds = inquiry.products ? [...new Set(inquiry.products.map((product) => product.brand?.brandId))].filter(Boolean) : [];
+
+    const productIds = inquiry.products ? inquiry.products.map((product) => product.productId) : [];
 
     setFormData({
       projectName: inquiry.projectName,
       inquiryStatus: inquiry.inquiryStatus,
       consumerId: inquiry.consumer ? inquiry.consumer.consumerId : "",
-      brandIds: brandId ? [brandId] : [],
-      productIds: productId ? [productId] : [],
+      brandIds: brandIds,
+      productIds: productIds,
       consultantId: inquiry.consultant ? inquiry.consultant.consultantId : "",
       remark: inquiry.remark || "",
       followUpUser: inquiry.followUpUser ? inquiry.followUpUser.id : "",
@@ -840,29 +841,44 @@ const Inquiry: React.FC = () => {
         : null
     );
 
-    // Set selected brands as array
-    setSelectedBrands(
-      inquiry.product?.brand
-        ? [
-            {
-              value: inquiry.product.brand.brandId,
-              label: inquiry.product.brand.brandName,
-            },
-          ]
-        : []
-    );
+    // Set selected brands as array of options
+    if (inquiry.products && inquiry.products.length > 0) {
+      const uniqueBrands = [
+        ...new Map(
+          inquiry.products
+            .filter((product) => product.brand)
+            .map((product) => [
+              product.brand?.brandId,
+              {
+                value: product.brand?.brandId,
+                label: product.brand?.brandName,
+              },
+            ])
+        ).values(),
+      ];
 
-    // Set selected products as array
-    setSelectedProducts(
-      inquiry.product
-        ? [
-            {
-              value: inquiry.product.productId,
-              label: inquiry.product.productName,
-            },
-          ]
-        : []
-    );
+      setSelectedBrands(uniqueBrands);
+
+      // Fetch products for these brands
+      const brandIdsString = uniqueBrands.map((brand) => brand.value).join(",");
+      if (brandIdsString) {
+        fetchProductsByBrands(brandIdsString);
+      }
+    } else {
+      setSelectedBrands([]);
+    }
+
+    // Set selected products as array of options
+    if (inquiry.products && inquiry.products.length > 0) {
+      const productOptions = inquiry.products.map((product) => ({
+        value: product.productId,
+        label: product.productName,
+      }));
+
+      setSelectedProducts(productOptions);
+    } else {
+      setSelectedProducts([]);
+    }
 
     setSelectedConsultant(
       inquiry.consultant
@@ -1032,9 +1048,18 @@ const Inquiry: React.FC = () => {
 
       const inquiryData = response.data.data;
 
+      // Extract the latest description from the description array
+      let latestDescription = "";
+      if (Array.isArray(inquiryData.description) && inquiryData.description.length > 0) {
+        // Get the most recent description (last item in array)
+        const lastDescription = inquiryData.description[inquiryData.description.length - 1];
+        latestDescription = lastDescription.description || "";
+      }
+
       setStatusChangeData({
         ...inquiryData,
         inquiryStatus: newStatus,
+        description: latestDescription,
       });
 
       setShowStatusChangeModal(true);
@@ -1118,6 +1143,7 @@ const Inquiry: React.FC = () => {
 
       setShowStatusChangeModal(false);
 
+      // Update the table data with the new status
       setTableData((prevData) => prevData.map((inquiry) => (inquiry.inquiryId === inquiryId ? { ...inquiry, inquiryStatus, description } : inquiry)));
     } catch (error: any) {
       console.error("Error updating inquiry:", error.response || error);
@@ -1595,7 +1621,7 @@ const Inquiry: React.FC = () => {
               tableData.map((inquiry, index) => (
                 <tr key={inquiry.inquiryId} className="hover:bg-gray-200 bg-white text-center dark:bg-black dark:hover:bg-gray-800 transform duration-200">
                   <td className="px-4 py-2 text-center">{(currentPage - 1) * pageSize + (index + 1)}</td>
-                  <td className="px-4 py-2">{inquiry.projectName}</td>
+                  <td className="px-4 py-2">{inquiry.projectName.slice(0,25)}...</td>
                   <td className="px-4 py-2">{inquiry.consumer?.consumerName || "N/A"}</td>
                   {/* <td className="px-4 py-2">{inquiry.products?.productName || "N/A"}</td> */}
                   <td className="px-4 py-2">{inquiry.products && inquiry.products.length > 0 ? inquiry.products.map((p) => p.productName).join(", ") : "N/A"}</td>
@@ -1795,24 +1821,7 @@ const Inquiry: React.FC = () => {
               {/* Brand multi-select */}
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Brand(s)</label>
-                <Select
-                  name="brandIds"
-                  value={selectedBrands}
-                  onChange={handleBrandChange}
-                  onInputChange={handleBrandSearch}
-                  options={brandOptions}
-                  placeholder="Search and Select Brands"
-                  isLoading={isLoadingBrands}
-                  isMulti
-                  className="basic-select"
-                  classNamePrefix="select"
-                  options={brandOptions}
-                  placeholder="Search and Select Brands"
-                  isLoading={isLoadingBrands}
-                  isMulti
-                  className="basic-select"
-                  classNamePrefix="select"
-                />
+                <Select name="brandIds" value={selectedBrands} onChange={handleBrandChange} onInputChange={handleBrandSearch} options={brandOptions} placeholder="Search and Select Brands" isLoading={isLoadingBrands} isMulti className="basic-select" classNamePrefix="select" />
                 {errors.brandIds && <div className="text-red-500 text-sm mt-1">{errors.brandIds}</div>}
               </div>
 

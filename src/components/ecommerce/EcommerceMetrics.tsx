@@ -530,6 +530,7 @@ export default function EcommerceMetrics() {
                     className="cursor-pointer hover:scale-110 hover:text-gray-700"
                     onClick={() => {
                       setSelectedReminder(item);
+                      setDoneDescription(item.description || ""); // Add this line
                       setDoneModalOpen(true);
                     }}>
                     Check
@@ -690,7 +691,7 @@ export default function EcommerceMetrics() {
             <form onSubmit={handleMarkAsDone}>
               <div className="mb-4">
                 <label className="block text-sm text-gray-600 dark:text-gray-300 mb-2">Description</label>
-                <textarea value={selectedReminder.description || ""} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" rows={3} placeholder="Add any notes about completing this follow-up" />
+                <textarea value={doneDescription} onChange={(e) => setDoneDescription(e.target.value)} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" rows={3} placeholder="Add any notes about completing this follow-up" />
               </div>
 
               <div className="mt-6 flex justify-end gap-3">
