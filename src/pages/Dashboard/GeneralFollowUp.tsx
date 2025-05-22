@@ -19,6 +19,7 @@ interface FollowUp {
   dueDate: Date;
   followUpPerson: { id: number; name: string };
   createdBy: { name: string };
+  createdAt: { name: string };
   updatedBy: { name: string } | null;
 }
 
@@ -275,6 +276,7 @@ const FollowUpTable = () => {
             <th className="px-3 py-2">Sr No</th>
             <th className="px-3 py-2">GeneralFollowUp Name</th>
             <th className="px-3 py-2">Created By</th>
+            <th className="px-3 py-2">Due Date</th>
             <th className="px-3 py-2">Description</th>
             <th className="px-3 py-2">Updated By</th>
             <th className="px-3 py-2">Actions</th>
@@ -287,6 +289,7 @@ const FollowUpTable = () => {
                 <td className="px-3 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="px-3 py-2">{item.generalFollowUpName}</td>
                 <td className="px-3 py-2">{item.createdBy?.name}</td>
+                <td className="px-3 py-2">{new Date(item.dueDate).toISOString().replace("T", " ").slice(0, 19)}</td>
                 <td className="px-3 py-2">{item.description}</td>
                 <td className="px-3 py-2">{item.updatedBy?.name || "—"}</td>
                 <td className="px-3 py-2 space-x-2">

@@ -1,11 +1,16 @@
+"use client";
+
+import type React from "react";
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { IoCloseCircleOutline } from "react-icons/io5";
+import { IoCheckmarkSharp, IoCloseCircleOutline } from "react-icons/io5";
 import { MdOutlineNavigateNext } from "react-icons/md";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
+import { FaEye, FaPenAlt } from "react-icons/fa";
 interface FollowUpItem {
   id: string;
   generalFollowUpName?: string;
@@ -138,45 +143,50 @@ export default function EcommerceMetrics() {
 
   const metricCards = [
     {
-      title: "Unassign Inquiries",
-      count: inquiries,
+      title: "Tender Inquiries",
+      count: rejectedInquiriesCount,
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="m15 9-6 6"></path>
+          <path d="m9 9 6 6"></path>
         </svg>
       ),
-      color: "bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400",
-      onClick: () => navigate("/inquiry"),
+      color: "bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/15 dark:text-yellow-400",
+      onClick: () => navigate("/inquiry", { state: { filterStatus: "TENDER" } }),
+      status: "TENDER",
     },
     {
       title: "Procurement Inquiries",
       count: ongoingInquiriesCount,
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
           <rect width="20" height="16" x="2" y="4" rx="2"></rect>
           <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
         </svg>
       ),
       color: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/15 dark:text-pink-400",
-      onClick: () => navigate("/inquiry"),
+      onClick: () => navigate("/inquiry", { state: { filterStatus: "PROCUREMENT" } }),
+      status: "PROCUREMENT",
     },
     {
       title: "Purchase Inquiries",
       count: completedInquiriesCount,
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
           <polyline points="22 4 12 14.01 9 11.01"></polyline>
         </svg>
       ),
       color: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
-      onClick: () => navigate("/inquiry"),
+      onClick: () => navigate("/inquiry", { state: { filterStatus: "PURCHASE" } }),
+      status: "PURCHASE",
     },
     {
       title: "Urgent Inquiries",
       count: activeUserCount,
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
           <circle cx="9" cy="7" r="4"></circle>
           <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -184,42 +194,8 @@ export default function EcommerceMetrics() {
         </svg>
       ),
       color: "bg-rose-500/10 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400",
-      onClick: () => navigate("/inquiry"),
-    },
-    {
-      title: "Tender Inquiries",
-      count: rejectedInquiriesCount,
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-          <circle cx="12" cy="12" r="10"></circle>
-          <path d="m15 9-6 6"></path>
-          <path d="m9 9 6 6"></path>
-        </svg>
-      ),
-      color: "bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/15 dark:text-yellow-400",
-      onClick: () => navigate("/inquiry"),
-    },
-    {
-      title: "Rejected Inquiries",
-      count: rejectedInquiriesCount,
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-        </svg>
-      ),
-      color: "bg-blue-500/10 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400",
-      onClick: () => navigate("/inquiry"),
-    },
-    {
-      title: "Assign Inquiries",
-      count: assignInquary,
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-        </svg>
-      ),
-      color: "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/15 dark:text-cyan-400",
-      onClick: () => navigate("/inquiry"),
+      onClick: () => navigate("/inquiry", { state: { filterStatus: "URGENT" } }),
+      status: "URGENT",
     },
   ];
 
@@ -269,49 +245,63 @@ export default function EcommerceMetrics() {
     const allDueDates = [...followUps.map((item: FollowUpItem) => new Date(item.dueDate).toLocaleDateString("en-CA").split("T")[0]), ...Object.keys(calendarEvents)];
 
     return (
-      <div className="rounded-2xl text-center bg-white p-4 pb-0 dark:border-gray-800 dark:bg-black">
-        <div className="justify-between flex">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Calendar</h2>
-          <p className=" font-medium text-gray-800 dark:text-white">{selectedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
+      <div className="flex flex-col md:flex-row gap-4 w-full">
+        {/* Calendar */}
+        <div className="rounded-2xl text-center bg-white p-4 dark:border-gray-800 dark:bg-black w-full md:w-[25%]">
+          <div className="justify-between flex">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Calendar</h2>
+            <p className="font-medium text-gray-800 dark:text-white">
+              {selectedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+            </p>
+          </div>
+
+          <DatePicker
+            inline
+            selected={selectedDate}
+            onChange={handleDateClick}
+            calendarClassName="dark:!bg-black"
+            dayClassName={(date) => {
+              const dateString = date.toLocaleDateString("en-CA").split("T")[0];
+              const isDueDate = allDueDates.includes(dateString);
+              const isSelected = date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth();
+              if (isDueDate && isSelected) {
+                return "bg-blue-600 text-white dark:!text-white";
+              } else if (isDueDate) {
+                return "bg-green-200 rounded dark:bg-green-900 dark:!text-white";
+              } else if (isSelected) {
+                return "bg-gray-800 text-white dark:bg-white dark:!text-white";
+              } else {
+                return "bg-gray-300 rounded dark:bg-gray-800 dark:!text-white";
+              }
+            }}
+          />
         </div>
 
-        <DatePicker
-          inline
-          selected={selectedDate}
-          onChange={handleDateClick}
-          calendarClassName="w-60.5 dark:!bg-black"
-          dayClassName={(date) => {
-            const dateString = date.toLocaleDateString("en-CA").split("T")[0];
-            const isDueDate = allDueDates.includes(dateString);
-            const isSelected = date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth();
-            if (isDueDate && isSelected) {
-              return "bg-blue-600 text-white dark:!text-white";
-            } else if (isDueDate) {
-              return "bg-green-200 rounded dark:bg-green-900 dark:!text-white";
-            } else if (isSelected) {
-              return "bg-gray-800 text-white dark:bg-white dark:!text-white";
-            } else {
-              return "bg-gray-300 rounded dark:bg-gray-800 dark:!text-white";
-            }
-          }}
-        />
-
         {/* Events Section */}
-        <div className="px-2 dark:bg-black rounded-lg">
-          <h3 className="font-semibold mb-2 dark:text-white">Events on {selectedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}:</h3>
+        <div className="w-full md:w-2/3 px-2 dark:bg-black rounded-lg bg-white p-4 dark:border-gray-800">
+          <h3 className="font-semibold mb-4 dark:text-white">
+            Events on {selectedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}:
+          </h3>
           {selectedDateFollowUps.length > 0 ? (
-            <div className="max-h-60 overflow-y-auto">
+            <div className="max-h-[400px] overflow-y-auto">
               {selectedDateFollowUps.map((item, index) => (
                 <div
                   key={index}
-                  className="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer mb-2"
+                  className="p-3 bg-white dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer mb-3"
                   onClick={() => {
                     setSelectedFollowUp(item);
                     setIsModalOpen(true);
-                  }}>
+                  }}
+                >
                   <div className="flex justify-between items-start">
                     <h4 className="font-medium text-gray-800 dark:text-white">{item.generalFollowUpName || "Untitled Follow-up"}</h4>
-                    <span className={`text-xs px-2 py-1 rounded ${item.status === "COMPLETED" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"}`}>{item.status || "PENDING"}</span>
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        item.status === "COMPLETED" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                      }`}
+                    >
+                      {item.status || "PENDING"}
+                    </span>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 truncate">{truncateText(item.description, 30) || "No description"}</p>
                   {item.followUpPerson && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Assigned to: {item.followUpPerson.name}</p>}
@@ -319,7 +309,7 @@ export default function EcommerceMetrics() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-center pb-4">No events scheduled for this date.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center py-4">No events scheduled for this date.</p>
           )}
         </div>
       </div>
@@ -413,7 +403,7 @@ export default function EcommerceMetrics() {
   };
 
   const handleFollowUpPersonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedUserId = parseInt(e.target.value);
+    const selectedUserId = Number.parseInt(e.target.value);
     const selectedUser = users.find((user) => user.value === selectedUserId);
 
     if (selectedReminder && selectedUser) {
@@ -482,26 +472,30 @@ export default function EcommerceMetrics() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Top Section: 3 Cards + Calendar */}
-      <div className="flex flex-col md:flex-row gap-4 w-full">
-        {/* 3 Cards */}
-        <div className="w-full md:w-3/4 grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {metricCards.map((card, i) => (
-            <div key={i} onClick={() => navigate("/inquiry")} className={`group cursor-pointer h-[110px] rounded-xl border border-gray-300 bg-white p-4 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-gray-700 dark:bg-gray-800`}>
-              <div className="flex items-center justify-between">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-full ${card.color} transition-all duration-300 group-hover:scale-110`}>{card.icon}</div>
-                <div className="text-right">
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.title}</span>
-                  <h4 className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{card.count}</h4>
-                </div>
+      {/* Top Section: 4 Cards */}
+      <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {metricCards.map((card, i) => (
+          <div
+            key={i}
+            onClick={card.onClick}
+            className={`group cursor-pointer h-[90px] rounded-xl border border-gray-300 bg-white p-3 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-gray-700 dark:bg-gray-800`}
+          >
+            <div className="flex items-center justify-between">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-full ${card.color} transition-all duration-300 group-hover:scale-110`}>
+                {card.icon}
+              </div>
+              <div className="text-right">
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{card.title}</span>
+                <h4 className="mt-1 text-xl font-bold tracking-tight text-gray-900 dark:text-white">{card.count}</h4>
               </div>
             </div>
-          ))}
-        </div>
-        {/* Calendar */}
-        <div className="w-full shadow-xl md:w-1/4 hover:scale-105 rounded-2xl border border-gray-500 transform duration-300">
-          <CalendarWidget />
-        </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Calendar and Events Section */}
+      <div className="w-full shadow-xl rounded-lg border border-gray-500 transform duration-300">
+        <CalendarWidget />
       </div>
 
       {/* Table Section */}
@@ -524,27 +518,35 @@ export default function EcommerceMetrics() {
                 <td className="px-4 py-2">{item.generalFollowUpName || "N/A"}</td>
                 <td className="px-4 py-2">{truncateText(item.description, 40)}</td>
                 {/* <td className="px-4 py-2">{item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "Not set"}</td> */}
-                <td className="px-4 py-2">{item.dueDate ? new Date(item.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Not set"}</td>
+                <td className="px-4 py-2">
+                  {item.dueDate
+                    ? new Date(item.dueDate).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "Not set"}
+                </td>
                 <td className="px-4 py-2 text-blue-600 dark:text-blue-400 flex justify-center gap-2">
                   <div
-                    className="cursor-pointer hover:scale-110 hover:text-gray-700"
+                    className="cursor-pointer p-2 bg-green-500 text-white rounded hover:bg-green-600"
                     onClick={() => {
                       setSelectedReminder(item);
                       setDoneDescription(item.description || ""); // Add this line
                       setDoneModalOpen(true);
                     }}>
-                    Check
+                    <IoCheckmarkSharp />
                   </div>
-                  <div className="cursor-pointer hover:scale-110 hover:text-gray-700" onClick={() => handleEditClick(item)}>
-                    Edit
+                  <div className="cursor-pointer p-2 bg-blue-500 text-white rounded hover:bg-blue-600" onClick={() => handleEditClick(item)}>
+                    <FaPenAlt />
                   </div>
                   <div
-                    className="cursor-pointer hover:scale-110 hover:text-gray-700"
+                    className="cursor-pointer p-2 bg-gray-500 text-white rounded hover:bg-gray-600"
                     onClick={() => {
                       setSelectedFollowUp(item);
                       setIsModalOpen(true);
                     }}>
-                    View
+                    <FaEye />
                   </div>
                 </td>
               </tr>
@@ -558,7 +560,7 @@ export default function EcommerceMetrics() {
             <MdOutlineNavigateNext className="text-xl rotate-180" /> Prev
           </button>
           {Array.from({ length: totalPages }, (_, i) => (
-            <button key={i + 1} onClick={() => handlePageChange(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-gray-800 text-white dark:bg-white dark:text-black" : ""}`}>
+            <button key={i + 1} onClick={() => handlePageChange(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-500 text-white dark:bg-white dark:text-black" : ""}`}>
               {i + 1}
             </button>
           ))}
@@ -593,7 +595,13 @@ export default function EcommerceMetrics() {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-300">Due Date:</p>
                 {/* <p className="text-base font-medium text-gray-800 dark:text-white">{new Date(selectedFollowUp.dueDate).toLocaleString()}</p> */}
-                <p className="text-base font-medium text-gray-800 dark:text-white">{new Date(selectedFollowUp.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
+                <p className="text-base font-medium text-gray-800 dark:text-white">
+                  {new Date(selectedFollowUp.dueDate).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </p>
               </div>
 
               <div>

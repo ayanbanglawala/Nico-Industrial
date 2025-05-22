@@ -34,22 +34,22 @@ export default function App() {
   const token = localStorage.getItem("token");
   return (
     <>
-    <ToastContainer autoClose={3000} position="top-right" limit={1} hideProgressBar theme="colored" closeOnClick pauseOnHover draggable pauseOnFocusLoss draggablePercent={60} />
+      <ToastContainer autoClose={3000} position="top-right" limit={1} hideProgressBar theme="colored" closeOnClick pauseOnHover draggable pauseOnFocusLoss draggablePercent={60} />
       <Router>
         <ScrollToTop />
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={!token ? <Navigate to="/signin" /> :<Home />} />
-            <Route index path="/inquiry" element={!token ? <Navigate to="/signin" /> :<Inquiry />} />
-            <Route index path="/product" element={!token ? <Navigate to="/signin" /> :<Product />} />
-            <Route index path="/consumer" element={!token ? <Navigate to="/signin" /> :<Consumer />} />
-            <Route index path="/consultant" element={!token ? <Navigate to="/signin" /> :<Consultant />} />
-            <Route index path="/general-follow-up" element={!token ? <Navigate to="/signin" /> :<GeneralFollowUp />} />
-            <Route index path="/brand" element={!token ? <Navigate to="/signin" /> :<Brand />} />
-            <Route index path="/role" element={!token ? <Navigate to="/signin" /> :<Role />} />
-            <Route index path="/users" element={!token ? <Navigate to="/signin" /> :<Users />} />
-            <Route index path="/analytics" element={!token ? <Navigate to="/signin" /> :<Analytics />} />
+            <Route index path="/" element={!token ? <Navigate to="/signin" /> : <Home />} />
+            <Route index path="/inquiry" element={!token ? <Navigate to="/signin" /> : <Inquiry />} />
+            <Route index path="/product" element={!token ? <Navigate to="/signin" /> : <Product />} />
+            <Route index path="/consumer" element={!token ? <Navigate to="/signin" /> : <Consumer />} />
+            <Route index path="/consultant" element={!token ? <Navigate to="/signin" /> : <Consultant />} />
+            <Route index path="/general-follow-up" element={!token ? <Navigate to="/signin" /> : <GeneralFollowUp />} />
+            <Route index path="/brand" element={!token ? <Navigate to="/signin" /> : <Brand />} />
+            <Route index path="/role" element={!token ? <Navigate to="/signin" /> : <Role />} />
+            <Route index path="/users" element={!token ? <Navigate to="/signin" /> : <Users />} />
+            <Route index path="/analytics" element={!token ? <Navigate to="/signin" /> : <Analytics />} />
             <Route path="/inquiry/:inquiryId" element={<InquiryView />} />
 
             {/* Others Page */}

@@ -103,6 +103,8 @@ const Inquiry: React.FC = () => {
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("");
   const [selectedQuotationFilter, setSelectedQuotationFilter] = useState<string | number>("");
   const [selectedFollowUpUserFilter, setSelectedFollowUpUserFilter] = useState<string | number>("");
+  const [selectedConsumerFilter, setSelectedConsumerFilter] = useState<string | number>("");
+  const [selectedConsultantFilter, setSelectedConsultantFilter] = useState<string | number>("");
   const [totalData, setTotalData] = useState<number>(0);
   const [followUpUserData, setFollowUpUserData] = useState<Array<{ id: string | number; active: boolean }>>([]);
   const [followUpQuotationData, setFollowUpQuotationData] = useState<Array<{ id: string | number; active: boolean }>>([]);
@@ -644,17 +646,31 @@ const Inquiry: React.FC = () => {
 
   const handleQuotationFilterChange = (value: string | number) => {
     setSelectedQuotationFilter(value);
+    setCurrentPage(1); // Reset to first page when filter changes
     fetchTableData(1, search);
   };
 
   const handleFollowUpUserFilterChange = (value: string | number) => {
     setSelectedFollowUpUserFilter(value);
+    setCurrentPage(1);
+    fetchTableData(1, search);
+  };
+
+  const handleConsumerFilterChange = (value: string | number) => {
+    setSelectedConsumerFilter(value);
+    setCurrentPage(1);
+    fetchTableData(1, search);
+  };
+
+  const handleConsultantFilterChange = (value: string | number) => {
+    setSelectedConsultantFilter(value);
+    setCurrentPage(1);
     fetchTableData(1, search);
   };
 
   useEffect(() => {
     fetchTableData(1, search);
-  }, [selectedStatusFilter, selectedQuotationFilter, selectedFollowUpUserFilter, search]);
+  }, [selectedStatusFilter, selectedQuotationFilter, selectedFollowUpUserFilter, selectedConsumerFilter, selectedConsultantFilter, search]);
 
   const fetchTableData = async (page: number, searchQuery = "", winloss = "", istotal = false) => {
     try {
@@ -665,8 +681,10 @@ const Inquiry: React.FC = () => {
           search: searchQuery,
           userId: userId,
           "inquiry-status": selectedStatusFilter || status || "",
-          QuotationPerson: selectedQuotationFilter || "",
+          quotationPerson: selectedQuotationFilter || "", // Note lowercase 'q' if backend expects it
           followUpPerson: selectedFollowUpUserFilter || "",
+          consumerId: selectedConsumerFilter || "",
+          consultantId: selectedConsultantFilter || "",
           winorloss: winloss,
           isfortotal: istotal,
         },
@@ -730,6 +748,39 @@ const Inquiry: React.FC = () => {
       console.error("Error fetching dropdown options:", error);
     }
   };
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const [usersResponse, consumersResponse, consultantsResponse] = await Promise.all([
+          axios.get(`https://nicoindustrial.com/api/user/list`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`https://nicoindustrial.com/api/consumer/all`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`https://nicoindustrial.com/api/consultant/all`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        // Format user options for Select component
+        const formattedUserOptions = usersResponse.data.data.list.map((user: User) => ({
+          value: user.id,
+          label: user.name,
+        }));
+        setUserOptions(formattedUserOptions);
+
+        // Store raw consumer and consultant data
+        setConsumerOptions(consumersResponse.data.data.consumers);
+        setConsultantOptions(consultantsResponse.data.data.Consultants);
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+      }
+    };
+
+    fetchInitialData();
+  }, [token]);
 
   const handleModalClose = () => {
     setShowCreateModal(false);
@@ -973,14 +1024,21 @@ const Inquiry: React.FC = () => {
   const userDropdownRef = useRef<HTMLDivElement>(null);
 
   // Initial load of data
+  // useEffect(() => {
+  //   if (showCreateModal === true) {
+  //     fetchConsumers();
+  //     fetchProducts();
+  //     fetchConsultants();
+  //     fetchUsers();
+  //   }
+  // }, [showCreateModal]);
+
   useEffect(() => {
-    if (showCreateModal === true) {
-      fetchConsumers();
-      fetchProducts();
-      fetchConsultants();
-      fetchUsers();
-    }
-  }, [showCreateModal]);
+    fetchConsumers();
+    fetchConsultants();
+    fetchUsers(); // Also fetch users since they're used in filters
+    fetchBrands(); // And brands if needed
+  }, []);
 
   useEffect(() => {
     fetchUsers();
@@ -1513,12 +1571,13 @@ const Inquiry: React.FC = () => {
         </div>
         {role === "Admin" ? (
           <>
+            {/* Filter by Quotation */}
             <div className="flex flex-col w-full sm:w-1/4 dark:text-black">
               <label className="mb-1 font-medium dark:text-white">Filter by Quotation</label>
               <Select
                 name="quotationFilter"
                 value={userOptions.find((option) => option.value === selectedQuotationFilter)}
-                onChange={(selectedOption) => handleQuotationFilterChange(selectedOption ? selectedOption.value : "")}
+                onChange={(selectedOption) => handleQuotationFilterChange(selectedOption?.value || "")}
                 options={[{ value: "", label: "All" }, ...userOptions]}
                 placeholder="Search and Select Quotation"
                 isSearchable
@@ -1527,14 +1586,52 @@ const Inquiry: React.FC = () => {
                 classNamePrefix="select"
               />
             </div>
+
+            {/* Filter by Follow Up */}
             <div className="flex flex-col w-full sm:w-[25.1%]">
               <label className="mb-1 font-medium">Filter by Follow Up</label>
               <Select
                 name="followUpUserFilter"
                 value={userOptions.find((option) => option.value === selectedFollowUpUserFilter)}
-                onChange={(selectedOption) => handleFollowUpUserFilterChange(selectedOption ? selectedOption.value : "")}
+                onChange={(selectedOption) => handleFollowUpUserFilterChange(selectedOption?.value || "")}
                 options={[{ value: "", label: "All" }, ...userOptions]}
                 placeholder="Search and Select Follow-Up User"
+                isSearchable
+                isClearable
+                className="basic-select border border-black rounded"
+                classNamePrefix="select"
+              />
+            </div>
+
+            {/* Filter by Consumer */}
+            <div className="flex flex-col w-full sm:w-1/4 dark:text-black">
+              <label className="mb-1 font-medium dark:text-white">Filter by Consumer</label>
+              <Select
+                name="consumerFilter"
+                value={consumerOptions.find((consumer) => consumer.consumerId === selectedConsumerFilter)}
+                onChange={(selectedOption) => handleConsumerFilterChange(selectedOption?.consumerId || "")}
+                getOptionValue={(option) => option.consumerId.toString()}
+                getOptionLabel={(option) => option.consumerName}
+                options={[{ consumerId: "", consumerName: "All" }, ...consumerOptions]}
+                placeholder="Search and Select Consumer"
+                isSearchable
+                isClearable
+                className="basic-select border border-black rounded"
+                classNamePrefix="select"
+              />
+            </div>
+
+            {/* Filter by Consultant */}
+            <div className="flex flex-col w-full sm:w-1/4">
+              <label className="mb-1 font-medium dark:text-white">Filter by Consultant</label>
+              <Select
+                name="consultantFilter"
+                value={consultantOptions.find((consultant) => consultant.consultantId === selectedConsultantFilter)}
+                onChange={(selectedOption) => handleConsultantFilterChange(selectedOption?.consultantId || "")}
+                getOptionValue={(option) => option.consultantId.toString()}
+                getOptionLabel={(option) => option.consultantName}
+                options={[{ consultantId: "", consultantName: "All" }, ...consultantOptions]}
+                placeholder="Search and Select Consultant"
                 isSearchable
                 isClearable
                 className="basic-select border border-black rounded"
@@ -1621,7 +1718,9 @@ const Inquiry: React.FC = () => {
               tableData.map((inquiry, index) => (
                 <tr key={inquiry.inquiryId} className="hover:bg-gray-200 bg-white text-center dark:bg-black dark:hover:bg-gray-800 transform duration-200">
                   <td className="px-4 py-2 text-center">{(currentPage - 1) * pageSize + (index + 1)}</td>
-                  <td className="px-4 py-2">{inquiry.projectName.slice(0,25)}...</td>
+                  <td className="px-4 py-2" title={inquiry.projectName}>
+                    {inquiry.projectName.length > 25 ? `${inquiry.projectName.slice(0, 25)}...` : inquiry.projectName}
+                  </td>
                   <td className="px-4 py-2">{inquiry.consumer?.consumerName || "N/A"}</td>
                   {/* <td className="px-4 py-2">{inquiry.products?.productName || "N/A"}</td> */}
                   <td className="px-4 py-2">{inquiry.products && inquiry.products.length > 0 ? inquiry.products.map((p) => p.productName).join(", ") : "N/A"}</td>
@@ -1645,16 +1744,22 @@ const Inquiry: React.FC = () => {
                         </button>
                       </div>
                     ) : inquiry.isWin ? (
-                      <button onClick={() => handleButtonClick(true, inquiry.inquiryId)} className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">
+                      <>
+                        <p className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">You Win</p>
+                        {/* <button onClick={() => handleButtonClick(true, inquiry.inquiryId)} className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">
                         <FontAwesomeIcon icon={faThumbsUp} />
-                      </button>
+                      </button> */}
+                      </>
                     ) : (
-                      <button onClick={() => handleButtonClick(false, inquiry.inquiryId)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-                        <FontAwesomeIcon icon={faThumbsDown} />
-                      </button>
+                      <>
+                        <p className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">You Loss</p>
+                        {/* <button onClick={() => handleButtonClick(false, inquiry.inquiryId)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                          <FontAwesomeIcon icon={faThumbsDown} />
+                        </button> */}
+                      </>
                     )}
                   </td>
-                  <td className="px-4 py-2 text-center space-x-1">
+                  <td className="px-2 py-2 text-center space-x-1">
                     <button onClick={() => handleView(inquiry)} className="p-2 bg-gray-500 text-white rounded hover:bg-gray-600">
                       <FaEye />
                     </button>
