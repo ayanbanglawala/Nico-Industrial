@@ -1,130 +1,139 @@
-"use client";
+"use client"
 
-import type React from "react";
-import { useState, useEffect, useRef } from "react";
-import { FaFileInvoice, FaPlus, FaUserCheck } from "react-icons/fa";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faThumbsUp, faThumbsDown } from "@fortawesome/free-solid-svg-icons";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useNavigate, useLocation } from "react-router-dom";
-import Select from "react-select";
-import { MdOutlineNavigateNext } from "react-icons/md";
-import { FaEye } from "react-icons/fa";
-import { FaPenAlt } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
+import type React from "react"
+import { useState, useEffect, useRef } from "react"
+import { FaFileInvoice, FaPlus, FaUserCheck } from "react-icons/fa"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faThumbsUp, faThumbsDown } from "@fortawesome/free-solid-svg-icons"
+import axios from "axios"
+import { ToastContainer, toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+import { useNavigate, useLocation } from "react-router-dom"
+import Select from "react-select"
+import { MdOutlineNavigateNext } from "react-icons/md"
+import { FaEye } from "react-icons/fa"
+import { FaPenAlt } from "react-icons/fa"
+import { MdDelete } from "react-icons/md"
 
 // Define TypeScript interfaces
 interface Consumer {
-  consumerId: string | number;
-  consumerName: string;
-  emailId?: string;
-  address?: string;
-  contact?: string;
+  consumerId: string | number
+  consumerName: string
+  emailId?: string
+  address?: string
+  contact?: string
 }
 
 interface Brand {
-  brandId: string | number;
-  brandName: string;
+  brandId: string | number
+  brandName: string
 }
 
 interface Product {
-  productId: string | number;
-  productName: string;
-  price?: number;
-  brand?: Brand;
+  productId: string | number
+  productName: string
+  price?: number
+  brand?: Brand
 }
 
 interface Consultant {
-  consultantId: string | number;
-  consultantName: string;
-  contactPerson?: string;
-  contactNumber?: string;
+  consultantId: string | number
+  consultantName: string
+  contactPerson?: string
+  contactNumber?: string
 }
 
 interface User {
-  id: string | number;
-  name: string;
-  email?: string;
-  active?: boolean;
-  designation?: string;
-  mobileNo?: string;
+  id: string | number
+  name: string
+  email?: string
+  active?: boolean
+  designation?: string
+  mobileNo?: string
 }
 
 interface Inquiry {
-  inquiryId: string | number;
-  projectName: string;
-  inquiryStatus: string;
-  description?: string;
-  consumer?: Consumer;
-  products?: Product;
-  brand?: Brand;
-  consultant?: Consultant;
-  followUpUser?: User;
-  followUpQuotation?: User;
-  remark?: string;
-  createdBy?: User;
-  createdAt?: string;
-  updatedAt?: string;
-  updatedBy?: User;
-  isWin?: boolean | null;
-  estimatePrice?: number; // Added estimatePrice field
+  inquiryId: string | number
+  projectName: string
+  inquiryStatus: string
+  description?: string
+  consumer?: Consumer
+  products?: Product
+  brand?: Brand
+  consultant?: Consultant
+  followUpUser?: User
+  followUpQuotation?: User
+  remark?: string
+  createdBy?: User
+  createdAt?: string
+  updatedAt?: string
+  updatedBy?: User
+  isWin?: boolean | null
+  estimatePrice?: number // Added estimatePrice field
 }
 
 interface FormData {
-  projectName: string;
-  inquiryStatus: string;
-  consumerId: string | number;
-  brandIds?: (string | number)[]; // Changed from brandId to brandIds array
-  productIds: (string | number)[]; // Changed from productId to productIds array
-  consultantId: string | number;
-  remark: string;
-  createdBy?: string | number;
-  followUpUser: string | number;
-  followUpQuotation: string | number;
-  description: string;
-  estimatePrice?: number; // Added estimatePrice field
+  projectName: string
+  inquiryStatus: string
+  consumerId: string | number
+  brandIds?: (string | number)[] // Changed from brandId to brandIds array
+  productIds: (string | number)[] // Changed from productId to productIds array
+  consultantId: string | number
+  remark: string
+  createdBy?: string | number
+  followUpUser: string | number
+  followUpQuotation: string | number
+  description: string
+  estimatePrice?: number // Added estimatePrice field
 }
 
 interface SelectOption {
-  value: string | number;
-  label: string;
+  value: string | number
+  label: string
 }
 
 interface LocationState {
-  status?: string;
+  status?: string
 }
 
 const Inquiry: React.FC = () => {
-  const token = localStorage.getItem("token");
-  const userId = Number.parseInt(localStorage.getItem("userId") || "0", 10);
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("");
-  const [selectedQuotationFilter, setSelectedQuotationFilter] = useState<string | number>("");
-  const [selectedFollowUpUserFilter, setSelectedFollowUpUserFilter] = useState<string | number>("");
-  const [selectedConsumerFilter, setSelectedConsumerFilter] = useState<string | number>("");
-  const [selectedConsultantFilter, setSelectedConsultantFilter] = useState<string | number>("");
-  const [totalData, setTotalData] = useState<number>(0);
-  const [followUpUserData, setFollowUpUserData] = useState<Array<{ id: string | number; active: boolean }>>([]);
-  const [followUpQuotationData, setFollowUpQuotationData] = useState<Array<{ id: string | number; active: boolean }>>([]);
+  const token = localStorage.getItem("token")
+  const userId = Number.parseInt(localStorage.getItem("userId") || "0", 10)
+  const [pageSize, setPageSize] = useState<number>(10)
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("")
+  const [selectedQuotationFilter, setSelectedQuotationFilter] = useState<string | number>("")
+  const [selectedFollowUpUserFilter, setSelectedFollowUpUserFilter] = useState<string | number>("")
+  const [selectedConsumerFilter, setSelectedConsumerFilter] = useState<string | number>("")
+  const [selectedConsultantFilter, setSelectedConsultantFilter] = useState<string | number>("")
+  const [totalData, setTotalData] = useState<number>(0)
+  const [followUpUserData, setFollowUpUserData] = useState<Array<{ id: string | number; active: boolean }>>([])
+  const [followUpQuotationData, setFollowUpQuotationData] = useState<Array<{ id: string | number; active: boolean }>>(
+    [],
+  )
 
-  const location = useLocation();
-  const { status } = (location.state as LocationState) || {};
+  const location = useLocation()
+  const { status } = (location.state as LocationState) || {}
 
-  const [showWinLossModal, setShowWinLossModal] = useState<boolean>(false);
-  const [modalDescription, setModalDescription] = useState<string>("");
-  const [isWin, setIsWin] = useState<boolean | null>(null);
-  const [currentInquiryId, setCurrentInquiryId] = useState<string | number | null>(null);
+  useEffect(() => {
+    if (status) {
+      setSelectedStatusFilter(status)
+      fetchTableData(1, search)
+    }
+  }, [status])
+
+  const [showWinLossModal, setShowWinLossModal] = useState<boolean>(false)
+  const [modalDescription, setModalDescription] = useState<string>("")
+  const [isWin, setIsWin] = useState<boolean | null>(null)
+  const [currentInquiryId, setCurrentInquiryId] = useState<string | number | null>(null)
 
   const handleButtonClick = (winStatus: boolean, inquiryId: string | number) => {
-    setIsWin(winStatus);
-    setCurrentInquiryId(inquiryId);
-    setShowWinLossModal(true);
-  };
+    setIsWin(winStatus)
+    setCurrentInquiryId(inquiryId)
+    setShowWinLossModal(true)
+  }
 
   const handleModalSubmit = () => {
-    if (!currentInquiryId) return;
+    if (!currentInquiryId) return
 
     fetch(`https://nicoindustrial.com/api/inquiry/winorloss/${currentInquiryId}?userId=${userId}&isWin=${isWin}`, {
       method: "PUT",
@@ -136,23 +145,23 @@ const Inquiry: React.FC = () => {
     })
       .then((response) => {
         if (response.ok) {
-          toast.success("Status updated successfully!");
-          fetchTableData(currentPage, search);
+          toast.success("Status updated successfully!")
+          fetchTableData(currentPage, search)
         } else {
-          toast.error("Error updating status.");
+          toast.error("Error updating status.")
         }
       })
       .catch((error) => {
-        toast.error("Error: " + error.message);
+        toast.error("Error: " + error.message)
       })
       .finally(() => {
-        setShowWinLossModal(false);
-        setModalDescription("");
-      });
-  };
+        setShowWinLossModal(false)
+        setModalDescription("")
+      })
+  }
 
-  const [selectedBrands, setSelectedBrands] = useState<SelectOption[]>([]);
-  const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<SelectOption[]>([])
+  const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>([])
 
   const [formData, setFormData] = useState<FormData>({
     projectName: "",
@@ -167,27 +176,27 @@ const Inquiry: React.FC = () => {
     description: "",
     brandIds: [], // Changed to array
     estimatePrice: 0, // Added estimatePrice with default value
-  });
+  })
 
-  const [formDataProduct, setformDataProduct] = useState<any>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [tableData, setTableData] = useState<Inquiry[]>([]);
-  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
-  const [editMode, setEditMode] = useState<boolean>(false);
-  const [selectedInquiryId, setSelectedInquiryId] = useState<string | number | null>(null);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
-  const [search, setSearch] = useState<string>("");
+  const [formDataProduct, setformDataProduct] = useState<any>({})
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [tableData, setTableData] = useState<Inquiry[]>([])
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false)
+  const [editMode, setEditMode] = useState<boolean>(false)
+  const [selectedInquiryId, setSelectedInquiryId] = useState<string | number | null>(null)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [totalPages, setTotalPages] = useState<number>(1)
+  const [search, setSearch] = useState<string>("")
 
   // For Product Modal
-  const [showProductModal, setShowProductModal] = useState<boolean>(false);
-  const [showViewModal, setShowViewModal] = useState<boolean>(false);
-  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+  const [showProductModal, setShowProductModal] = useState<boolean>(false)
+  const [showViewModal, setShowViewModal] = useState<boolean>(false)
+  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
 
-  const navigate = useNavigate();
-  const userRole = localStorage.getItem("userRole");
-  const [quotationDescription, setQuotationDescription] = useState<string>("");
-  const [followUpDescription, setFollowUpDescription] = useState<string>("");
+  const navigate = useNavigate()
+  const userRole = localStorage.getItem("userRole")
+  const [quotationDescription, setQuotationDescription] = useState<string>("")
+  const [followUpDescription, setFollowUpDescription] = useState<string>("")
 
   // Function to handle marking quotation as done
   const handleQuotationDone = async (inquiryId: string | number, followUpUserId: string | number) => {
@@ -204,8 +213,8 @@ const Inquiry: React.FC = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
+        },
+      )
 
       if (response.status === 200) {
         toast.success(response.data.message || "Quotation successful", {
@@ -214,36 +223,36 @@ const Inquiry: React.FC = () => {
           hideProgressBar: false,
           className: "toast-success",
           style: { backgroundColor: "green" },
-        });
+        })
 
-        setQuotationDescription("");
-        setshowStatusQuartationChangeModal(false);
-        fetchTableData(currentPage);
+        setQuotationDescription("")
+        setshowStatusQuartationChangeModal(false)
+        fetchTableData(currentPage)
       } else {
         toast.error("Error in response, status code: " + response.status, {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
           style: { backgroundColor: "red" },
-        });
+        })
       }
     } catch (error) {
-      console.error("Error marking quotation as done:", error);
+      console.error("Error marking quotation as done:", error)
       toast.error("Error failed", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
         style: { backgroundColor: "red" },
-      });
+      })
     }
-  };
+  }
 
   // Check if the token exists in localStorage
   useEffect(() => {
     if (localStorage.getItem("token") === null) {
-      navigate("/");
+      navigate("/")
     }
-  }, [navigate]);
+  }, [navigate])
 
   // Function to handle reassigning follow-up
   const handleFollowUpReassign = async (inquiryId: string | number, followUpQuotationId: string | number) => {
@@ -259,8 +268,8 @@ const Inquiry: React.FC = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
+        },
+      )
 
       toast.success(response.data.message || "Follow-up reassigned successfully", {
         position: "top-right",
@@ -268,36 +277,40 @@ const Inquiry: React.FC = () => {
         hideProgressBar: false,
         className: "toast-success",
         style: { backgroundColor: "green" },
-      });
+      })
 
-      setshowStatusQuartationChangeModal(false);
-      fetchTableData(currentPage);
+      setshowStatusQuartationChangeModal(false)
+      fetchTableData(currentPage)
     } catch (error) {
-      console.error("Error reassigning follow-up:", error);
+      console.error("Error reassigning follow-up:", error)
       toast.error("Error reassigning follow-up", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
         style: { backgroundColor: "red" },
-      });
+      })
     }
-  };
+  }
 
   const handleDetailsClick = (id: string | number) => {
-    navigate(`/inquiry/${id}`);
-  };
+    navigate(`/inquiry/${id}`)
+  }
 
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const debounceSearch = (fetchFunction: (inputValue: string) => void, inputValue: string, setIsLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const debounceSearch = (
+    fetchFunction: (inputValue: string) => void,
+    inputValue: string,
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  ) => {
     if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+      clearTimeout(timeoutRef.current)
     }
 
     timeoutRef.current = setTimeout(() => {
-      fetchFunction(inputValue);
-      setIsLoading(false);
-    }, 500);
-  };
+      fetchFunction(inputValue)
+      setIsLoading(false)
+    }, 500)
+  }
 
   const handleSubmitProduct = async () => {
     try {
@@ -306,73 +319,74 @@ const Inquiry: React.FC = () => {
           Authorization: `Bearer ${token}`,
           userId: userId.toString(),
         },
-      });
+      })
 
-      const successMessage = response.data.message || "Product created successfully!";
-      setSuccessMessage(successMessage);
+      const successMessage = response.data.message || "Product created successfully!"
+      setSuccessMessage(successMessage)
 
-      setTimeout(() => setSuccessMessage(""), 3000);
-      fetchDropdownOptions();
-      setShowProductModal(false);
-      setformDataProduct({});
+      setTimeout(() => setSuccessMessage(""), 3000)
+      fetchDropdownOptions()
+      setShowProductModal(false)
+      setformDataProduct({})
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Error submitting product. Please try again.";
-      setErrorMessage(errorMessage);
+      const errorMessage = error.response?.data?.message || "Error submitting product. Please try again."
+      setErrorMessage(errorMessage)
 
-      setTimeout(() => setErrorMessage(""), 3000);
+      setTimeout(() => setErrorMessage(""), 3000)
     }
-  };
+  }
 
   // Consumer add more
-  const [successMessage, setSuccessMessage] = useState<string>("");
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [editingId, setEditingId] = useState<string | number | null>(null);
-  const [showModalConsumer, setShowModalConsumer] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string>("")
+  const [errorMessage, setErrorMessage] = useState<string>("")
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+  const [editingId, setEditingId] = useState<string | number | null>(null)
+  const [showModalConsumer, setShowModalConsumer] = useState<boolean>(false)
 
   const [formDataConsumer, setFormDataConsumer] = useState<{
-    consumerName: string;
-    emailId: string;
-    address: string;
-    contact: string;
+    consumerName: string
+    emailId: string
+    address: string
+    contact: string
   }>({
     consumerName: "",
     emailId: "",
     address: "",
     contact: "",
-  });
+  })
 
   const handleConsumerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormDataConsumer({ ...formDataConsumer, [name]: value });
-  };
+    const { name, value } = e.target
+    setFormDataConsumer({ ...formDataConsumer, [name]: value })
+  }
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+    const newErrors: Record<string, string> = {}
 
-    if (!formData.projectName.trim()) newErrors.projectName = "Project Name is required.";
-    if (!formData.inquiryStatus) newErrors.inquiryStatus = "Inquiry Status is required.";
-    if (!formData.description.trim()) newErrors.description = "Description is required.";
-    if (!formData.consumerId) newErrors.consumerId = "Consumer is required.";
-    if (!formData.brandIds || formData.brandIds.length === 0) newErrors.brandIds = "At least one Brand is required.";
-    if (!formData.productIds || formData.productIds.length === 0) newErrors.productIds = "At least one Product is required.";
-    if (!formData.consultantId) newErrors.consultantId = "Consultant is required.";
-    if (!formData.followUpQuotation) newErrors.followUpQuotation = "Follow-up Quotation is required.";
-    if (!formData.followUpUser) newErrors.followUpUser = "Follow-up User is required.";
-    if (!formData.remark.trim()) newErrors.remark = "Remark is required.";
+    if (!formData.projectName.trim()) newErrors.projectName = "Project Name is required."
+    if (!formData.inquiryStatus) newErrors.inquiryStatus = "Inquiry Status is required."
+    if (!formData.description.trim()) newErrors.description = "Description is required."
+    if (!formData.consumerId) newErrors.consumerId = "Consumer is required."
+    if (!formData.brandIds || formData.brandIds.length === 0) newErrors.brandIds = "At least one Brand is required."
+    if (!formData.productIds || formData.productIds.length === 0)
+      newErrors.productIds = "At least one Product is required."
+    if (!formData.consultantId) newErrors.consultantId = "Consultant is required."
+    if (!formData.followUpQuotation) newErrors.followUpQuotation = "Follow-up Quotation is required."
+    if (!formData.followUpUser) newErrors.followUpUser = "Follow-up User is required."
+    if (!formData.remark.trim()) newErrors.remark = "Remark is required."
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   // Submit handler for consumer form
   const handleSubmitConsumer = async () => {
     try {
       const response = await axios.post(`https://nicoindustrial.com/api/consumer/save`, formDataConsumer, {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      })
 
-      const successMessage = response.data.message || "Consumer saved successfully!";
+      const successMessage = response.data.message || "Consumer saved successfully!"
 
       toast.success(successMessage, {
         position: "top-right",
@@ -380,18 +394,18 @@ const Inquiry: React.FC = () => {
         hideProgressBar: false,
         className: "toast-success",
         style: { backgroundColor: "green" },
-      });
+      })
 
       setFormDataConsumer({
         consumerName: "",
         emailId: "",
         address: "",
         contact: "",
-      });
-      setShowModalConsumer(false);
-      fetchDropdownOptions();
+      })
+      setShowModalConsumer(false)
+      fetchDropdownOptions()
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Failed to save consumer. Please try again.";
+      const errorMessage = error.response?.data?.message || "Failed to save consumer. Please try again."
 
       toast.error(errorMessage, {
         position: "top-right",
@@ -399,90 +413,90 @@ const Inquiry: React.FC = () => {
         hideProgressBar: false,
         className: "toast-error",
         style: { backgroundColor: "red" },
-      });
+      })
     }
-  };
+  }
 
   const handleCloseConsumer = () => {
-    setShowModalConsumer(false);
+    setShowModalConsumer(false)
     setFormDataConsumer({
       consumerName: "",
       emailId: "",
       address: "",
       contact: "",
-    });
-    setFormErrors({});
-    setErrorMessage("");
-    setSuccessMessage("");
-  };
+    })
+    setFormErrors({})
+    setErrorMessage("")
+    setSuccessMessage("")
+  }
 
   // Consultant add more
   const [consultantformData, setconsultantFormData] = useState<{
-    consultantName: string;
-    contactPerson: string;
-    contactNumber: string;
-    createdBy: { id: number };
+    consultantName: string
+    contactPerson: string
+    contactNumber: string
+    createdBy: { id: number }
   }>({
     consultantName: "",
     contactPerson: "",
     contactNumber: "",
     createdBy: { id: userId },
-  });
+  })
 
-  const [message, setMessage] = useState<string>("");
-  const [messageType, setMessageType] = useState<string>("");
-  const [showModalConsultant, setShowModalConsultant] = useState<boolean>(false);
-  const [consltanterrors, setConsultantErrors] = useState<Record<string, string>>({});
+  const [message, setMessage] = useState<string>("")
+  const [messageType, setMessageType] = useState<string>("")
+  const [showModalConsultant, setShowModalConsultant] = useState<boolean>(false)
+  const [consltanterrors, setConsultantErrors] = useState<Record<string, string>>({})
 
   // Function to close consultant modal
   const handleCloseConsultant = () => {
-    setShowModalConsultant(false);
+    setShowModalConsultant(false)
     setconsultantFormData({
       consultantName: "",
       contactPerson: "",
       contactNumber: "",
       createdBy: { id: userId },
-    });
-    setConsultantErrors({});
-    setMessage("");
-    setMessageType("");
-  };
+    })
+    setConsultantErrors({})
+    setMessage("")
+    setMessageType("")
+  }
 
   // Function to handle form input changes
   const handleConsultantInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setconsultantFormData({
       ...consultantformData,
       [name]: value,
-    });
-  };
+    })
+  }
 
   // Validation for consultant form fields
   const validateConsultantFields = () => {
-    const consltanterrors: Record<string, string> = {};
+    const consltanterrors: Record<string, string> = {}
     if (!consultantformData.consultantName) {
-      consltanterrors.consultantName = "Consultant Name is required.";
+      consltanterrors.consultantName = "Consultant Name is required."
     }
     if (!consultantformData.contactPerson) {
-      consltanterrors.contactPerson = "Contact Person is required.";
+      consltanterrors.contactPerson = "Contact Person is required."
     }
     if (!consultantformData.contactNumber) {
-      consltanterrors.contactNumber = "Contact Number is required.";
+      consltanterrors.contactNumber = "Contact Number is required."
     }
-    setConsultantErrors(consltanterrors);
-    return Object.keys(consltanterrors).length === 0;
-  };
+    setConsultantErrors(consltanterrors)
+    return Object.keys(consltanterrors).length === 0
+  }
 
   // Function to add validation class based on errors
   const getValidationClass = (fieldName: string) => {
-    return consltanterrors[fieldName] ? "is-invalid" : "";
-  };
+    return consltanterrors[fieldName] ? "is-invalid" : ""
+  }
 
   // Submit the consultant form
   const consultantHandleSubmit = async () => {
-    const isValid = validateConsultantFields();
+    const isValid = validateConsultantFields()
     if (!isValid) {
-      return;
+      return
     }
 
     try {
@@ -490,9 +504,9 @@ const Inquiry: React.FC = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      })
 
-      const successMessage = response.data.message || "Consultant saved successfully!";
+      const successMessage = response.data.message || "Consultant saved successfully!"
 
       toast.success(successMessage, {
         position: "top-right",
@@ -500,18 +514,18 @@ const Inquiry: React.FC = () => {
         hideProgressBar: false,
         className: "toast-success",
         style: { backgroundColor: "green" },
-      });
+      })
 
       setconsultantFormData({
         consultantName: "",
         contactPerson: "",
         contactNumber: "",
         createdBy: { id: userId },
-      });
+      })
 
-      handleCloseConsultant();
+      handleCloseConsultant()
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Failed to save consultant. Please try again.";
+      const errorMessage = error.response?.data?.message || "Failed to save consultant. Please try again."
 
       toast.error(errorMessage, {
         position: "top-right",
@@ -519,19 +533,19 @@ const Inquiry: React.FC = () => {
         hideProgressBar: false,
         className: "toast-error",
         style: { backgroundColor: "red" },
-      });
+      })
     }
-  };
+  }
 
   // User add more
   const [newUserData, setNewUserData] = useState<{
-    userId: string;
-    name: string;
-    email: string;
-    password: string;
-    designation: string;
-    roleId: string | number;
-    mobileNo: string;
+    userId: string
+    name: string
+    email: string
+    password: string
+    designation: string
+    roleId: string | number
+    mobileNo: string
   }>({
     userId: "",
     name: "",
@@ -540,9 +554,9 @@ const Inquiry: React.FC = () => {
     designation: "",
     roleId: "",
     mobileNo: "",
-  });
+  })
 
-  const [showUserModal, setShowUserModal] = useState<boolean>(false);
+  const [showUserModal, setShowUserModal] = useState<boolean>(false)
 
   // Fetch Roles
   const fetchRoles = async () => {
@@ -551,30 +565,30 @@ const Inquiry: React.FC = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      })
 
-      const rolesData = response.data.data.roles;
+      const rolesData = response.data.data.roles
       const rolesArray = rolesData.map((role: any) => ({
         id: role.Id,
         name: role.name.trim(),
-      }));
+      }))
 
-      setRoleOptions(rolesArray);
+      setRoleOptions(rolesArray)
     } catch (error) {
-      console.error("Error fetching roles:", error);
+      console.error("Error fetching roles:", error)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchRoles();
-  }, []);
+    fetchRoles()
+  }, [])
 
-  const [roleOptions, setRoleOptions] = useState<Array<{ id: string | number; name: string }>>([]);
+  const [roleOptions, setRoleOptions] = useState<Array<{ id: string | number; name: string }>>([])
 
   const handleNewUserInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setNewUserData({ ...newUserData, [name]: value });
-  };
+    const { name, value } = e.target
+    setNewUserData({ ...newUserData, [name]: value })
+  }
 
   const handleSubmitNewUser = async () => {
     const submissionData = {
@@ -585,16 +599,16 @@ const Inquiry: React.FC = () => {
       designation: newUserData.designation,
       role: { id: newUserData.roleId },
       mobileNo: newUserData.mobileNo,
-    };
+    }
 
     try {
       const response = await axios.post(`https://nicoindustrial.com/api/user/signup`, submissionData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      })
 
-      const successMessage = response.data.message || "User saved successfully!";
+      const successMessage = response.data.message || "User saved successfully!"
 
       toast.success(successMessage, {
         position: "top-right",
@@ -602,7 +616,7 @@ const Inquiry: React.FC = () => {
         hideProgressBar: false,
         className: "toast-success",
         style: { backgroundColor: "green" },
-      });
+      })
 
       setNewUserData({
         userId: "",
@@ -612,12 +626,12 @@ const Inquiry: React.FC = () => {
         designation: "",
         roleId: "",
         mobileNo: "",
-      });
+      })
 
-      fetchDropdownOptions();
-      setShowUserModal(false);
+      fetchDropdownOptions()
+      setShowUserModal(false)
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Failed to save new user. Please try again.";
+      const errorMessage = error.response?.data?.message || "Failed to save new user. Please try again."
 
       toast.error(errorMessage, {
         position: "top-right",
@@ -625,52 +639,59 @@ const Inquiry: React.FC = () => {
         hideProgressBar: false,
         className: "toast-error",
         style: { backgroundColor: "red" },
-      });
+      })
 
-      console.error("Error saving new user:", error);
+      console.error("Error saving new user:", error)
     }
-  };
+  }
 
   // Follow-up
-  const [isFollowUpUser, setIsFollowUpUser] = useState<boolean>(true);
+  const [isFollowUpUser, setIsFollowUpUser] = useState<boolean>(true)
 
   useEffect(() => {
-    fetchTableData(currentPage, search);
-  }, [currentPage, search, pageSize]);
+    fetchTableData(currentPage, search)
+  }, [currentPage, search, pageSize])
 
   const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedStatus = e.target.value;
-    setSelectedStatusFilter(selectedStatus);
-    fetchTableData(1, search);
-  };
+    const selectedStatus = e.target.value
+    setSelectedStatusFilter(selectedStatus)
+    fetchTableData(1, search)
+  }
 
   const handleQuotationFilterChange = (value: string | number) => {
-    setSelectedQuotationFilter(value);
-    setCurrentPage(1); // Reset to first page when filter changes
-    fetchTableData(1, search);
-  };
+    setSelectedQuotationFilter(value)
+    setCurrentPage(1) // Reset to first page when filter changes
+    fetchTableData(1, search)
+  }
 
   const handleFollowUpUserFilterChange = (value: string | number) => {
-    setSelectedFollowUpUserFilter(value);
-    setCurrentPage(1);
-    fetchTableData(1, search);
-  };
+    setSelectedFollowUpUserFilter(value)
+    setCurrentPage(1)
+    fetchTableData(1, search)
+  }
 
   const handleConsumerFilterChange = (value: string | number) => {
-    setSelectedConsumerFilter(value);
-    setCurrentPage(1);
-    fetchTableData(1, search);
-  };
+    setSelectedConsumerFilter(value)
+    setCurrentPage(1)
+    fetchTableData(1, search)
+  }
 
   const handleConsultantFilterChange = (value: string | number) => {
-    setSelectedConsultantFilter(value);
-    setCurrentPage(1);
-    fetchTableData(1, search);
-  };
+    setSelectedConsultantFilter(value)
+    setCurrentPage(1)
+    fetchTableData(1, search)
+  }
 
   useEffect(() => {
-    fetchTableData(1, search);
-  }, [selectedStatusFilter, selectedQuotationFilter, selectedFollowUpUserFilter, selectedConsumerFilter, selectedConsultantFilter, search]);
+    fetchTableData(1, search)
+  }, [
+    selectedStatusFilter,
+    selectedQuotationFilter,
+    selectedFollowUpUserFilter,
+    selectedConsumerFilter,
+    selectedConsultantFilter,
+    search,
+  ])
 
   const fetchTableData = async (page: number, searchQuery = "", winloss = "", istotal = false) => {
     try {
@@ -691,30 +712,30 @@ const Inquiry: React.FC = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
-      console.log(response);
+      })
+      console.log(response)
 
-      const inquiryContent = response.data.data.inquiries.content;
+      const inquiryContent = response.data.data.inquiries.content
       const userData = inquiryContent.map((inquiry: Inquiry) => ({
         id: inquiry.followUpUser?.id || "N/A",
         active: inquiry.followUpUser?.active || false,
-      }));
+      }))
 
       const quotationData = inquiryContent.map((inquiry: Inquiry) => ({
         id: inquiry.followUpQuotation?.id || "N/A",
         active: inquiry.followUpQuotation?.active || false,
-      }));
+      }))
 
-      setFollowUpUserData(userData);
-      setFollowUpQuotationData(quotationData);
+      setFollowUpUserData(userData)
+      setFollowUpQuotationData(quotationData)
 
-      setTotalData(response.data.data.totalItems);
-      setTableData(inquiryContent);
-      setTotalPages(response.data.data.totalPages);
+      setTotalData(response.data.data.totalItems)
+      setTableData(inquiryContent)
+      setTotalPages(response.data.data.totalPages)
     } catch (error) {
-      console.error("Error fetching table data:", error);
+      console.error("Error fetching table data:", error)
     }
-  };
+  }
 
   const fetchDropdownOptions = async () => {
     try {
@@ -739,15 +760,15 @@ const Inquiry: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         }),
-      ]);
+      ])
 
-      setConsumerOptions(consumers.data.data.consumers);
-      setConsultantOptions(consultants.data.data.Consultants);
-      setUserOptions(users.data.data.list);
+      setConsumerOptions(consumers.data.data.consumers)
+      setConsultantOptions(consultants.data.data.Consultants)
+      setUserOptions(users.data.data.list)
     } catch (error) {
-      console.error("Error fetching dropdown options:", error);
+      console.error("Error fetching dropdown options:", error)
     }
-  };
+  }
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -762,56 +783,56 @@ const Inquiry: React.FC = () => {
           axios.get(`https://nicoindustrial.com/api/consultant/all`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-        ]);
+        ])
 
         // Format user options for Select component
         const formattedUserOptions = usersResponse.data.data.list.map((user: User) => ({
           value: user.id,
           label: user.name,
-        }));
-        setUserOptions(formattedUserOptions);
+        }))
+        setUserOptions(formattedUserOptions)
 
         // Store raw consumer and consultant data
-        setConsumerOptions(consumersResponse.data.data.consumers);
-        setConsultantOptions(consultantsResponse.data.data.Consultants);
+        setConsumerOptions(consumersResponse.data.data.consumers)
+        setConsultantOptions(consultantsResponse.data.data.Consultants)
       } catch (error) {
-        console.error("Error fetching initial data:", error);
+        console.error("Error fetching initial data:", error)
       }
-    };
+    }
 
-    fetchInitialData();
-  }, [token]);
+    fetchInitialData()
+  }, [token])
 
   const handleModalClose = () => {
-    setShowCreateModal(false);
-    resetForm();
-  };
+    setShowCreateModal(false)
+    resetForm()
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!validateForm()) {
-      return;
+      return
     }
 
     try {
-      let response;
+      let response
       if (editMode) {
-        const updateData = { ...formData, updatedBy: userId };
+        const updateData = { ...formData, updatedBy: userId }
         response = await axios.put(`https://nicoindustrial.com/api/inquiry/update/${selectedInquiryId}`, updateData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        });
+        })
       } else {
         response = await axios.post(`https://nicoindustrial.com/api/inquiry/save`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        });
+        })
       }
 
-      const successMessage = response.data.message || "Inquiry processed successfully!";
+      const successMessage = response.data.message || "Inquiry processed successfully!"
 
       toast.success(successMessage, {
         position: "top-right",
@@ -819,21 +840,21 @@ const Inquiry: React.FC = () => {
         hideProgressBar: false,
         className: "toast-success",
         style: { backgroundColor: "green" },
-      });
+      })
 
-      fetchTableData(currentPage);
-      handleModalClose();
+      fetchTableData(currentPage)
+      handleModalClose()
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Error processing the inquiry. Please try again.";
+      const errorMessage = error.response?.data?.message || "Error processing the inquiry. Please try again."
 
       toast.error(errorMessage, {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
         style: { backgroundColor: "red" },
-      });
+      })
     }
-  };
+  }
 
   const resetForm = () => {
     setFormData({
@@ -849,25 +870,27 @@ const Inquiry: React.FC = () => {
       description: "",
       brandIds: [],
       estimatePrice: 0,
-    });
-    setSelectedConsumer(null);
-    setSelectedBrands([]);
-    setSelectedProducts([]);
-    setSelectedConsultant(null);
-    setSelectedFollowUpUser(null);
-    setSelectedFollowUpQuotation(null);
-    setErrors({});
-    setEditMode(false);
-    setSelectedInquiryId(null);
-  };
+    })
+    setSelectedConsumer(null)
+    setSelectedBrands([])
+    setSelectedProducts([])
+    setSelectedConsultant(null)
+    setSelectedFollowUpUser(null)
+    setSelectedFollowUpQuotation(null)
+    setErrors({})
+    setEditMode(false)
+    setSelectedInquiryId(null)
+  }
 
   const handleEdit = (inquiry: Inquiry) => {
-    setSelectedInquiryId(inquiry.inquiryId);
+    setSelectedInquiryId(inquiry.inquiryId)
 
     // Extract brand and product IDs from the products array
-    const brandIds = inquiry.products ? [...new Set(inquiry.products.map((product) => product.brand?.brandId))].filter(Boolean) : [];
+    const brandIds = inquiry.products
+      ? [...new Set(inquiry.products.map((product) => product.brand?.brandId))].filter(Boolean)
+      : []
 
-    const productIds = inquiry.products ? inquiry.products.map((product) => product.productId) : [];
+    const productIds = inquiry.products ? inquiry.products.map((product) => product.productId) : []
 
     setFormData({
       projectName: inquiry.projectName,
@@ -881,7 +904,7 @@ const Inquiry: React.FC = () => {
       followUpQuotation: inquiry.followUpQuotation ? inquiry.followUpQuotation.id : "",
       description: inquiry.description || "",
       estimatePrice: inquiry.estimatePrice || 0,
-    });
+    })
 
     setSelectedConsumer(
       inquiry.consumer
@@ -889,8 +912,8 @@ const Inquiry: React.FC = () => {
             value: inquiry.consumer.consumerId,
             label: inquiry.consumer.consumerName,
           }
-        : null
-    );
+        : null,
+    )
 
     // Set selected brands as array of options
     if (inquiry.products && inquiry.products.length > 0) {
@@ -904,19 +927,19 @@ const Inquiry: React.FC = () => {
                 value: product.brand?.brandId,
                 label: product.brand?.brandName,
               },
-            ])
+            ]),
         ).values(),
-      ];
+      ]
 
-      setSelectedBrands(uniqueBrands);
+      setSelectedBrands(uniqueBrands)
 
       // Fetch products for these brands
-      const brandIdsString = uniqueBrands.map((brand) => brand.value).join(",");
+      const brandIdsString = uniqueBrands.map((brand) => brand.value).join(",")
       if (brandIdsString) {
-        fetchProductsByBrands(brandIdsString);
+        fetchProductsByBrands(brandIdsString)
       }
     } else {
-      setSelectedBrands([]);
+      setSelectedBrands([])
     }
 
     // Set selected products as array of options
@@ -924,11 +947,11 @@ const Inquiry: React.FC = () => {
       const productOptions = inquiry.products.map((product) => ({
         value: product.productId,
         label: product.productName,
-      }));
+      }))
 
-      setSelectedProducts(productOptions);
+      setSelectedProducts(productOptions)
     } else {
-      setSelectedProducts([]);
+      setSelectedProducts([])
     }
 
     setSelectedConsultant(
@@ -937,10 +960,12 @@ const Inquiry: React.FC = () => {
             value: inquiry.consultant.consultantId,
             label: inquiry.consultant.consultantName,
           }
-        : null
-    );
+        : null,
+    )
 
-    setSelectedFollowUpUser(inquiry.followUpUser ? { value: inquiry.followUpUser.id, label: inquiry.followUpUser.name } : null);
+    setSelectedFollowUpUser(
+      inquiry.followUpUser ? { value: inquiry.followUpUser.id, label: inquiry.followUpUser.name } : null,
+    )
 
     setSelectedFollowUpQuotation(
       inquiry.followUpQuotation
@@ -948,12 +973,12 @@ const Inquiry: React.FC = () => {
             value: inquiry.followUpQuotation.id,
             label: inquiry.followUpQuotation.name,
           }
-        : null
-    );
+        : null,
+    )
 
-    setEditMode(true);
-    setShowCreateModal(true);
-  };
+    setEditMode(true)
+    setShowCreateModal(true)
+  }
 
   const handleDelete = async (id: string | number) => {
     if (window.confirm("Are you sure you want to delete this inquiry?")) {
@@ -962,9 +987,9 @@ const Inquiry: React.FC = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        });
+        })
 
-        const successMessage = response.data.message || "Inquiry deleted successfully!";
+        const successMessage = response.data.message || "Inquiry deleted successfully!"
 
         toast.success(successMessage, {
           position: "top-right",
@@ -972,56 +997,56 @@ const Inquiry: React.FC = () => {
           hideProgressBar: false,
           className: "toast-success",
           style: { backgroundColor: "green" },
-        });
+        })
 
-        setTimeout(() => setSuccessMessage(""), 3000);
-        fetchTableData(currentPage);
+        setTimeout(() => setSuccessMessage(""), 3000)
+        fetchTableData(currentPage)
       } catch (error: any) {
-        const errorMessage = error.response?.data?.message || "Error deleting the inquiry. Please try again.";
+        const errorMessage = error.response?.data?.message || "Error deleting the inquiry. Please try again."
 
         toast.error(errorMessage, {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
           style: { backgroundColor: "red" },
-        });
+        })
 
-        setTimeout(() => setErrorMessage(""), 3000);
+        setTimeout(() => setErrorMessage(""), 3000)
       }
     }
-  };
+  }
 
   const handlePrev = () => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+      setCurrentPage(currentPage - 1)
     }
-  };
+  }
 
   const handleNext = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+      setCurrentPage(currentPage + 1)
     }
-  };
+  }
 
   const handleView = (inquiry: any) => {
-    console.log("Viewing inquiry:", inquiry.inquiryId);
+    console.log("Viewing inquiry:", inquiry.inquiryId)
 
-    navigate(`/inquiry/${inquiry.inquiryId}`);
-    setSelectedInquiry(inquiry);
+    navigate(`/inquiry/${inquiry.inquiryId}`)
+    setSelectedInquiry(inquiry)
     // setShowViewModal(true);
-  };
+  }
 
   // State for storing dropdown options
-  const [consumerOptions, setConsumerOptions] = useState<Consumer[]>([]);
-  const [productOptions, setProductOptions] = useState<SelectOption[]>([]);
-  const [consultantOptions, setConsultantOptions] = useState<Consultant[]>([]);
-  const [userOptions, setUserOptions] = useState<SelectOption[]>([]);
+  const [consumerOptions, setConsumerOptions] = useState<Consumer[]>([])
+  const [productOptions, setProductOptions] = useState<SelectOption[]>([])
+  const [consultantOptions, setConsultantOptions] = useState<Consultant[]>([])
+  const [userOptions, setUserOptions] = useState<SelectOption[]>([])
 
   // Dropdown refs for scroll tracking
-  const consumerDropdownRef = useRef<HTMLDivElement>(null);
-  const productDropdownRef = useRef<HTMLDivElement>(null);
-  const consultantDropdownRef = useRef<HTMLDivElement>(null);
-  const userDropdownRef = useRef<HTMLDivElement>(null);
+  const consumerDropdownRef = useRef<HTMLDivElement>(null)
+  const productDropdownRef = useRef<HTMLDivElement>(null)
+  const consultantDropdownRef = useRef<HTMLDivElement>(null)
+  const userDropdownRef = useRef<HTMLDivElement>(null)
 
   // Initial load of data
   // useEffect(() => {
@@ -1034,41 +1059,41 @@ const Inquiry: React.FC = () => {
   // }, [showCreateModal]);
 
   useEffect(() => {
-    fetchConsumers();
-    fetchConsultants();
-    fetchUsers(); // Also fetch users since they're used in filters
-    fetchBrands(); // And brands if needed
-  }, []);
+    fetchConsumers()
+    fetchConsultants()
+    fetchUsers() // Also fetch users since they're used in filters
+    fetchBrands() // And brands if needed
+  }, [])
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers()
+  }, [])
 
-  const [selectedConsumer, setSelectedConsumer] = useState<SelectOption | null>(null);
-  const [isLoadingConsumers, setIsLoadingConsumers] = useState<boolean>(false);
+  const [selectedConsumer, setSelectedConsumer] = useState<SelectOption | null>(null)
+  const [isLoadingConsumers, setIsLoadingConsumers] = useState<boolean>(false)
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setFormData({
       ...formData,
       [name]: value,
-    });
-  };
+    })
+  }
 
   const handleConsumerChange = (selectedOption: SelectOption | null) => {
-    setSelectedConsumer(selectedOption);
+    setSelectedConsumer(selectedOption)
     setFormData({
       ...formData,
       consumerId: selectedOption ? selectedOption.value : "",
-    });
-  };
+    })
+  }
 
   const handleConsumerSearch = (inputValue: string) => {
-    debounceSearch(fetchConsumers, inputValue, setIsLoadingConsumers);
-  };
+    debounceSearch(fetchConsumers, inputValue, setIsLoadingConsumers)
+  }
 
   const fetchConsumers = async (inputValue = "") => {
-    setIsLoadingConsumers(true);
+    setIsLoadingConsumers(true)
     try {
       const response = await axios.get(`https://nicoindustrial.com/api/consumer/all`, {
         headers: {
@@ -1077,24 +1102,24 @@ const Inquiry: React.FC = () => {
         params: {
           search: inputValue,
         },
-      });
+      })
       const consumers = response.data.data.consumers.map((consumer: Consumer) => ({
         value: consumer.consumerId,
         label: consumer.consumerName,
-      }));
-      setConsumerOptions(response.data.data.consumers);
+      }))
+      setConsumerOptions(response.data.data.consumers)
     } catch (error) {
-      console.error("Error fetching consumers:", error);
+      console.error("Error fetching consumers:", error)
     } finally {
-      setIsLoadingConsumers(false);
+      setIsLoadingConsumers(false)
     }
-  };
+  }
 
   const handleSearch = (fetchFunc: (inputValue: string) => void, inputValue: string) => {
-    fetchFunc(inputValue);
-  };
+    fetchFunc(inputValue)
+  }
 
-  const [showStatusChangeModal, setShowStatusChangeModal] = useState<boolean>(false);
+  const [showStatusChangeModal, setShowStatusChangeModal] = useState<boolean>(false)
 
   const handleStatusChange = async (inquiryId: string | number, newStatus: string) => {
     try {
@@ -1102,39 +1127,39 @@ const Inquiry: React.FC = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      })
 
-      const inquiryData = response.data.data;
+      const inquiryData = response.data.data
 
       // Extract the latest description from the description array
-      let latestDescription = "";
+      let latestDescription = ""
       if (Array.isArray(inquiryData.description) && inquiryData.description.length > 0) {
         // Get the most recent description (last item in array)
-        const lastDescription = inquiryData.description[inquiryData.description.length - 1];
-        latestDescription = lastDescription.description || "";
+        const lastDescription = inquiryData.description[inquiryData.description.length - 1]
+        latestDescription = lastDescription.description || ""
       }
 
       setStatusChangeData({
         ...inquiryData,
         inquiryStatus: newStatus,
         description: latestDescription,
-      });
+      })
 
-      setShowStatusChangeModal(true);
+      setShowStatusChangeModal(true)
     } catch (error) {
-      console.error("Error fetching inquiry details:", error);
-      alert("Failed to fetch inquiry details. Please check your connection or try again.");
+      console.error("Error fetching inquiry details:", error)
+      alert("Failed to fetch inquiry details. Please check your connection or try again.")
     }
-  };
+  }
 
   const submitStatusChange = async () => {
     if (!isFollowUpUser && !quotationDescription) {
-      setStatusChangeError("Description is required.");
-      return;
+      setStatusChangeError("Description is required.")
+      return
     }
     if (!description) {
-      setStatusChangeError("Description is required.");
-      return;
+      setStatusChangeError("Description is required.")
+      return
     }
 
     try {
@@ -1150,28 +1175,46 @@ const Inquiry: React.FC = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
+        },
+      )
 
-      setSuccessMessage(response.data.message);
-      setShowStatusChangeModal(false);
-      setDescription("");
+      setSuccessMessage(response.data.message)
+      setShowStatusChangeModal(false)
+      setDescription("")
 
-      setTableData((prevData) => prevData.map((inquiry) => (inquiry.inquiryId === statusChangeData.inquiryId ? { ...inquiry, inquiryStatus: statusChangeData.inquiryStatus } : inquiry)));
+      setTableData((prevData) =>
+        prevData.map((inquiry) =>
+          inquiry.inquiryId === statusChangeData.inquiryId
+            ? { ...inquiry, inquiryStatus: statusChangeData.inquiryStatus }
+            : inquiry,
+        ),
+      )
 
-      setTimeout(() => setSuccessMessage(""), 2000);
+      setTimeout(() => setSuccessMessage(""), 2000)
     } catch (error) {
-      setErrorMessage("Failed to update status. Please try again.");
-      setTimeout(() => setErrorMessage(""), 3000);
+      setErrorMessage("Failed to update status. Please try again.")
+      setTimeout(() => setErrorMessage(""), 3000)
     }
-  };
+  }
 
   const submitStatusDropdownChange = async () => {
-    const { inquiryId, inquiryStatus, projectName, description, consumer, product, consultant, followUpUser, followUpQuotation, remark, updatedBy } = statusChangeData;
+    const {
+      inquiryId,
+      inquiryStatus,
+      projectName,
+      description,
+      consumer,
+      product,
+      consultant,
+      followUpUser,
+      followUpQuotation,
+      remark,
+      updatedBy,
+    } = statusChangeData
 
     if (!description) {
-      setStatusChangeError("Description is required.");
-      return;
+      setStatusChangeError("Description is required.")
+      return
     }
 
     try {
@@ -1186,41 +1229,45 @@ const Inquiry: React.FC = () => {
         followUpQuotation: followUpQuotation?.id,
         remark,
         updatedBy: updatedBy?.id || userId,
-      };
+      }
 
       const response = await axios.put(`https://nicoindustrial.com/api/inquiry/update/${inquiryId}`, requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      })
 
       toast.success(response.data.message || "Inquiry updated successfully!", {
         position: "top-right",
         autoClose: 3000,
-      });
+      })
 
-      setShowStatusChangeModal(false);
+      setShowStatusChangeModal(false)
 
       // Update the table data with the new status
-      setTableData((prevData) => prevData.map((inquiry) => (inquiry.inquiryId === inquiryId ? { ...inquiry, inquiryStatus, description } : inquiry)));
+      setTableData((prevData) =>
+        prevData.map((inquiry) =>
+          inquiry.inquiryId === inquiryId ? { ...inquiry, inquiryStatus, description } : inquiry,
+        ),
+      )
     } catch (error: any) {
-      console.error("Error updating inquiry:", error.response || error);
+      console.error("Error updating inquiry:", error.response || error)
 
       toast.error(error.response?.data?.message || "Failed to update inquiry. Please try again.", {
         position: "top-right",
         autoClose: 3000,
-      });
+      })
     }
-  };
+  }
 
-  const [showStatusQuartationChangeModal, setshowStatusQuartationChangeModal] = useState<boolean>(false);
-  const [statusChangeData, setStatusChangeData] = useState<any>({});
-  const [description, setDescription] = useState<string>("");
-  const [statusChangeError, setStatusChangeError] = useState<string>("");
+  const [showStatusQuartationChangeModal, setshowStatusQuartationChangeModal] = useState<boolean>(false)
+  const [statusChangeData, setStatusChangeData] = useState<any>({})
+  const [description, setDescription] = useState<string>("")
+  const [statusChangeError, setStatusChangeError] = useState<string>("")
 
   // Fetch products
   const fetchProducts = async (inputValue = "") => {
-    setIsLoadingProducts(true);
+    setIsLoadingProducts(true)
     try {
       const response = await axios.get(`https://nicoindustrial.com/api/product/list`, {
         headers: {
@@ -1229,18 +1276,18 @@ const Inquiry: React.FC = () => {
         params: {
           search: inputValue,
         },
-      });
+      })
       const products = response.data.data.productList.map((product: Product) => ({
         value: product.productId,
         label: product.productName,
-      }));
+      }))
       // setProductOptions(products);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error fetching products:", error)
     } finally {
-      setIsLoadingProducts(false);
+      setIsLoadingProducts(false)
     }
-  };
+  }
 
   // const handleProductDropdownOpen = () => {
   //   if (productOptions.length === 0) {
@@ -1256,7 +1303,7 @@ const Inquiry: React.FC = () => {
 
   // Fetch consultants
   const fetchConsultants = async (inputValue = "") => {
-    setIsLoadingConsultants(true);
+    setIsLoadingConsultants(true)
     try {
       const response = await axios.get(`https://nicoindustrial.com/api/consultant/all`, {
         headers: {
@@ -1265,22 +1312,22 @@ const Inquiry: React.FC = () => {
         params: {
           search: inputValue,
         },
-      });
+      })
       // const consultants = response.data.data.Consultants.map((consultant: Consultant) => ({
       //   value: consultant.consultantId,
       //   label: consultant.consultantName,
       // }));
-      setConsultantOptions(response.data.data.Consultants);
+      setConsultantOptions(response.data.data.Consultants)
     } catch (error) {
-      console.error("Error fetching consultants:", error);
+      console.error("Error fetching consultants:", error)
     } finally {
-      setIsLoadingConsultants(false);
+      setIsLoadingConsultants(false)
     }
-  };
+  }
 
   // Handling search for Follow-up User and Quotation
   const fetchUsers = async (inputValue = "") => {
-    setIsLoadingUsers(true);
+    setIsLoadingUsers(true)
     try {
       const response = await axios.get(`https://nicoindustrial.com/api/user/list`, {
         headers: {
@@ -1289,31 +1336,31 @@ const Inquiry: React.FC = () => {
         params: {
           search: inputValue,
         },
-      });
+      })
       const users = response.data.data.list.map((user: User) => ({
         value: user.id,
         label: user.name,
-      }));
-      setUserOptions(users);
+      }))
+      setUserOptions(users)
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching users:", error)
     } finally {
-      setIsLoadingUsers(false);
+      setIsLoadingUsers(false)
     }
-  };
+  }
 
   const handleQuotationSearch = (inputValue: string) => {
     if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+      clearTimeout(timeoutRef.current)
     }
 
     timeoutRef.current = setTimeout(() => {
-      fetchFollowUpQuotations(inputValue);
-    }, 500);
-  };
+      fetchFollowUpQuotations(inputValue)
+    }, 500)
+  }
 
   const fetchFollowUpQuotations = async (inputValue = "") => {
-    setIsLoadingQuotations(true);
+    setIsLoadingQuotations(true)
     try {
       const response = await axios.get(`https://nicoindustrial.com/api/user/list`, {
         headers: {
@@ -1322,59 +1369,67 @@ const Inquiry: React.FC = () => {
         params: {
           search: inputValue,
         },
-      });
+      })
 
       const quotations = response.data.data.list.map((user: User) => ({
         value: user.id,
         label: user.name,
-      }));
+      }))
 
-      setQuotationOptions(quotations);
+      setQuotationOptions(quotations)
     } catch (error) {
-      console.error("Error fetching quotations:", error);
+      console.error("Error fetching quotations:", error)
     } finally {
-      setIsLoadingQuotations(false);
+      setIsLoadingQuotations(false)
     }
-  };
+  }
 
-  const [quotationOptions, setQuotationOptions] = useState<SelectOption[]>([]);
-  const [isLoadingQuotations, setIsLoadingQuotations] = useState<boolean>(false);
-  const [selectedFollowUpQuotation, setSelectedFollowUpQuotation] = useState<SelectOption | null>(null);
+  const [quotationOptions, setQuotationOptions] = useState<SelectOption[]>([])
+  const [isLoadingQuotations, setIsLoadingQuotations] = useState<boolean>(false)
+  const [selectedFollowUpQuotation, setSelectedFollowUpQuotation] = useState<SelectOption | null>(null)
 
   const handleProductSearch = (inputValue: string) => {
-    debounceSearch(fetchProducts, inputValue, setIsLoadingProducts);
-  };
+    debounceSearch(fetchProducts, inputValue, setIsLoadingProducts)
+  }
 
   const handleConsultantSearch = (inputValue: string) => {
-    debounceSearch(fetchConsultants, inputValue, setIsLoadingConsultants);
-  };
+    debounceSearch(fetchConsultants, inputValue, setIsLoadingConsultants)
+  }
 
   const handleUserSearch = (inputValue: string) => {
     if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+      clearTimeout(timeoutRef.current)
     }
 
     timeoutRef.current = setTimeout(() => {
-      fetchUsers(inputValue);
-    }, 500);
-  };
+      fetchUsers(inputValue)
+    }, 500)
+  }
 
-  const [isLoadingProducts, setIsLoadingProducts] = useState<boolean>(false);
-  const [isLoadingConsultants, setIsLoadingConsultants] = useState<boolean>(false);
-  const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(false);
+  const [isLoadingProducts, setIsLoadingProducts] = useState<boolean>(false)
+  const [isLoadingConsultants, setIsLoadingConsultants] = useState<boolean>(false)
+  const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(false)
 
-  const [selectedProduct, setSelectedProduct] = useState<SelectOption | null>(null);
-  const [selectedConsultant, setSelectedConsultant] = useState<SelectOption | null>(null);
-  const [selectedFollowUpUser, setSelectedFollowUpUser] = useState<SelectOption | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<SelectOption | null>(null)
+  const [selectedConsultant, setSelectedConsultant] = useState<SelectOption | null>(null)
+  const [selectedFollowUpUser, setSelectedFollowUpUser] = useState<SelectOption | null>(null)
 
-  const isModalOpen = showViewModal || showCreateModal || showProductModal || showModalConsumer || showModalConsultant || showUserModal || showWinLossModal || showStatusQuartationChangeModal;
+  const isModalOpen =
+    showViewModal ||
+    showCreateModal ||
+    showProductModal ||
+    showModalConsumer ||
+    showModalConsultant ||
+    showUserModal ||
+    showWinLossModal ||
+    showStatusQuartationChangeModal
 
-  const [brandOptions, setBrandOptions] = useState<SelectOption[]>([]);
-  const [selectedBrand, setSelectedBrand] = useState<SelectOption | null>(null);
-  const [isLoadingBrands, setIsLoadingBrands] = useState<boolean>(false);
+  const [brandOptions, setBrandOptions] = useState<SelectOption[]>([])
+  const [selectedBrand, setSelectedBrand] = useState<SelectOption | null>(null)
+  const [isLoadingBrands, setIsLoadingBrands] = useState<boolean>(false)
 
   const fetchBrands = async (searchQuery = "") => {
-    setIsLoadingBrands(true);
+    setIsLoadingBrands(true)
     try {
       const response = await axios.get(`https://nicoindustrial.com/api/brand/list`, {
         params: {
@@ -1385,24 +1440,24 @@ const Inquiry: React.FC = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      })
 
       const brands = response.data.data.map((brand: Brand) => ({
         value: brand.brandId,
         label: brand.brandName,
-      }));
-      setBrandOptions(brands);
+      }))
+      setBrandOptions(brands)
     } catch (error) {
-      console.error("Error fetching brands:", error);
+      console.error("Error fetching brands:", error)
     } finally {
-      setIsLoadingBrands(false);
+      setIsLoadingBrands(false)
     }
-  };
+  }
 
   // Fetch Products by selected brand
   const fetchProductsByBrand = async (brandId: string | number) => {
-    if (!brandId) return;
-    setIsLoadingProducts(true);
+    if (!brandId) return
+    setIsLoadingProducts(true)
     try {
       const response = await axios.get(`https://nicoindustrial.com/api/product/listByBrands`, {
         headers: {
@@ -1411,57 +1466,57 @@ const Inquiry: React.FC = () => {
         params: {
           brandIds: brandId,
         },
-      });
-      console.log(response.data);
+      })
+      console.log(response.data)
       const products = response.data.data.map((product: Product) => ({
         value: product.productId,
         label: `${product.productName}${product.price ? ` - $${product.price}` : ""}`,
-      }));
-      setProductOptions(products);
+      }))
+      setProductOptions(products)
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error fetching products:", error)
     } finally {
-      setIsLoadingProducts(false);
+      setIsLoadingProducts(false)
     }
-  };
+  }
 
   // Handle brand change for multiple select
   const handleBrandChange = (selectedOptions: readonly SelectOption[]) => {
-    const options = selectedOptions as SelectOption[];
-    setSelectedBrands(options);
+    const options = selectedOptions as SelectOption[]
+    setSelectedBrands(options)
     setFormData({
       ...formData,
       brandIds: options.map((option) => option.value),
-    });
+    })
 
     // If brands change, fetch products for all selected brands
     if (options.length > 0) {
-      const brandIds = options.map((option) => option.value).join(",");
-      fetchProductsByBrands(brandIds);
+      const brandIds = options.map((option) => option.value).join(",")
+      fetchProductsByBrands(brandIds)
     } else {
-      setSelectedProducts([]);
-      setProductOptions([]);
+      setSelectedProducts([])
+      setProductOptions([])
       setFormData((prev) => ({
         ...prev,
         productIds: [],
-      }));
+      }))
     }
-  };
+  }
 
   // Handle product change for multiple select
   const handleProductChange = (selectedOptions: readonly SelectOption[]) => {
-    const options = selectedOptions as SelectOption[];
-    setSelectedProducts(options);
+    const options = selectedOptions as SelectOption[]
+    setSelectedProducts(options)
     setFormData({
       ...formData,
       productIds: options.map((option) => option.value),
-    });
-  };
+    })
+  }
 
   // Update fetchProductsByBrand to handle multiple brands
   const fetchProductsByBrands = async (brandIds: string | number) => {
-    if (!brandIds) return;
-    setIsLoadingProducts(true);
+    if (!brandIds) return
+    setIsLoadingProducts(true)
     try {
       const response = await axios.get(`https://nicoindustrial.com/api/product/listByBrands`, {
         headers: {
@@ -1470,18 +1525,18 @@ const Inquiry: React.FC = () => {
         params: {
           brandIds: brandIds,
         },
-      });
+      })
       const products = response.data.data.map((product: Product) => ({
         value: product.productId,
         label: `${product.productName}${product.price ? ` - $${product.price}` : ""}`,
-      }));
-      setProductOptions(products);
+      }))
+      setProductOptions(products)
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error fetching products:", error)
     } finally {
-      setIsLoadingProducts(false);
+      setIsLoadingProducts(false)
     }
-  };
+  }
 
   // Handle brand change
   // const handleBrandChange = (selectedOption: SelectOption | null) => {
@@ -1505,21 +1560,21 @@ const Inquiry: React.FC = () => {
 
   // Handle brand search
   const handleBrandSearch = (inputValue: string) => {
-    fetchBrands(inputValue);
-  };
+    fetchBrands(inputValue)
+  }
 
   // Initial load of brands
   useEffect(() => {
-    fetchBrands();
-  }, []);
+    fetchBrands()
+  }, [])
 
-  const [month, setMonth] = useState<string>("");
-  const [year, setYear] = useState<string>("");
+  const [month, setMonth] = useState<string>("")
+  const [year, setYear] = useState<string>("")
 
   const handleExport = async () => {
     if (!month || !year) {
-      alert("Please select both month and year.");
-      return;
+      alert("Please select both month and year.")
+      return
     }
 
     try {
@@ -1527,33 +1582,33 @@ const Inquiry: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
         params: { month, year },
         responseType: "blob",
-      });
+      })
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `inquiry_${month}_${year}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement("a")
+      link.href = url
+      link.setAttribute("download", `inquiry_${month}_${year}.xlsx`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
     } catch (error) {
-      console.error("Error downloading the Excel file:", error);
+      console.error("Error downloading the Excel file:", error)
     }
-  };
+  }
 
   useEffect(() => {
     if (isModalOpen) {
-      fetchFollowUpQuotations();
-      document.body.style.overflow = "hidden";
+      fetchFollowUpQuotations()
+      document.body.style.overflow = "hidden"
     } else {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "auto"
     }
     return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [isModalOpen]);
+      document.body.style.overflow = "auto"
+    }
+  }, [isModalOpen])
 
-  const role = localStorage.getItem("userRole");
+  const role = localStorage.getItem("userRole")
 
   return (
     <div className="max-w-7xl mx-auto p-3 rounded-lg dark:text-white">
@@ -1561,7 +1616,11 @@ const Inquiry: React.FC = () => {
       <div className="flex flex-wrap gap-4 mb-3">
         <div className="flex flex-col w-full sm:w-1/5">
           <label className="mb-1 font-medium">Filter by Status</label>
-          <select value={selectedStatusFilter} onChange={handleStatusFilterChange} className="p-2 border border-black dark:border-white rounded-lg">
+          <select
+            value={selectedStatusFilter}
+            onChange={handleStatusFilterChange}
+            className="p-2 border border-black dark:border-white rounded-lg"
+          >
             <option value="">All</option>
             <option value="TENDER">Tender</option>
             <option value="PURCHASE">Purchase</option>
@@ -1644,7 +1703,13 @@ const Inquiry: React.FC = () => {
         )}
         <div className="flex flex-col w-full sm:w-1/4">
           <label className="mb-1 font-medium">Search</label>
-          <input type="text" placeholder="Search inquiries..." value={search} onChange={(e) => setSearch(e.target.value)} className="p-2 border border-black rounded-lg dark:border-white" />
+          <input
+            type="text"
+            placeholder="Search inquiries..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="p-2 border border-black rounded-lg dark:border-white"
+          />
         </div>
       </div>
 
@@ -1654,9 +1719,26 @@ const Inquiry: React.FC = () => {
           <>
             <div className="flex flex-col w-full sm:w-1/6">
               <label className="mb-1 font-medium">Month</label>
-              <select value={month} onChange={(e) => setMonth(e.target.value)} className="p-2 border border-black rounded-lg dark:border-white">
+              <select
+                value={month}
+                onChange={(e) => setMonth(e.target.value)}
+                className="p-2 border border-black rounded-lg dark:border-white"
+              >
                 <option value="">All</option>
-                {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((m, i) => (
+                {[
+                  "January",
+                  "February",
+                  "March",
+                  "April",
+                  "May",
+                  "June",
+                  "July",
+                  "August",
+                  "September",
+                  "October",
+                  "November",
+                  "December",
+                ].map((m, i) => (
                   <option key={i} value={i + 1}>
                     {m}
                   </option>
@@ -1666,7 +1748,11 @@ const Inquiry: React.FC = () => {
 
             <div className="flex flex-col w-full sm:w-1/4">
               <label className="mb-1 font-medium">Year</label>
-              <select value={year} onChange={(e) => setYear(e.target.value)} className="p-2 border border-black rounded-lg dark:border-white">
+              <select
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                className="p-2 border border-black rounded-lg dark:border-white"
+              >
                 <option value="">All</option>
                 <option>2024</option>
                 <option>2025</option>
@@ -1674,7 +1760,10 @@ const Inquiry: React.FC = () => {
               </select>
             </div>
             <div className="flex gap-2 mt-6 sm:mt-0 w-full sm:w-[100%]">
-              <button onClick={handleExport} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+              <button
+                onClick={handleExport}
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+              >
                 Export to Excel
               </button>
             </div>
@@ -1685,9 +1774,10 @@ const Inquiry: React.FC = () => {
         <div className="flex gap-2 mt-6 sm:mt-0 w-full justify-end">
           <button
             onClick={() => {
-              setShowCreateModal(true), resetForm();
+              setShowCreateModal(true), resetForm()
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
             <FaPlus />
             Create Inquiry
           </button>
@@ -1695,8 +1785,14 @@ const Inquiry: React.FC = () => {
       </div>
 
       {/* Success and Error Messages */}
-      {successMessage && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{successMessage}</div>}
-      {errorMessage && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{errorMessage}</div>}
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {successMessage}
+        </div>
+      )}
+      {errorMessage && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{errorMessage}</div>
+      )}
 
       {/* Table */}
       <div className="overflow-auto">
@@ -1716,17 +1812,28 @@ const Inquiry: React.FC = () => {
           <tbody>
             {tableData.length > 0 ? (
               tableData.map((inquiry, index) => (
-                <tr key={inquiry.inquiryId} className="hover:bg-gray-200 bg-white text-center dark:bg-black dark:hover:bg-gray-800 transform duration-200">
+                <tr
+                  key={inquiry.inquiryId}
+                  className="hover:bg-gray-200 bg-white text-center dark:bg-black dark:hover:bg-gray-800 transform duration-200"
+                >
                   <td className="px-4 py-2 text-center">{(currentPage - 1) * pageSize + (index + 1)}</td>
                   <td className="px-4 py-2" title={inquiry.projectName}>
                     {inquiry.projectName.length > 25 ? `${inquiry.projectName.slice(0, 25)}...` : inquiry.projectName}
                   </td>
                   <td className="px-4 py-2">{inquiry.consumer?.consumerName || "N/A"}</td>
                   {/* <td className="px-4 py-2">{inquiry.products?.productName || "N/A"}</td> */}
-                  <td className="px-4 py-2">{inquiry.products && inquiry.products.length > 0 ? inquiry.products.map((p) => p.productName).join(", ") : "N/A"}</td>
+                  <td className="px-4 py-2">
+                    {inquiry.products && inquiry.products.length > 0
+                      ? inquiry.products.map((p) => p.productName).join(", ")
+                      : "N/A"}
+                  </td>
                   <td className="px-4 py-2">{inquiry.consultant?.consultantName || "N/A"}</td>
                   <td className="px-4 py-2">
-                    <select className="p-2 text-sm border border-black dark:border-white rounded-lg w-full dark:bg-black" value={inquiry.inquiryStatus} onChange={(e) => handleStatusChange(inquiry.inquiryId, e.target.value)}>
+                    <select
+                      className="p-2 text-sm border border-black dark:border-white rounded-lg w-full dark:bg-black"
+                      value={inquiry.inquiryStatus}
+                      onChange={(e) => handleStatusChange(inquiry.inquiryId, e.target.value)}
+                    >
                       <option value="TENDER">TENDER</option>
                       <option value="PURCHASE">PURCHASE</option>
                       <option value="PROCUREMENT">PROCUREMENT</option>
@@ -1736,10 +1843,16 @@ const Inquiry: React.FC = () => {
                   <td className="px-4 py-2">
                     {inquiry.isWin === null ? (
                       <div className="flex justify-center gap-1">
-                        <button onClick={() => handleButtonClick(true, inquiry.inquiryId)} className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">
+                        <button
+                          onClick={() => handleButtonClick(true, inquiry.inquiryId)}
+                          className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                        >
                           <FontAwesomeIcon icon={faThumbsUp} />
                         </button>
-                        <button onClick={() => handleButtonClick(false, inquiry.inquiryId)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                        <button
+                          onClick={() => handleButtonClick(false, inquiry.inquiryId)}
+                          className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                        >
                           <FontAwesomeIcon icon={faThumbsDown} />
                         </button>
                       </div>
@@ -1760,57 +1873,72 @@ const Inquiry: React.FC = () => {
                     )}
                   </td>
                   <td className="px-2 py-2 text-center space-x-1">
-                    <button onClick={() => handleView(inquiry)} className="p-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                    <button
+                      onClick={() => handleView(inquiry)}
+                      className="p-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                    >
                       <FaEye />
                     </button>
-                    <button onClick={() => handleEdit(inquiry)} className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    <button
+                      onClick={() => handleEdit(inquiry)}
+                      className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
                       <FaPenAlt />
                     </button>
-                    <button onClick={() => handleDelete(inquiry.inquiryId)} className="p-2 bg-red-500 text-white rounded hover:bg-red-600">
+                    <button
+                      onClick={() => handleDelete(inquiry.inquiryId)}
+                      className="p-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
                       <MdDelete />
                     </button>
 
-                    {inquiry.followUpQuotation?.id === userId && inquiry.isWin == null && inquiry.quotationGiven === false && (
-                      <button
-                        onClick={() => {
-                          setQuotationDescription(inquiry.description || "");
-                          setStatusChangeData({
-                            inquiryId: inquiry.inquiryId,
-                            followUpQuotationId: inquiry.followUpQuotation.id,
-                            followUpUserId: null,
-                          });
-                          setSelectedFollowUpUser({
-                            value: inquiry.followUpQuotation.id,
-                            label: inquiry.followUpQuotation.name,
-                          });
-                          setIsFollowUpUser(false);
-                          setshowStatusQuartationChangeModal(true);
-                        }}
-                        className="p-2 bg-purple-500 text-white rounded hover:bg-purple-600">
-                        <FaFileInvoice />
-                      </button>
-                    )}
+                    {inquiry.followUpQuotation?.id === userId &&
+                      inquiry.isWin == null &&
+                      inquiry.quotationGiven === false && (
+                        <button
+                          onClick={() => {
+                            setQuotationDescription(inquiry.description || "")
+                            setStatusChangeData({
+                              inquiryId: inquiry.inquiryId,
+                              followUpQuotationId: inquiry.followUpQuotation.id,
+                              followUpUserId: null,
+                            })
+                            setSelectedFollowUpUser({
+                              value: inquiry.followUpQuotation.id,
+                              label: inquiry.followUpQuotation.name,
+                            })
+                            setIsFollowUpUser(false)
+                            setshowStatusQuartationChangeModal(true)
+                          }}
+                          className="p-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+                        >
+                          <FaFileInvoice />
+                        </button>
+                      )}
 
-                    {inquiry.followUpUser?.id === userId && inquiry.isWin == null && inquiry.quotationGiven === true && (
-                      <button
-                        onClick={() => {
-                          setFollowUpDescription(inquiry.description || "");
-                          setStatusChangeData({
-                            inquiryId: inquiry.inquiryId,
-                            followUpQuotationId: null,
-                            followUpUserId: inquiry.followUpUser.id,
-                          });
-                          setSelectedFollowUpUser({
-                            value: inquiry.followUpUser.id,
-                            label: inquiry.followUpUser.name,
-                          });
-                          setIsFollowUpUser(true);
-                          setshowStatusQuartationChangeModal(true);
-                        }}
-                        className="p-2 bg-indigo-500 text-white rounded hover:bg-indigo-600">
-                        <FaUserCheck />
-                      </button>
-                    )}
+                    {inquiry.followUpUser?.id === userId &&
+                      inquiry.isWin == null &&
+                      inquiry.quotationGiven === true && (
+                        <button
+                          onClick={() => {
+                            setFollowUpDescription(inquiry.description || "")
+                            setStatusChangeData({
+                              inquiryId: inquiry.inquiryId,
+                              followUpQuotationId: null,
+                              followUpUserId: inquiry.followUpUser.id,
+                            })
+                            setSelectedFollowUpUser({
+                              value: inquiry.followUpUser.id,
+                              label: inquiry.followUpUser.name,
+                            })
+                            setIsFollowUpUser(true)
+                            setshowStatusQuartationChangeModal(true)
+                          }}
+                          className="p-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
+                        >
+                          <FaUserCheck />
+                        </button>
+                      )}
                   </td>
                 </tr>
               ))
@@ -1827,35 +1955,49 @@ const Inquiry: React.FC = () => {
         {/* Pagination */}
         <div className="flex justify-between items-center mt-6">
           <p className="text-sm text-gray-600">
-            Showing {tableData.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} to {(currentPage - 1) * pageSize + tableData.length} of {totalData} results
+            Showing {tableData.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} to{" "}
+            {(currentPage - 1) * pageSize + tableData.length} of {totalData} results
           </p>
           <div className="flex gap-2">
-            <button onClick={handlePrev} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black" disabled={currentPage === 1}>
+            <button
+              onClick={handlePrev}
+              className="px-3 flex py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black"
+              disabled={currentPage === 1}
+            >
               <MdOutlineNavigateNext className="text-2xl rotate-180" />
               Previous
             </button>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              const pageNum = currentPage > 3 ? currentPage - 3 + i + 1 : i + 1;
+              const pageNum = currentPage > 3 ? currentPage - 3 + i + 1 : i + 1
               if (pageNum <= totalPages) {
                 return (
-                  <button key={i} onClick={() => setCurrentPage(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}
+                  >
                     {pageNum}
                   </button>
-                );
+                )
               }
-              return null;
+              return null
             })}
-            <button onClick={handleNext} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black" disabled={currentPage === totalPages}>
+            <button
+              onClick={handleNext}
+              className="px-3 flex py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black"
+              disabled={currentPage === totalPages}
+            >
               Next <MdOutlineNavigateNext className="text-2xl" />
             </button>
           </div>
           <select
             value={pageSize}
             onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPage(1);
+              setPageSize(Number(e.target.value))
+              setCurrentPage(1)
             }}
-            className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+            className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white"
+          >
             <option value={10}>10 per page</option>
             <option value={25}>25 per page</option>
             <option value={50}>50 per page</option>
@@ -1872,13 +2014,27 @@ const Inquiry: React.FC = () => {
             <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Project Name</label>
-                <input name="projectName" value={formData.projectName} onChange={handleFormChange} type="text" placeholder="Project Name" className="p-3 border rounded" required />
+                <input
+                  name="projectName"
+                  value={formData.projectName}
+                  onChange={handleFormChange}
+                  type="text"
+                  placeholder="Project Name"
+                  className="p-3 border rounded"
+                  required
+                />
                 {errors.projectName && <div className="text-red-500 text-sm mt-1">{errors.projectName}</div>}
               </div>
 
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Status</label>
-                <select name="inquiryStatus" value={formData.inquiryStatus} onChange={handleFormChange} className="p-3 border rounded" required>
+                <select
+                  name="inquiryStatus"
+                  value={formData.inquiryStatus}
+                  onChange={handleFormChange}
+                  className="p-3 border rounded"
+                  required
+                >
                   <option value="">Select Status</option>
                   <option value="TENDER">TENDER</option>
                   <option value="PURCHASE">PURCHASE</option>
@@ -1890,7 +2046,15 @@ const Inquiry: React.FC = () => {
 
               <div className="flex flex-col col-span-2">
                 <label className="mb-1 font-medium">Description</label>
-                <textarea name="description" value={formData.description} onChange={handleFormChange} placeholder="Description" className="p-3 border rounded" rows={1} required />
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleFormChange}
+                  placeholder="Description"
+                  className="p-3 border rounded"
+                  rows={1}
+                  required
+                />
                 {errors.description && <div className="text-red-500 text-sm mt-1">{errors.description}</div>}
               </div>
 
@@ -1901,9 +2065,9 @@ const Inquiry: React.FC = () => {
                   value={selectedConsumer}
                   onChange={(selectedOption) => {
                     if (selectedOption?.value === "add_more") {
-                      setShowModalConsumer(true);
+                      setShowModalConsumer(true)
                     } else {
-                      handleConsumerChange(selectedOption);
+                      handleConsumerChange(selectedOption)
                     }
                   }}
                   onInputChange={handleConsumerSearch}
@@ -1926,7 +2090,18 @@ const Inquiry: React.FC = () => {
               {/* Brand multi-select */}
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Brand(s)</label>
-                <Select name="brandIds" value={selectedBrands} onChange={handleBrandChange} onInputChange={handleBrandSearch} options={brandOptions} placeholder="Search and Select Brands" isLoading={isLoadingBrands} isMulti className="basic-select" classNamePrefix="select" />
+                <Select
+                  name="brandIds"
+                  value={selectedBrands}
+                  onChange={handleBrandChange}
+                  onInputChange={handleBrandSearch}
+                  options={brandOptions}
+                  placeholder="Search and Select Brands"
+                  isLoading={isLoadingBrands}
+                  isMulti
+                  className="basic-select"
+                  classNamePrefix="select"
+                />
                 {errors.brandIds && <div className="text-red-500 text-sm mt-1">{errors.brandIds}</div>}
               </div>
 
@@ -1952,7 +2127,14 @@ const Inquiry: React.FC = () => {
               {/* Add estimatePrice field */}
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Estimated Price</label>
-                <input type="number" name="estimatePrice" value={formData.estimatePrice} onChange={handleFormChange} placeholder="Enter estimated price" className="p-3 border rounded" />
+                <input
+                  type="number"
+                  name="estimatePrice"
+                  value={formData.estimatePrice}
+                  onChange={handleFormChange}
+                  placeholder="Enter estimated price"
+                  className="p-3 border rounded"
+                />
               </div>
 
               <div className="flex flex-col">
@@ -1962,13 +2144,13 @@ const Inquiry: React.FC = () => {
                   value={selectedConsultant}
                   onChange={(selectedOption) => {
                     if (selectedOption?.value === "add_more") {
-                      setShowModalConsultant(true);
+                      setShowModalConsultant(true)
                     } else {
-                      setSelectedConsultant(selectedOption);
+                      setSelectedConsultant(selectedOption)
                       setFormData({
                         ...formData,
                         consultantId: selectedOption ? selectedOption.value : "",
-                      });
+                      })
                     }
                   }}
                   onInputChange={handleConsultantSearch}
@@ -1995,13 +2177,13 @@ const Inquiry: React.FC = () => {
                   value={selectedFollowUpQuotation}
                   onChange={(selectedOption) => {
                     if (selectedOption?.value === "add_more") {
-                      setShowUserModal(true);
+                      setShowUserModal(true)
                     } else {
-                      setSelectedFollowUpQuotation(selectedOption);
+                      setSelectedFollowUpQuotation(selectedOption)
                       setFormData({
                         ...formData,
                         followUpQuotation: selectedOption ? selectedOption.value : "",
-                      });
+                      })
                     }
                   }}
                   onInputChange={handleQuotationSearch}
@@ -2012,7 +2194,9 @@ const Inquiry: React.FC = () => {
                   className="basic-select"
                   classNamePrefix="select"
                 />
-                {errors.followUpQuotation && <div className="text-red-500 text-sm mt-1">{errors.followUpQuotation}</div>}
+                {errors.followUpQuotation && (
+                  <div className="text-red-500 text-sm mt-1">{errors.followUpQuotation}</div>
+                )}
               </div>
 
               <div className="flex flex-col">
@@ -2022,13 +2206,13 @@ const Inquiry: React.FC = () => {
                   value={selectedFollowUpUser}
                   onChange={(selectedOption) => {
                     if (selectedOption?.value === "add_more") {
-                      setShowUserModal(true);
+                      setShowUserModal(true)
                     } else {
-                      setSelectedFollowUpUser(selectedOption);
+                      setSelectedFollowUpUser(selectedOption)
                       setFormData({
                         ...formData,
                         followUpUser: selectedOption ? selectedOption.value : "",
-                      });
+                      })
                     }
                   }}
                   onInputChange={handleUserSearch}
@@ -2044,7 +2228,15 @@ const Inquiry: React.FC = () => {
 
               <div className="flex flex-col col-span-2">
                 <label className="mb-1 font-medium">Remark</label>
-                <textarea name="remark" value={formData.remark} onChange={handleFormChange} placeholder="Remark" className="p-3 border rounded" rows={1} required />
+                <textarea
+                  name="remark"
+                  value={formData.remark}
+                  onChange={handleFormChange}
+                  placeholder="Remark"
+                  className="p-3 border rounded"
+                  rows={1}
+                  required
+                />
                 {errors.remark && <div className="text-red-500 text-sm mt-1">{errors.remark}</div>}
               </div>
 
@@ -2052,12 +2244,13 @@ const Inquiry: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setShowCreateModal(false);
-                    resetForm();
-                    setEditMode(false);
-                    setSelectedInquiryId(null);
+                    setShowCreateModal(false)
+                    resetForm()
+                    setEditMode(false)
+                    setSelectedInquiryId(null)
                   }}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
                   Cancel
                 </button>
                 <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
@@ -2118,12 +2311,16 @@ const Inquiry: React.FC = () => {
 
               <div className="flex gap-2">
                 <label className="mb-1 font-medium text-gray-600">Created At:</label>
-                <p className="bg-gray-100 rounded">{selectedInquiry.createdAt ? new Date(selectedInquiry.createdAt).toLocaleString() : "N/A"}</p>
+                <p className="bg-gray-100 rounded">
+                  {selectedInquiry.createdAt ? new Date(selectedInquiry.createdAt).toLocaleString() : "N/A"}
+                </p>
               </div>
 
               <div className="flex gap-2">
                 <label className="mb-1 font-medium text-gray-600">Last Updated:</label>
-                <p className="bg-gray-100 rounded">{selectedInquiry.updatedAt ? new Date(selectedInquiry.updatedAt).toLocaleString() : "N/A"}</p>
+                <p className="bg-gray-100 rounded">
+                  {selectedInquiry.updatedAt ? new Date(selectedInquiry.updatedAt).toLocaleString() : "N/A"}
+                </p>
               </div>
             </div>
 
@@ -2138,7 +2335,10 @@ const Inquiry: React.FC = () => {
             </div>
 
             <div className="flex justify-end mt-4">
-              <button onClick={() => setShowViewModal(false)} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              <button
+                onClick={() => setShowViewModal(false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
                 Close
               </button>
             </div>
@@ -2187,10 +2387,16 @@ const Inquiry: React.FC = () => {
               </div>
 
               <div className="flex justify-end gap-2 mt-4">
-                <button onClick={() => setShowProductModal(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                <button
+                  onClick={() => setShowProductModal(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
                   Cancel
                 </button>
-                <button onClick={handleSubmitProduct} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button
+                  onClick={handleSubmitProduct}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
                   Save Product
                 </button>
               </div>
@@ -2205,15 +2411,29 @@ const Inquiry: React.FC = () => {
           <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4">{editingId ? "Edit Consumer" : "Create Consumer"}</h2>
 
-            {successMessage && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{successMessage}</div>}
-            {errorMessage && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{errorMessage}</div>}
+            {successMessage && (
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                {successMessage}
+              </div>
+            )}
+            {errorMessage && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{errorMessage}</div>
+            )}
 
             <div className="space-y-4">
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">
                   Consumer Name <span className="text-red-500">*</span>
                 </label>
-                <input type="text" placeholder="Enter Consumer Name" name="consumerName" value={formDataConsumer.consumerName} onChange={handleConsumerInputChange} className={`p-3 border rounded ${formErrors.consumerName ? "border-red-500" : ""}`} required />
+                <input
+                  type="text"
+                  placeholder="Enter Consumer Name"
+                  name="consumerName"
+                  value={formDataConsumer.consumerName}
+                  onChange={handleConsumerInputChange}
+                  className={`p-3 border rounded ${formErrors.consumerName ? "border-red-500" : ""}`}
+                  required
+                />
                 {formErrors.consumerName && <div className="text-red-500 text-sm mt-1">{formErrors.consumerName}</div>}
               </div>
 
@@ -2221,7 +2441,15 @@ const Inquiry: React.FC = () => {
                 <label className="mb-1 font-medium">
                   Email <span className="text-red-500">*</span>
                 </label>
-                <input type="email" placeholder="Enter Email" name="emailId" value={formDataConsumer.emailId} onChange={handleConsumerInputChange} className={`p-3 border rounded ${formErrors.emailId ? "border-red-500" : ""}`} required />
+                <input
+                  type="email"
+                  placeholder="Enter Email"
+                  name="emailId"
+                  value={formDataConsumer.emailId}
+                  onChange={handleConsumerInputChange}
+                  className={`p-3 border rounded ${formErrors.emailId ? "border-red-500" : ""}`}
+                  required
+                />
                 {formErrors.emailId && <div className="text-red-500 text-sm mt-1">{formErrors.emailId}</div>}
               </div>
 
@@ -2229,7 +2457,15 @@ const Inquiry: React.FC = () => {
                 <label className="mb-1 font-medium">
                   Address <span className="text-red-500">*</span>
                 </label>
-                <input type="text" placeholder="Enter Address" name="address" value={formDataConsumer.address} onChange={handleConsumerInputChange} className={`p-3 border rounded ${formErrors.address ? "border-red-500" : ""}`} required />
+                <input
+                  type="text"
+                  placeholder="Enter Address"
+                  name="address"
+                  value={formDataConsumer.address}
+                  onChange={handleConsumerInputChange}
+                  className={`p-3 border rounded ${formErrors.address ? "border-red-500" : ""}`}
+                  required
+                />
                 {formErrors.address && <div className="text-red-500 text-sm mt-1">{formErrors.address}</div>}
               </div>
 
@@ -2237,7 +2473,15 @@ const Inquiry: React.FC = () => {
                 <label className="mb-1 font-medium">
                   Contact <span className="text-red-500">*</span>
                 </label>
-                <input type="text" placeholder="Enter Contact" name="contact" value={formDataConsumer.contact} onChange={handleConsumerInputChange} className={`p-3 border rounded ${formErrors.contact ? "border-red-500" : ""}`} required />
+                <input
+                  type="text"
+                  placeholder="Enter Contact"
+                  name="contact"
+                  value={formDataConsumer.contact}
+                  onChange={handleConsumerInputChange}
+                  className={`p-3 border rounded ${formErrors.contact ? "border-red-500" : ""}`}
+                  required
+                />
                 {formErrors.contact && <div className="text-red-500 text-sm mt-1">{formErrors.contact}</div>}
               </div>
 
@@ -2245,7 +2489,10 @@ const Inquiry: React.FC = () => {
                 <button onClick={handleCloseConsumer} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
                   Close
                 </button>
-                <button onClick={handleSubmitConsumer} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button
+                  onClick={handleSubmitConsumer}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
                   Save Consumer
                 </button>
               </div>
@@ -2260,32 +2507,71 @@ const Inquiry: React.FC = () => {
           <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Create Consultant</h2>
 
-            {message && <div className={`${messageType === "success" ? "bg-green-100 border-green-400 text-green-700" : "bg-red-100 border-red-400 text-red-700"} px-4 py-3 rounded mb-4 border`}>{message}</div>}
+            {message && (
+              <div
+                className={`${messageType === "success" ? "bg-green-100 border-green-400 text-green-700" : "bg-red-100 border-red-400 text-red-700"} px-4 py-3 rounded mb-4 border`}
+              >
+                {message}
+              </div>
+            )}
 
             <div className="space-y-4">
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Consultant Name</label>
-                <input type="text" placeholder="Enter consultant name" name="consultantName" value={consultantformData.consultantName} onChange={handleConsultantInputChange} className={`p-3 border rounded ${getValidationClass("consultantName") ? "border-red-500" : ""}`} required />
-                {consltanterrors.consultantName && <div className="text-red-500 text-sm mt-1">{consltanterrors.consultantName}</div>}
+                <input
+                  type="text"
+                  placeholder="Enter consultant name"
+                  name="consultantName"
+                  value={consultantformData.consultantName}
+                  onChange={handleConsultantInputChange}
+                  className={`p-3 border rounded ${getValidationClass("consultantName") ? "border-red-500" : ""}`}
+                  required
+                />
+                {consltanterrors.consultantName && (
+                  <div className="text-red-500 text-sm mt-1">{consltanterrors.consultantName}</div>
+                )}
               </div>
 
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Contact Person</label>
-                <input type="text" placeholder="Enter contact person" name="contactPerson" value={consultantformData.contactPerson} onChange={handleConsultantInputChange} className={`p-3 border rounded ${getValidationClass("contactPerson") ? "border-red-500" : ""}`} required />
-                {consltanterrors.contactPerson && <div className="text-red-500 text-sm mt-1">{consltanterrors.contactPerson}</div>}
+                <input
+                  type="text"
+                  placeholder="Enter contact person"
+                  name="contactPerson"
+                  value={consultantformData.contactPerson}
+                  onChange={handleConsultantInputChange}
+                  className={`p-3 border rounded ${getValidationClass("contactPerson") ? "border-red-500" : ""}`}
+                  required
+                />
+                {consltanterrors.contactPerson && (
+                  <div className="text-red-500 text-sm mt-1">{consltanterrors.contactPerson}</div>
+                )}
               </div>
 
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Contact Number</label>
-                <input type="text" placeholder="Enter contact number" name="contactNumber" value={consultantformData.contactNumber} onChange={handleConsultantInputChange} className={`p-3 border rounded ${getValidationClass("contactNumber") ? "border-red-500" : ""}`} required />
-                {consltanterrors.contactNumber && <div className="text-red-500 text-sm mt-1">{consltanterrors.contactNumber}</div>}
+                <input
+                  type="text"
+                  placeholder="Enter contact number"
+                  name="contactNumber"
+                  value={consultantformData.contactNumber}
+                  onChange={handleConsultantInputChange}
+                  className={`p-3 border rounded ${getValidationClass("contactNumber") ? "border-red-500" : ""}`}
+                  required
+                />
+                {consltanterrors.contactNumber && (
+                  <div className="text-red-500 text-sm mt-1">{consltanterrors.contactNumber}</div>
+                )}
               </div>
 
               <div className="flex justify-end gap-2 mt-4">
                 <button onClick={handleCloseConsultant} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
                   Close
                 </button>
-                <button onClick={consultantHandleSubmit} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button
+                  onClick={consultantHandleSubmit}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
                   Save Consultant
                 </button>
               </div>
@@ -2298,27 +2584,59 @@ const Inquiry: React.FC = () => {
       {showUserModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-[#00000071] backdrop-blur-xs overflow-y-auto py-4">
           <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4">{isFollowUpUser ? "Create Follow-up User" : "Create Follow-up Quotation"}</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {isFollowUpUser ? "Create Follow-up User" : "Create Follow-up Quotation"}
+            </h2>
 
             <div className="space-y-4">
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Name</label>
-                <input type="text" placeholder="Enter name" name="name" value={newUserData.name} onChange={handleNewUserInputChange} className="p-3 border rounded" required />
+                <input
+                  type="text"
+                  placeholder="Enter name"
+                  name="name"
+                  value={newUserData.name}
+                  onChange={handleNewUserInputChange}
+                  className="p-3 border rounded"
+                  required
+                />
               </div>
 
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Email</label>
-                <input type="email" placeholder="Enter email" name="email" value={newUserData.email} onChange={handleNewUserInputChange} className="p-3 border rounded" required />
+                <input
+                  type="email"
+                  placeholder="Enter email"
+                  name="email"
+                  value={newUserData.email}
+                  onChange={handleNewUserInputChange}
+                  className="p-3 border rounded"
+                  required
+                />
               </div>
 
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Designation</label>
-                <input type="text" placeholder="Enter designation" name="designation" value={newUserData.designation} onChange={handleNewUserInputChange} className="p-3 border rounded" required />
+                <input
+                  type="text"
+                  placeholder="Enter designation"
+                  name="designation"
+                  value={newUserData.designation}
+                  onChange={handleNewUserInputChange}
+                  className="p-3 border rounded"
+                  required
+                />
               </div>
 
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Role</label>
-                <select name="roleId" value={newUserData.roleId} onChange={handleNewUserInputChange} className="p-3 border rounded" required>
+                <select
+                  name="roleId"
+                  value={newUserData.roleId}
+                  onChange={handleNewUserInputChange}
+                  className="p-3 border rounded"
+                  required
+                >
                   <option value="">Select Role</option>
                   {roleOptions.map((role) => (
                     <option key={role.id} value={role.id}>
@@ -2330,19 +2648,41 @@ const Inquiry: React.FC = () => {
 
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Mobile No</label>
-                <input type="text" placeholder="Enter mobile number" name="mobileNo" value={newUserData.mobileNo} onChange={handleNewUserInputChange} className="p-3 border rounded" required />
+                <input
+                  type="text"
+                  placeholder="Enter mobile number"
+                  name="mobileNo"
+                  value={newUserData.mobileNo}
+                  onChange={handleNewUserInputChange}
+                  className="p-3 border rounded"
+                  required
+                />
               </div>
 
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Password</label>
-                <input type="password" placeholder="Enter password" name="password" value={newUserData.password} onChange={handleNewUserInputChange} className="p-3 border rounded" required />
+                <input
+                  type="password"
+                  placeholder="Enter password"
+                  name="password"
+                  value={newUserData.password}
+                  onChange={handleNewUserInputChange}
+                  className="p-3 border rounded"
+                  required
+                />
               </div>
 
               <div className="flex justify-end gap-2 mt-4">
-                <button onClick={() => setShowUserModal(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                <button
+                  onClick={() => setShowUserModal(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
                   Cancel
                 </button>
-                <button onClick={handleSubmitNewUser} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button
+                  onClick={handleSubmitNewUser}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
                   Save {isFollowUpUser ? "User" : "Quotation"}
                 </button>
               </div>
@@ -2377,10 +2717,16 @@ const Inquiry: React.FC = () => {
               </div>
 
               <div className="flex justify-end gap-2 mt-4">
-                <button onClick={() => setShowStatusChangeModal(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                <button
+                  onClick={() => setShowStatusChangeModal(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
                   Cancel
                 </button>
-                <button onClick={submitStatusDropdownChange} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button
+                  onClick={submitStatusDropdownChange}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
                   Submit
                 </button>
               </div>
@@ -2393,25 +2739,38 @@ const Inquiry: React.FC = () => {
       {showStatusQuartationChangeModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-[#00000071] backdrop-blur-xs">
           <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">{isFollowUpUser ? "Reassign Follow-up" : "Mark Quotation Done"}</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {isFollowUpUser ? "Reassign Follow-up" : "Mark Quotation Done"}
+            </h2>
 
             <div className="space-y-4">
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Description (Required)</label>
-                <textarea rows={3} placeholder="Enter a description" value={isFollowUpUser ? followUpDescription : quotationDescription} onChange={(e) => (isFollowUpUser ? setFollowUpDescription(e.target.value) : setQuotationDescription(e.target.value))} className="p-3 border rounded" required />
+                <textarea
+                  rows={3}
+                  placeholder="Enter a description"
+                  value={isFollowUpUser ? followUpDescription : quotationDescription}
+                  onChange={(e) =>
+                    isFollowUpUser ? setFollowUpDescription(e.target.value) : setQuotationDescription(e.target.value)
+                  }
+                  className="p-3 border rounded"
+                  required
+                />
               </div>
 
               <div className="flex flex-col">
-                <label className="mb-1 font-medium">{isFollowUpUser ? "Reassign Follow-up User" : "Select Follow-up Quotation User"}</label>
+                <label className="mb-1 font-medium">
+                  {isFollowUpUser ? "Reassign Follow-up User" : "Select Follow-up Quotation User"}
+                </label>
                 <Select
                   name="followUpUser"
                   value={selectedFollowUpUser}
                   onChange={(selectedOption) => {
-                    setSelectedFollowUpUser(selectedOption);
+                    setSelectedFollowUpUser(selectedOption)
                     setStatusChangeData((prevState: typeof statusChangeData) => ({
                       ...prevState,
                       followUpQuotationId: selectedOption ? selectedOption.value : null,
-                    }));
+                    }))
                   }}
                   onInputChange={handleUserSearch}
                   options={[...userOptions, { value: "add_more", label: "Add More" }]}
@@ -2425,16 +2784,26 @@ const Inquiry: React.FC = () => {
               </div>
 
               <div className="flex justify-end gap-2 mt-4">
-                <button onClick={() => setshowStatusQuartationChangeModal(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                <button
+                  onClick={() => setshowStatusQuartationChangeModal(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
                   Cancel
                 </button>
                 <button
                   onClick={() =>
                     isFollowUpUser
-                      ? handleFollowUpReassign(statusChangeData.inquiryId, selectedFollowUpUser ? selectedFollowUpUser.value : statusChangeData.followUpQuotationId)
-                      : handleQuotationDone(statusChangeData.inquiryId, selectedFollowUpUser ? selectedFollowUpUser.value : statusChangeData.followUpUserId)
+                      ? handleFollowUpReassign(
+                          statusChangeData.inquiryId,
+                          selectedFollowUpUser ? selectedFollowUpUser.value : statusChangeData.followUpQuotationId,
+                        )
+                      : handleQuotationDone(
+                          statusChangeData.inquiryId,
+                          selectedFollowUpUser ? selectedFollowUpUser.value : statusChangeData.followUpUserId,
+                        )
                   }
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
                   Submit
                 </button>
               </div>
@@ -2452,14 +2821,27 @@ const Inquiry: React.FC = () => {
             <div className="space-y-4">
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Description</label>
-                <textarea rows={3} placeholder="Enter description" value={modalDescription} onChange={(e) => setModalDescription(e.target.value)} className="p-3 border rounded" required />
+                <textarea
+                  rows={3}
+                  placeholder="Enter description"
+                  value={modalDescription}
+                  onChange={(e) => setModalDescription(e.target.value)}
+                  className="p-3 border rounded"
+                  required
+                />
               </div>
 
               <div className="flex justify-end gap-2 mt-4">
-                <button onClick={() => setShowWinLossModal(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                <button
+                  onClick={() => setShowWinLossModal(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
                   Cancel
                 </button>
-                <button onClick={handleModalSubmit} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button
+                  onClick={handleModalSubmit}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
                   Submit
                 </button>
               </div>
@@ -2470,7 +2852,7 @@ const Inquiry: React.FC = () => {
 
       <ToastContainer />
     </div>
-  );
-};
+  )
+}
 
-export default Inquiry;
+export default Inquiry

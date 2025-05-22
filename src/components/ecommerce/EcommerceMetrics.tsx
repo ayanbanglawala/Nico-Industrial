@@ -1,80 +1,80 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
-import { IoCheckmarkSharp, IoCloseCircleOutline } from "react-icons/io5";
-import { MdOutlineNavigateNext } from "react-icons/md";
-import axios from "axios";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { toast } from "react-toastify";
-import { FaEye, FaPenAlt } from "react-icons/fa";
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router"
+import { IoCheckmarkSharp, IoCloseCircleOutline } from "react-icons/io5"
+import { MdOutlineNavigateNext } from "react-icons/md"
+import axios from "axios"
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
+import { toast } from "react-toastify"
+import { FaEye, FaPenAlt } from "react-icons/fa"
 interface FollowUpItem {
-  id: string;
-  generalFollowUpName?: string;
-  generalFollowUpId?: string;
-  description?: string;
-  dueDate: string;
-  statusNotes?: string;
-  status?: string;
-  createdAt?: string;
+  id: string
+  generalFollowUpName?: string
+  generalFollowUpId?: string
+  description?: string
+  dueDate: string
+  statusNotes?: string
+  status?: string
+  createdAt?: string
   createdBy?: {
-    id: string;
-    name?: string;
-  };
+    id: string
+    name?: string
+  }
   followUpPerson?: {
-    id: number;
-    name: string;
-    email: string;
-    designation: string;
-    mobileNo: string;
-    active: boolean;
-    deleted: boolean;
-  };
+    id: number
+    name: string
+    email: string
+    designation: string
+    mobileNo: string
+    active: boolean
+    deleted: boolean
+  }
 }
 
 export default function EcommerceMetrics() {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [users, setUsers] = useState<{ value: number; label: string }[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
-  const [selectedReminder, setSelectedReminder] = useState<FollowUpItem | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [inquiries, setInquiries] = useState(0);
-  const [activeUserCount, setActiveUserCount] = useState(0);
-  const [completedInquiriesCount, setCompletedInquiriesCount] = useState(0);
-  const [ongoingInquiriesCount, setOngoingInquiriesCount] = useState(0);
-  const [remindersCount, setRemindersCount] = useState(0);
-  const [rejectedInquiriesCount, setRejectedInquiriesCount] = useState(0);
-  const [assignInquary, setAssignInquary] = useState(0);
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [followUps, setFollowUps] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [followUpPersonName, setfollowUpPersonName] = useState(1);
-  const pageSize = 10;
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUpItem | null>(null);
-  const [doneModalOpen, setDoneModalOpen] = useState(false);
-  const [doneDescription, setDoneDescription] = useState("");
-  const [selectedDateFollowUps, setSelectedDateFollowUps] = useState<FollowUpItem[]>([]);
-  console.log(loading, assignInquary, totalUsers, followUpPersonName, remindersCount, error);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [users, setUsers] = useState<{ value: number; label: string }[]>([])
+  const [loadingUsers, setLoadingUsers] = useState(false)
+  const [selectedReminder, setSelectedReminder] = useState<FollowUpItem | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [inquiries, setInquiries] = useState(0)
+  const [activeUserCount, setActiveUserCount] = useState(0)
+  const [completedInquiriesCount, setCompletedInquiriesCount] = useState(0)
+  const [ongoingInquiriesCount, setOngoingInquiriesCount] = useState(0)
+  const [remindersCount, setRemindersCount] = useState(0)
+  const [rejectedInquiriesCount, setRejectedInquiriesCount] = useState(0)
+  const [assignInquary, setAssignInquary] = useState(0)
+  const [totalUsers, setTotalUsers] = useState(0)
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [followUps, setFollowUps] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [followUpPersonName, setfollowUpPersonName] = useState(1)
+  const [pageSize] = useState(10)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUpItem | null>(null)
+  const [doneModalOpen, setDoneModalOpen] = useState(false)
+  const [doneDescription, setDoneDescription] = useState("")
+  const [selectedDateFollowUps, setSelectedDateFollowUps] = useState<FollowUpItem[]>([])
+  console.log(loading, assignInquary, totalUsers, followUpPersonName, remindersCount, error)
 
-  const navigate = useNavigate();
-  const authToken = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId");
+  const navigate = useNavigate()
+  const authToken = localStorage.getItem("token")
+  const userId = localStorage.getItem("userId")
 
   const truncateText = (text: string | undefined, maxLength: number) => {
-    if (!text) return "N/A";
-    return text.length <= maxLength ? text : text.slice(0, maxLength) + "...";
-  };
+    if (!text) return "N/A"
+    return text.length <= maxLength ? text : text.slice(0, maxLength) + "..."
+  }
 
   const fetchFollowUps = async (page = 1) => {
     try {
-      const currentDate = new Date().toISOString().split("T")[0];
+      const currentDate = new Date().toISOString().split("T")[0]
       const response = await axios.get(`https://nicoindustrial.com/api/generalFollowUp/getall`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -85,14 +85,14 @@ export default function EcommerceMetrics() {
           page: page,
           size: pageSize,
         },
-      });
-      setFollowUps(response.data.data.list);
-      setTotalPages(response.data.data.totalPages);
+      })
+      setFollowUps(response.data.data.list)
+      setTotalPages(response.data.data.totalPages)
     } catch (error) {
-      console.error("Error fetching follow-ups:", error);
-      setError((error as any).message);
+      console.error("Error fetching follow-ups:", error)
+      setError((error as any).message)
     }
-  };
+  }
 
   useEffect(() => {
     const fetchInquiries = async () => {
@@ -100,93 +100,137 @@ export default function EcommerceMetrics() {
         const res = await axios.get(`https://nicoindustrial.com/api/inquiry/totalinquiries`, {
           params: { userId, isAdmin: false },
           headers: { Authorization: `Bearer ${authToken}` },
-        });
-        setInquiries(res.data.data.totalInquiries);
+        })
+        setInquiries(res.data.data.totalInquiries)
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message)
       }
-    };
+    }
 
     const dashboardDataFetch = async () => {
       try {
         const res = await axios.get(`https://nicoindustrial.com/api/user/dashboard/data`, {
           params: { userId },
           headers: { Authorization: `Bearer ${authToken}` },
-        });
+        })
 
-        setActiveUserCount(res.data.data.urgentInquiryCount || 0);
-        setCompletedInquiriesCount(res.data.data.purchaseInquiryCount || 0);
-        setOngoingInquiriesCount(res.data.data.procurementInquiryCount || 0);
-        setRemindersCount(res.data.data.remindersCount || 0);
-        setRejectedInquiriesCount(res.data.data.tenderInquiryCount || 0);
-        setAssignInquary(res.data.data.assignInquiryCount || 0);
-        setTotalUsers(res.data.data.totalUser || 0);
-        setfollowUpPersonName(res.data.data.followUpPerson.name || 0);
+        setActiveUserCount(res.data.data.urgentInquiryCount || 0)
+        setCompletedInquiriesCount(res.data.data.purchaseInquiryCount || 0)
+        setOngoingInquiriesCount(res.data.data.procurementInquiryCount || 0)
+        setRemindersCount(res.data.data.remindersCount || 0)
+        setRejectedInquiriesCount(res.data.data.tenderInquiryCount || 0)
+        setAssignInquary(res.data.data.assignInquiryCount || 0)
+        setTotalUsers(res.data.data.totalUser || 0)
+        setfollowUpPersonName(res.data.data.followUpPerson.name || 0)
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchInquiries();
-    dashboardDataFetch();
-    fetchFollowUps();
-  }, []);
+    fetchInquiries()
+    dashboardDataFetch()
+    fetchFollowUps()
+  }, [])
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      fetchFollowUps(page);
+      setCurrentPage(page)
+      fetchFollowUps(page)
     }
-  };
+  }
 
   const metricCards = [
     {
       title: "Tender Inquiries",
       count: rejectedInquiriesCount,
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-4 w-4"
+        >
           <circle cx="12" cy="12" r="10"></circle>
           <path d="m15 9-6 6"></path>
           <path d="m9 9 6 6"></path>
         </svg>
       ),
       color: "bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/15 dark:text-yellow-400",
-      onClick: () => navigate("/inquiry", { state: { filterStatus: "TENDER" } }),
+      onClick: () => navigate("/inquiry", { state: { status: "TENDER" } }),
       status: "TENDER",
     },
     {
       title: "Procurement Inquiries",
       count: ongoingInquiriesCount,
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-4 w-4"
+        >
           <rect width="20" height="16" x="2" y="4" rx="2"></rect>
           <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
         </svg>
       ),
       color: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/15 dark:text-pink-400",
-      onClick: () => navigate("/inquiry", { state: { filterStatus: "PROCUREMENT" } }),
+      onClick: () => navigate("/inquiry", { state: { status: "PROCUREMENT" } }),
       status: "PROCUREMENT",
     },
     {
       title: "Purchase Inquiries",
       count: completedInquiriesCount,
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-4 w-4"
+        >
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
           <polyline points="22 4 12 14.01 9 11.01"></polyline>
         </svg>
       ),
       color: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
-      onClick: () => navigate("/inquiry", { state: { filterStatus: "PURCHASE" } }),
+      onClick: () => navigate("/inquiry", { state: { status: "PURCHASE" } }),
       status: "PURCHASE",
     },
     {
       title: "Urgent Inquiries",
       count: activeUserCount,
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-4 w-4"
+        >
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
           <circle cx="9" cy="7" r="4"></circle>
           <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -194,23 +238,25 @@ export default function EcommerceMetrics() {
         </svg>
       ),
       color: "bg-rose-500/10 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400",
-      onClick: () => navigate("/inquiry", { state: { filterStatus: "URGENT" } }),
+      onClick: () => navigate("/inquiry", { state: { status: "URGENT" } }),
       status: "URGENT",
     },
-  ];
+  ]
 
-  const dueDates = followUps.map((item: FollowUpItem) => new Date(item.dueDate).toLocaleDateString("en-CA").split("T")[0]);
+  const dueDates = followUps.map(
+    (item: FollowUpItem) => new Date(item.dueDate).toLocaleDateString("en-CA").split("T")[0],
+  )
 
   const CalendarWidget = () => {
-    const [calendarEvents, setCalendarEvents] = useState<{ [date: string]: any[] }>({});
-    const [loadingEvents, setLoadingEvents] = useState(false);
-    console.log(dueDates, loadingEvents);
+    const [calendarEvents, setCalendarEvents] = useState<{ [date: string]: any[] }>({})
+    const [loadingEvents, setLoadingEvents] = useState(false)
+    console.log(dueDates, loadingEvents)
 
     // Fetch calendar events when month changes
     const fetchCalendarEvents = async () => {
-      setLoadingEvents(true);
+      setLoadingEvents(true)
       try {
-        const month = selectedDate.getMonth() + 1; // months are 0-indexed in JS
+        const month = selectedDate.getMonth() + 1 // months are 0-indexed in JS
         const response = await axios.get(`https://nicoindustrial.com/api/dashboard/calenderevent`, {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -219,30 +265,33 @@ export default function EcommerceMetrics() {
             month: month,
             userId: userId,
           },
-        });
-        setCalendarEvents(response.data.data || {});
+        })
+        setCalendarEvents(response.data.data || {})
       } catch (error) {
-        console.error("Error fetching calendar events:", error);
+        console.error("Error fetching calendar events:", error)
       } finally {
-        setLoadingEvents(false);
+        setLoadingEvents(false)
       }
-    };
+    }
 
     useEffect(() => {
-      fetchCalendarEvents();
-    }, [selectedDate.getMonth()]);
+      fetchCalendarEvents()
+    }, [selectedDate.getMonth()])
 
     const handleDateClick = (date: Date | null) => {
       if (date) {
-        setSelectedDate(date);
-        const dateString = date.toISOString().split("T")[0];
-        const eventsForDate = calendarEvents[dateString] || [];
-        setSelectedDateFollowUps(eventsForDate);
+        setSelectedDate(date)
+        const dateString = date.toISOString().split("T")[0]
+        const eventsForDate = calendarEvents[dateString] || []
+        setSelectedDateFollowUps(eventsForDate)
       }
-    };
+    }
 
     // Combine due dates from both followUps and calendarEvents
-    const allDueDates = [...followUps.map((item: FollowUpItem) => new Date(item.dueDate).toLocaleDateString("en-CA").split("T")[0]), ...Object.keys(calendarEvents)];
+    const allDueDates = [
+      ...followUps.map((item: FollowUpItem) => new Date(item.dueDate).toLocaleDateString("en-CA").split("T")[0]),
+      ...Object.keys(calendarEvents),
+    ]
 
     return (
       <div className="flex flex-col md:flex-row gap-4 w-full">
@@ -261,17 +310,18 @@ export default function EcommerceMetrics() {
             onChange={handleDateClick}
             calendarClassName="dark:!bg-black"
             dayClassName={(date) => {
-              const dateString = date.toLocaleDateString("en-CA").split("T")[0];
-              const isDueDate = allDueDates.includes(dateString);
-              const isSelected = date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth();
+              const dateString = date.toLocaleDateString("en-CA").split("T")[0]
+              const isDueDate = allDueDates.includes(dateString)
+              const isSelected =
+                date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth()
               if (isDueDate && isSelected) {
-                return "bg-blue-600 text-white dark:!text-white";
+                return "bg-blue-600 text-white dark:!text-white"
               } else if (isDueDate) {
-                return "bg-green-200 rounded dark:bg-green-900 dark:!text-white";
+                return "bg-green-200 rounded dark:bg-green-900 dark:!text-white"
               } else if (isSelected) {
-                return "bg-gray-800 text-white dark:bg-white dark:!text-white";
+                return "bg-gray-800 text-white dark:bg-white dark:!text-white"
               } else {
-                return "bg-gray-300 rounded dark:bg-gray-800 dark:!text-white";
+                return "bg-gray-300 rounded dark:bg-gray-800 dark:!text-white"
               }
             }}
           />
@@ -289,22 +339,32 @@ export default function EcommerceMetrics() {
                   key={index}
                   className="p-3 bg-white dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer mb-3"
                   onClick={() => {
-                    setSelectedFollowUp(item);
-                    setIsModalOpen(true);
+                    setSelectedFollowUp(item)
+                    setIsModalOpen(true)
                   }}
                 >
                   <div className="flex justify-between items-start">
-                    <h4 className="font-medium text-gray-800 dark:text-white">{item.generalFollowUpName || "Untitled Follow-up"}</h4>
+                    <h4 className="font-medium text-gray-800 dark:text-white">
+                      {item.generalFollowUpName || "Untitled Follow-up"}
+                    </h4>
                     <span
                       className={`text-xs px-2 py-1 rounded ${
-                        item.status === "COMPLETED" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                        item.status === "COMPLETED"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
                       }`}
                     >
                       {item.status || "PENDING"}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 truncate">{truncateText(item.description, 30) || "No description"}</p>
-                  {item.followUpPerson && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Assigned to: {item.followUpPerson.name}</p>}
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 truncate">
+                    {truncateText(item.description, 30) || "No description"}
+                  </p>
+                  {item.followUpPerson && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Assigned to: {item.followUpPerson.name}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -313,55 +373,57 @@ export default function EcommerceMetrics() {
           )}
         </div>
       </div>
-    );
-  };
+    )
+  }
 
   const fetchUsers = async () => {
-    setLoadingUsers(true);
+    setLoadingUsers(true)
     try {
       const response = await axios.get(`https://nicoindustrial.com/api/user/list`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
-      });
+      })
       const userOptions = response.data.data.list.map((user: any) => ({
         value: user.id,
         label: user.name,
-      }));
-      setUsers(userOptions);
+      }))
+      setUsers(userOptions)
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching users:", error)
     } finally {
-      setLoadingUsers(false);
+      setLoadingUsers(false)
     }
-  };
+  }
 
   useEffect(() => {
     const fetchData = async () => {
       // After fetching follow-ups, initialize selected date follow-ups
-      const currentDateString = new Date().toISOString().split("T")[0];
-      const initialFiltered = followUps.filter((item: FollowUpItem) => new Date(item.dueDate).toISOString().split("T")[0] === currentDateString);
-      setSelectedDateFollowUps(initialFiltered);
-    };
+      const currentDateString = new Date().toISOString().split("T")[0]
+      const initialFiltered = followUps.filter(
+        (item: FollowUpItem) => new Date(item.dueDate).toISOString().split("T")[0] === currentDateString,
+      )
+      setSelectedDateFollowUps(initialFiltered)
+    }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   const handleEditClick = (item: FollowUpItem) => {
-    setSelectedReminder(item);
-    setIsEditModalOpen(true);
-    fetchUsers();
-  };
+    setSelectedReminder(item)
+    setIsEditModalOpen(true)
+    fetchUsers()
+  }
 
   const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    if (!selectedReminder) return;
+    if (!selectedReminder) return
 
     try {
-      const reminderId = selectedReminder.id || selectedReminder.generalFollowUpId;
+      const reminderId = selectedReminder.id || selectedReminder.generalFollowUpId
       if (!reminderId) {
-        throw new Error("No valid ID found for this reminder");
+        throw new Error("No valid ID found for this reminder")
       }
 
       const updatedData = {
@@ -375,36 +437,40 @@ export default function EcommerceMetrics() {
         ...(selectedReminder.status && { status: selectedReminder.status }),
         updatedAt: new Date().toISOString(),
         updatedBy: { id: userId },
-      };
+      }
 
-      const response = await axios.put(`https://nicoindustrial.com/api/generalFollowUp/update/${reminderId}`, updatedData, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
+      const response = await axios.put(
+        `https://nicoindustrial.com/api/generalFollowUp/update/${reminderId}`,
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
         },
-      });
+      )
 
-      toast.success(response.data.message || "Reminder updated successfully");
-      setIsEditModalOpen(false);
-      fetchFollowUps(currentPage);
+      toast.success(response.data.message || "Reminder updated successfully")
+      setIsEditModalOpen(false)
+      fetchFollowUps(currentPage)
     } catch (error) {
-      console.error("Error updating reminder:", error);
-      alert((error as any).response?.data?.message || "Error updating reminder");
+      console.error("Error updating reminder:", error)
+      alert((error as any).response?.data?.message || "Error updating reminder")
     }
-  };
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     if (selectedReminder) {
       setSelectedReminder({
         ...selectedReminder,
         [name]: value,
-      });
+      })
     }
-  };
+  }
 
   const handleFollowUpPersonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedUserId = Number.parseInt(e.target.value);
-    const selectedUser = users.find((user) => user.value === selectedUserId);
+    const selectedUserId = Number.parseInt(e.target.value)
+    const selectedUser = users.find((user) => user.value === selectedUserId)
 
     if (selectedReminder && selectedUser) {
       setSelectedReminder({
@@ -419,56 +485,60 @@ export default function EcommerceMetrics() {
           active: selectedReminder.followUpPerson?.active || false,
           deleted: selectedReminder.followUpPerson?.deleted || false,
         },
-      });
+      })
     }
-  };
+  }
 
   const handleMarkAsDone = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedReminder) return;
+    e.preventDefault()
+    if (!selectedReminder) return
 
     if (!selectedReminder) {
-      console.error("No reminder selected");
-      alert("No reminder selected");
-      return;
+      console.error("No reminder selected")
+      alert("No reminder selected")
+      return
     }
 
     try {
-      const reminderId = selectedReminder.id || selectedReminder.generalFollowUpId;
+      const reminderId = selectedReminder.id || selectedReminder.generalFollowUpId
       const updatedData = {
         description: doneDescription || "Marked as completed",
         updatedBy: {
           id: userId || "",
         },
         status: "COMPLETED",
-      };
+      }
 
-      const response = await axios.put(`https://nicoindustrial.com/api/generalFollowUp/make/done/${reminderId}`, updatedData, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
+      const response = await axios.put(
+        `https://nicoindustrial.com/api/generalFollowUp/make/done/${reminderId}`,
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
         },
-      });
+      )
 
-      toast.success(response.data.message || "Follow-up marked as done successfully");
-      setDoneModalOpen(false);
-      setDoneDescription("");
-      fetchFollowUps(currentPage);
+      toast.success(response.data.message || "Follow-up marked as done successfully")
+      setDoneModalOpen(false)
+      setDoneDescription("")
+      fetchFollowUps(currentPage)
     } catch (error) {
-      console.error("Error marking as done:", error);
-      alert((error as any).response?.data?.message || "Error marking follow-up as done");
+      console.error("Error marking as done:", error)
+      alert((error as any).response?.data?.message || "Error marking follow-up as done")
     }
-  };
+  }
 
   useEffect(() => {
     if (isModalOpen || isEditModalOpen || doneModalOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = "hidden"
     } else {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "auto"
     }
     return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [isModalOpen, isEditModalOpen, doneModalOpen]);
+      document.body.style.overflow = "auto"
+    }
+  }, [isModalOpen, isEditModalOpen, doneModalOpen])
 
   return (
     <div className="flex flex-col gap-6">
@@ -481,7 +551,9 @@ export default function EcommerceMetrics() {
             className={`group cursor-pointer h-[90px] rounded-xl border border-gray-300 bg-white p-3 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-gray-700 dark:bg-gray-800`}
           >
             <div className="flex items-center justify-between">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-full ${card.color} transition-all duration-300 group-hover:scale-110`}>
+              <div
+                className={`flex h-10 w-10 items-center justify-center rounded-full ${card.color} transition-all duration-300 group-hover:scale-110`}
+              >
                 {card.icon}
               </div>
               <div className="text-right">
@@ -513,7 +585,10 @@ export default function EcommerceMetrics() {
           </thead>
           <tbody>
             {followUps.map((item: FollowUpItem, index: number) => (
-              <tr key={item.id} className=" dark:hover:bg-gray-800 transform duration-200 hover:bg-gray-200 bg-white dark:bg-black text-center">
+              <tr
+                key={item.id}
+                className=" dark:hover:bg-gray-800 transform duration-200 hover:bg-gray-200 bg-white dark:bg-black text-center"
+              >
                 <td className="px-4 py-2">{(currentPage - 1) * pageSize + index + 1}</td>
                 <td className="px-4 py-2">{item.generalFollowUpName || "N/A"}</td>
                 <td className="px-4 py-2">{truncateText(item.description, 40)}</td>
@@ -531,21 +606,26 @@ export default function EcommerceMetrics() {
                   <div
                     className="cursor-pointer p-2 bg-green-500 text-white rounded hover:bg-green-600"
                     onClick={() => {
-                      setSelectedReminder(item);
-                      setDoneDescription(item.description || ""); // Add this line
-                      setDoneModalOpen(true);
-                    }}>
+                      setSelectedReminder(item)
+                      setDoneDescription(item.description || "") // Add this line
+                      setDoneModalOpen(true)
+                    }}
+                  >
                     <IoCheckmarkSharp />
                   </div>
-                  <div className="cursor-pointer p-2 bg-blue-500 text-white rounded hover:bg-blue-600" onClick={() => handleEditClick(item)}>
+                  <div
+                    className="cursor-pointer p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    onClick={() => handleEditClick(item)}
+                  >
                     <FaPenAlt />
                   </div>
                   <div
                     className="cursor-pointer p-2 bg-gray-500 text-white rounded hover:bg-gray-600"
                     onClick={() => {
-                      setSelectedFollowUp(item);
-                      setIsModalOpen(true);
-                    }}>
+                      setSelectedFollowUp(item)
+                      setIsModalOpen(true)
+                    }}
+                  >
                     <FaEye />
                   </div>
                 </td>
@@ -556,15 +636,27 @@ export default function EcommerceMetrics() {
 
         {/* Pagination Controls */}
         <div className="mt-4 flex justify-end gap-2 text-sm">
-          <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 flex py-1 border rounded dark:text-white border-black dark:border-white">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 flex py-1 border rounded dark:text-white border-black dark:border-white"
+          >
             <MdOutlineNavigateNext className="text-xl rotate-180" /> Prev
           </button>
           {Array.from({ length: totalPages }, (_, i) => (
-            <button key={i + 1} onClick={() => handlePageChange(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-500 text-white dark:bg-white dark:text-black" : ""}`}>
+            <button
+              key={i + 1}
+              onClick={() => handlePageChange(i + 1)}
+              className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-500 text-white dark:bg-white dark:text-black" : ""}`}
+            >
               {i + 1}
             </button>
           ))}
-          <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 flex py-1 border rounded dark:text-white border-black dark:border-white">
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 flex py-1 border rounded dark:text-white border-black dark:border-white"
+          >
             Next <MdOutlineNavigateNext className="text-xl" />
           </button>
         </div>
@@ -576,7 +668,10 @@ export default function EcommerceMetrics() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Reminder Details</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
                 <IoCloseCircleOutline size={24} />
               </button>
             </div>
@@ -584,12 +679,16 @@ export default function EcommerceMetrics() {
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-300">FollowUp Name:</p>
-                <p className="text-base font-medium text-gray-800 dark:text-white">{selectedFollowUp.generalFollowUpName || "N/A"}</p>
+                <p className="text-base font-medium text-gray-800 dark:text-white">
+                  {selectedFollowUp.generalFollowUpName || "N/A"}
+                </p>
               </div>
 
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-300">Description:</p>
-                <p className="text-base font-medium text-gray-800 dark:text-white">{selectedFollowUp.description || "N/A"}</p>
+                <p className="text-base font-medium text-gray-800 dark:text-white">
+                  {selectedFollowUp.description || "N/A"}
+                </p>
               </div>
 
               <div>
@@ -611,12 +710,17 @@ export default function EcommerceMetrics() {
 
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-300">Follow Up Person:</p>
-                <p className="text-base font-medium text-gray-800 dark:text-white">{selectedFollowUp.followUpPerson?.name || "N/A"}</p>
+                <p className="text-base font-medium text-gray-800 dark:text-white">
+                  {selectedFollowUp.followUpPerson?.name || "N/A"}
+                </p>
               </div>
             </div>
 
             <div className="mt-6 flex justify-end">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+              >
                 Close
               </button>
             </div>
@@ -629,7 +733,10 @@ export default function EcommerceMetrics() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Edit Reminder</h3>
-              <button onClick={() => setIsEditModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
                 <IoCloseCircleOutline size={24} />
               </button>
             </div>
@@ -638,22 +745,48 @@ export default function EcommerceMetrics() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">FollowUp Name:</label>
-                  <input type="text" name="generalFollowUpName" value={selectedReminder.generalFollowUpName || ""} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                  <input
+                    type="text"
+                    name="generalFollowUpName"
+                    value={selectedReminder.generalFollowUpName || ""}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                    required
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Description:</label>
-                  <textarea name="description" value={selectedReminder.description || ""} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" rows={3} />
+                  <textarea
+                    name="description"
+                    value={selectedReminder.description || ""}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                    rows={3}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Due Date and Time:</label>
-                  <input type="datetime-local" name="dueDate" value={new Date(selectedReminder.dueDate).toISOString().slice(0, 16)} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                  <input
+                    type="datetime-local"
+                    name="dueDate"
+                    value={new Date(selectedReminder.dueDate).toISOString().slice(0, 16)}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                    required
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Status Notes:</label>
-                  <textarea name="statusNotes" value={selectedReminder.statusNotes || ""} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" rows={2} />
+                  <textarea
+                    name="statusNotes"
+                    value={selectedReminder.statusNotes || ""}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                    rows={2}
+                  />
                 </div>
 
                 <div>
@@ -661,7 +794,13 @@ export default function EcommerceMetrics() {
                   {loadingUsers ? (
                     <p>Loading users...</p>
                   ) : (
-                    <select name="followUpPerson" value={selectedReminder.followUpPerson?.id || ""} onChange={handleFollowUpPersonChange} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required>
+                    <select
+                      name="followUpPerson"
+                      value={selectedReminder.followUpPerson?.id || ""}
+                      onChange={handleFollowUpPersonChange}
+                      className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                      required
+                    >
                       <option value="">Select a person</option>
                       {users.map((user) => (
                         <option key={user.value} value={user.value}>
@@ -674,7 +813,11 @@ export default function EcommerceMetrics() {
               </div>
 
               <div className="mt-6 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsEditModalOpen(false)} className="px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
                   Cancel
                 </button>
                 <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
@@ -691,7 +834,10 @@ export default function EcommerceMetrics() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Mark as Done</h3>
-              <button onClick={() => setDoneModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              <button
+                onClick={() => setDoneModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
                 <IoCloseCircleOutline size={24} />
               </button>
             </div>
@@ -699,11 +845,21 @@ export default function EcommerceMetrics() {
             <form onSubmit={handleMarkAsDone}>
               <div className="mb-4">
                 <label className="block text-sm text-gray-600 dark:text-gray-300 mb-2">Description</label>
-                <textarea value={doneDescription} onChange={(e) => setDoneDescription(e.target.value)} className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" rows={3} placeholder="Add any notes about completing this follow-up" />
+                <textarea
+                  value={doneDescription}
+                  onChange={(e) => setDoneDescription(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                  rows={3}
+                  placeholder="Add any notes about completing this follow-up"
+                />
               </div>
 
               <div className="mt-6 flex justify-end gap-3">
-                <button type="button" onClick={() => setDoneModalOpen(false)} className="px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                <button
+                  type="button"
+                  onClick={() => setDoneModalOpen(false)}
+                  className="px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
                   Cancel
                 </button>
                 <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
@@ -715,5 +871,5 @@ export default function EcommerceMetrics() {
         </div>
       )}
     </div>
-  );
+  )
 }
