@@ -93,10 +93,7 @@ const InquiryView = () => {
     <div className="p-5 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Inquiry Details</h2>
-        <button 
-          onClick={() => navigate(-1)} 
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
+        <button onClick={() => navigate(-1)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
           Back to Inquiry List
         </button>
       </div>
@@ -106,75 +103,55 @@ const InquiryView = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Project Name:</label>
-            <p className="px-3 py-2 flex-1 break-words">
-              {inquiry.projectName || "N/A"}
-            </p>
+            <p className="px-3 py-2 flex-1 break-words">{inquiry.projectName || "N/A"}</p>
           </div>
 
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Inquiry Status:</label>
-            <p className="px-3 py-2 flex-1">
-              {inquiry.inquiryStatus || "N/A"}
-            </p>
+            <p className="px-3 py-2 flex-1">{inquiry.inquiryStatus || "N/A"}</p>
           </div>
 
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Consumer Name:</label>
-            <p className="px-3 py-2 flex-1">
-              {inquiry.consumer?.consumerName || "N/A"}
-            </p>
+            <p className="px-3 py-2 flex-1">{inquiry.consumer?.consumerName || "N/A"}</p>
           </div>
 
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Product Name:</label>
-            <p className="px-3 py-2 flex-1">
-              {inquiry.products && inquiry.products.length > 0 
-                ? inquiry.products.map(p => p.productName).join(", ") 
-                : "N/A"}
-            </p>
+            <p className="px-3 py-2 flex-1">{inquiry.products && inquiry.products.length > 0 ? inquiry.products.map((p) => p.productName).join(", ") : "N/A"}</p>
           </div>
 
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Brand Name:</label>
             <p className="px-3 py-2 flex-1">
-              {inquiry.products && inquiry.products.length > 0 
+              {inquiry.products && inquiry.products.length > 0
                 ? inquiry.products
-                    .map(p => p.brand?.brandName)
+                    .map((p) => p.brand?.brandName)
                     .filter((brandName): brandName is string => brandName !== undefined)
-                    .join(", ") 
+                    .join(", ")
                 : "N/A"}
             </p>
           </div>
 
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Consultant Name:</label>
-            <p className="px-3 py-2 flex-1">
-              {inquiry.consultant?.consultantName || "N/A"}
-            </p>
+            <p className="px-3 py-2 flex-1">{inquiry.consultant?.consultantName || "N/A"}</p>
           </div>
 
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Created By:</label>
-            <p className="px-3 py-2 flex-1">
-              {inquiry.createdBy?.name || "N/A"}
-            </p>
+            <p className="px-3 py-2 flex-1">{inquiry.createdBy?.name || "N/A"}</p>
           </div>
 
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Estimated Price:</label>
-            <p className="px-3 py-2 flex-1">
-              {inquiry.estimatePrice !== null && inquiry.estimatePrice !== undefined 
-                ? `₹${inquiry.estimatePrice.toLocaleString()}` 
-                : "N/A"}
-            </p>
+            <p className="px-3 py-2 flex-1">{inquiry.estimatePrice !== null && inquiry.estimatePrice !== undefined ? `₹${inquiry.estimatePrice.toLocaleString()}` : "N/A"}</p>
           </div>
         </div>
 
         <div className="flex items-start">
           <label className="font-medium text-gray-600 min-w-[120px] mt-2">Remark:</label>
-          <p className="p-3 flex-1 min-h-20">
-            {inquiry.remark || "N/A"}
-          </p>
+          <p className="p-3 flex-1 min-h-20">{inquiry.remark || "N/A"}</p>
         </div>
       </div>
 
@@ -184,16 +161,12 @@ const InquiryView = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Follow-Up Person:</label>
-            <p className="px-3 py-2 flex-1">
-              {inquiry.followUpUser?.name || "N/A"}
-            </p>
+            <p className="px-3 py-2 flex-1">{inquiry.followUpUser?.name || "N/A"}</p>
           </div>
 
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Quotation Person:</label>
-            <p className="px-3 py-2 flex-1">
-              {inquiry.followUpQuotation?.name || "N/A"}
-            </p>
+            <p className="px-3 py-2 flex-1">{inquiry.followUpQuotation?.name || "N/A"}</p>
           </div>
         </div>
       </div>
@@ -204,26 +177,53 @@ const InquiryView = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Created At:</label>
-            <p className="px-3 py-2 flex-1">
-              {inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleString() : "N/A"}
-            </p>
+            <p className="px-3 py-2 flex-1">{inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleString() : "N/A"}</p>
           </div>
 
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Last Updated:</label>
-            <p className="px-3 py-2 flex-1">
-              {inquiry.updatedAt ? new Date(inquiry.updatedAt).toLocaleString() : "N/A"}
-            </p>
+            <p className="px-3 py-2 flex-1">{inquiry.updatedAt ? new Date(inquiry.updatedAt).toLocaleString() : "N/A"}</p>
           </div>
         </div>
       </div>
 
       {/* Description History Section */}
-      <div className="bg-white rounded-lg shadow p-6">
+      {/* <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold mb-4">Description History</h3>
         {inquiry.description && inquiry.description.length > 0 ? (
           <div className="space-y-4">
             {inquiry.description.map((desc, index) => (
+              <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
+                <p className="mb-2 text-gray-800">{desc.description}</p>
+                <div className="text-sm text-gray-500 space-y-1">
+                  <div className="flex items-center">
+                    <span className="font-medium min-w-[90px]">Created by:</span>
+                    <span>{desc.createdBy?.name || "N/A"}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="font-medium min-w-[90px]">Created at:</span>
+                    <span>{desc.createdAt ? new Date(desc.createdAt).toLocaleString() : "N/A"}</span>
+                  </div>
+                  {desc.assignTo && (
+                    <div className="flex items-center">
+                      <span className="font-medium min-w-[90px]">Assigned to:</span>
+                      <span>{desc.assignTo.name}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="bg-gray-100 rounded p-4 text-gray-500">No description history available</p>
+        )}
+      </div> */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-semibold mb-4">Description History</h3>
+        {inquiry.description && inquiry.description.length > 0 ? (
+          <div className="space-y-4">
+            {/* Reverse the array before mapping */}
+            {[...inquiry.description].reverse().map((desc, index) => (
               <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
                 <p className="mb-2 text-gray-800">{desc.description}</p>
                 <div className="text-sm text-gray-500 space-y-1">
