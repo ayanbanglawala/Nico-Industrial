@@ -29,6 +29,7 @@ import Role from "./pages/Dashboard/Role";
 import Analytics from "./pages/Dashboard/Analytics";
 import { ToastContainer } from "react-toastify";
 import InquiryView from "./pages/Dashboard/InquiryView";
+import Notification from "./pages/Dashboard/Notification";
 
 export default function App() {
   const token = localStorage.getItem("token");
@@ -51,6 +52,7 @@ export default function App() {
             <Route index path="/users" element={!token ? <Navigate to="/signin" /> : <Users />} />
             <Route index path="/analytics" element={!token ? <Navigate to="/signin" /> : <Analytics />} />
             <Route path="/inquiry/:inquiryId" element={<InquiryView />} />
+            <Route path="/allnotification" element={<Notification />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

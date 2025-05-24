@@ -691,8 +691,8 @@ const Inquiry: React.FC = () => {
           search: searchQuery,
           userId: userId,
           "inquiry-status": selectedStatusFilter || status || "",
-          "quotation-person": selectedQuotationFilter || "", // Changed parameter name to match backend expectation
-          "follow-up-person": selectedFollowUpUserFilter || "", // Changed parameter name to match backend expectation
+          followUpQuotationId: selectedQuotationFilter || "", // Changed parameter name to match backend expectation
+          followUpUserId: selectedFollowUpUserFilter || "", // Changed parameter name to match backend expectation
           consumerId: selectedConsumerFilter || "",
           consultantId: selectedConsultantFilter || "",
           winorloss: winloss,
@@ -1727,15 +1727,15 @@ const Inquiry: React.FC = () => {
             {tableData.length > 0 ? (
               tableData.map((inquiry, index) => (
                 <tr key={inquiry.inquiryId} className="hover:bg-gray-200 bg-white text-center dark:bg-black dark:hover:bg-gray-800 transform duration-200">
-                  <td className="px-4 py-2 text-center">{(currentPage - 1) * pageSize + (index + 1)}</td>
-                  <td className="px-4 py-2" title={inquiry.projectName}>
+                  <td className="px-3 py-2 text-center">{(currentPage - 1) * pageSize + (index + 1)}</td>
+                  <td className="px-3 py-2" title={inquiry.projectName}>
                     {inquiry.projectName.length > 25 ? `${inquiry.projectName.slice(0, 25)}...` : inquiry.projectName}
                   </td>
-                  <td className="px-4 py-2">{inquiry.consumer?.consumerName || "N/A"}</td>
+                  <td className="px-3 py-2">{inquiry.consumer?.consumerName || "N/A"}</td>
                   {/* <td className="px-4 py-2">{inquiry.products?.productName || "N/A"}</td> */}
-                  <td className="px-4 py-2">{inquiry.products && inquiry.products.length > 0 ? inquiry.products.map((p) => p.productName).join(", ") : "N/A"}</td>
-                  <td className="px-4 py-2">{inquiry.consultant?.consultantName || "N/A"}</td>
-                  <td className="px-4 py-2">
+                  <td className="px-3 py-2">{inquiry.products && inquiry.products.length > 0 ? inquiry.products.map((p) => p.productName).join(", ") : "N/A"}</td>
+                  <td className="px-3 py-2">{inquiry.consultant?.consultantName || "N/A"}</td>
+                  <td className="px-3 py-2">
                     <select className="p-2 text-sm border border-black dark:border-white rounded-lg w-full dark:bg-black" value={inquiry.inquiryStatus} onChange={(e) => handleStatusChange(inquiry.inquiryId, e.target.value)}>
                       <option value="TENDER">TENDER</option>
                       <option value="PURCHASE">PURCHASE</option>
@@ -1743,7 +1743,7 @@ const Inquiry: React.FC = () => {
                       <option value="URGENT">URGENT</option>
                     </select>
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-3 py-2">
                     {inquiry.isWin === null ? (
                       <div className="flex justify-center gap-1">
                         <button onClick={() => handleButtonClick(true, inquiry.inquiryId)} className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">
