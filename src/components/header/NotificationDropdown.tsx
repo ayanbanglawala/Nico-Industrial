@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [notification, setNotification] = useState(null);
+  const [error, setError] = useState<string | null>(null); // Explicitly type error as string or null
+  const [notifications, setNotifications] = useState<any[]>([]); // Initialize as array
   const navigate = useNavigate();
 
   function toggleDropdown() {
@@ -26,24 +24,37 @@ export default function NotificationDropdown() {
   };
 
   useEffect(() => {
-    const dashboardDataFetch = async () => {
-      const authToken = localStorage.getItem("token");
-      const userId = localStorage.getItem("userId");
-      try {
-        const res = await axios.get(`https://nicoindustrial.com/api/user/dashboard/data`, {
-          params: { userId },
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
+    const fetchNotifications = async () => {
+      const token = localStorage.getItem("token");
+      const id = localStorage.getItem("userId"); // Get id from localStorage
 
-        setNotification(res.data.data.notifications || 0);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
+      if (!id || !token) {
+        setError("User ID or token not found");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get(`https://nicoindustrial.com/api/notification/getNotification/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
+        setNotifications(response.data);
+        setLoading(false);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred");
+        }
         setLoading(false);
       }
     };
 
-    dashboardDataFetch();
+    fetchNotifications();
   }, []);
 
   return (
@@ -51,8 +62,8 @@ export default function NotificationDropdown() {
       <button
         onClick={() => navigate("/allnotification")}
         className="relative flex items-center justify-center text-gray-500 transition-colors bg-white border border-black rounded-full dropdown-toggle hover:text-gray-700 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
-        <span className={`absolute text-white justify-center -right-4 -top-1 z-10 h-7 w-7 rounded-full bg-orange-400 ${!notifying ? "hidden" : "flex"}`}>
-          <p className="mt-0.5">{notification}</p>
+        <span className={`absolute text-white justify-center -right-1 top-0 z-10 h-3 w-3 rounded-full bg-orange-400 ${!notifying ? "hidden" : "flex"}`}>
+          {/* <p className="mt-0.5">{notifications.filter((n) => !n.readable).length}</p> */}
           <span className="absolute inline-flex w-full h-full bg-orange-400 rounded-full opacity-75 animate-ping"></span>
         </span>
         <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

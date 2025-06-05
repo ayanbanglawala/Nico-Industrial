@@ -1,8 +1,16 @@
 import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
 
 import PageMeta from "../../components/common/PageMeta";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
 
 export default function Home() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/signin");
+    }
+  })
   return (
     <>
       <PageMeta

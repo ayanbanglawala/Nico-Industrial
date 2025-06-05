@@ -129,7 +129,7 @@ export const useRole = () => {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(data.message || "Role deleted successfully");
+        toast.success("Role deleted successfully");
         fetchData(search);
       } else {
         toast.error(data.message || "Failed to delete role");

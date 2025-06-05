@@ -7,6 +7,7 @@ import { FaPenAlt, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdDelete, MdOutlineNavigateNext } from "react-icons/md";
+import { useNavigate } from "react-router";
 
 type Brand = {
   brandId: number;
@@ -38,6 +39,12 @@ const Product = () => {
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/signin");
+    }
+  })
 
   // const productsPerPage = 10;
   const [productsPerPage, setProductsPerPage] = useState(10);
@@ -221,7 +228,7 @@ const Product = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const successMessage = response.data.message || "Product deleted successfully!";
+        const successMessage = "Product deleted successfully!" || response.data.message;
         // Show success toast with green color and red progress bar
         toast.success(successMessage, {
           position: "top-right",
@@ -273,7 +280,7 @@ const Product = () => {
   return (
     <div className="p-4 dark:text-white">
       {/* Top Controls */}
-      <div className="flex justify-between items-center mb-4">
+      <div data-aos="fade-up" className="flex justify-between items-center mb-4">
         <input
           type="text"
           placeholder="Search Product..."
@@ -297,7 +304,7 @@ const Product = () => {
       </div>
 
       {/* Product Table */}
-      <div className="overflow-x-auto">
+      <div data-aos="fade-up" className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
           <thead className="bg-[#38487c] text-white dark:text-white dark:bg-black">
             <tr className="text-center">

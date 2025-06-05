@@ -3,6 +3,7 @@ import axios from "axios";
 import { FaPenAlt, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { MdDelete, MdOutlineNavigateNext } from "react-icons/md";
+import { useNavigate } from "react-router";
 
 const Users = () => {
   const [search, setSearch] = useState("");
@@ -24,6 +25,12 @@ const Users = () => {
     mobile: "",
     role: "",
   });
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/signin");
+    }
+  })
 
   const [newUser, setNewUser] = useState({
     name: "",
@@ -333,7 +340,7 @@ const Users = () => {
 
   return (
     <div className="p-4 dark:text-white">
-      <div className="flex justify-between items-center mb-4">
+      <div data-aos="fade-up" className="flex justify-between items-center mb-4">
         <input
           type="text"
           placeholder="Search username..."
@@ -351,7 +358,7 @@ const Users = () => {
         </button>
       </div>
 
-      <table className="min-w-full border border-gray-200 text-left">
+      <table data-aos="fade-up" className="min-w-full border border-gray-200 text-left">
         <thead className="bg-[#38487c] text-white dark:text-white dark:bg-black">
           <tr className="text-center">
             <th className="border p-2">Sr No</th>
@@ -396,7 +403,7 @@ const Users = () => {
       </table>
 
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-6">
+      <div data-aos="fade-up" className="flex justify-between items-center mt-6">
         <p className="text-sm text-gray-600">
           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalRecords)} of {totalRecords} results
         </p>

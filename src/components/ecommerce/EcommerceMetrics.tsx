@@ -462,7 +462,7 @@ export default function EcommerceMetrics() {
   return (
     <div className="flex flex-col gap-6">
       {/* Top Section: 4 Cards */}
-      <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div data-aos="fade-down" className="w-full grid grid-cols-2 sm:grid-cols-4 gap-4">
         {metricCards.map((card, i) => (
           <div key={i} onClick={card.onClick} className={`group cursor-pointer h-[90px] rounded-xl border border-gray-300 bg-white p-3 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-gray-700 dark:bg-gray-800`}>
             <div className="flex items-center justify-between">
@@ -477,12 +477,12 @@ export default function EcommerceMetrics() {
       </div>
 
       {/* Calendar and Events Section */}
-      <div className="w-full shadow-xl rounded-lg border border-gray-500 transform duration-300">
+      <div data-aos="zoom-in" className="w-full shadow-xl rounded-lg border border-gray-500 transform duration-300">
         <CalendarWidget />
       </div>
 
       {/* Table Section */}
-      <div className="w-full overflow-auto shadow-xl rounded-2xl border border-gray-600 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div data-aos="fade-up" className="w-full overflow-auto shadow-xl rounded-2xl border border-gray-600 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Follow Ups</h2>
         <table className="min-w-full text-sm text-left text-gray-800 dark:text-gray-200">
           <thead className="text-xs uppercase text-white bg-[#38487c] dark:text-gray-400 dark:bg-black border dark:border-gray-500">
@@ -495,7 +495,7 @@ export default function EcommerceMetrics() {
             </tr>
           </thead>
           <tbody>
-            {followUps.map((item: FollowUpItem, index: number) => (
+            {followUps.length > 0 ? followUps.map((item: FollowUpItem, index: number) => (
               <tr key={item.id} className=" dark:hover:bg-gray-800 transform duration-200 hover:bg-gray-200 bg-white dark:bg-black text-center">
                 <td className="px-4 py-2">{(currentPage - 1) * pageSize + index + 1}</td>
                 <td className="px-4 py-2">{item.generalFollowUpName || "N/A"}</td>
@@ -533,7 +533,13 @@ export default function EcommerceMetrics() {
                   </div>
                 </td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan={5} className="px-4 py-2 text-center">
+                  No follow ups found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 

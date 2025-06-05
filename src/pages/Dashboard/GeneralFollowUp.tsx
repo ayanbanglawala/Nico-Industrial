@@ -2,8 +2,9 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaPenAlt, FaPlus } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { MdDelete, MdOutlineNavigateNext } from "react-icons/md";
+import { useNavigate } from "react-router";
 
 interface User {
   id: number;
@@ -49,6 +50,12 @@ const FollowUpTable = () => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const currentUserId = localStorage.getItem("userId");
   const currentUserName = localStorage.getItem("userName");
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/signin");
+    }
+  });
 
   const [formData, setFormData] = useState({
     followUpName: "",
@@ -150,13 +157,13 @@ const FollowUpTable = () => {
       return;
     }
 
-    let dueDateObj: Date;
-    if (formData.dueDate.includes("T")) {
-      dueDateObj = new Date(formData.dueDate);
-    } else {
-      const dueDateTime = `${formData.dueDate}T${formData.dueTime || "00:00"}:00`;
-      dueDateObj = new Date(dueDateTime);
-    }
+    // Create Date object from input
+    const dueDate = new Date(formData.dueDate);
+
+    // Convert to ISO string (UTC) and remove the 'Z' to indicate local time should be preserved
+    // const isoString = dueDate.toISOString();
+
+    dueDate.setMinutes(dueDate.getMinutes() - dueDate.getTimezoneOffset());
 
     const dataToSubmit: FollowUpSubmitData = {
       generalFollowUpName: formData.followUpName,
@@ -164,9 +171,14 @@ const FollowUpTable = () => {
       description: formData.description,
       status: isEditing ? formData.status : "PENDING",
       statusNotes: formData.statusNotes,
-      dueDate: new Date(formData.dueDate),
+      dueDate: dueDate, // Send as Date object with correct time
       createdBy: { id: userId },
     };
+    console.log(dataToSubmit.dueDate);
+    console.log("Input value:", formData.dueDate);
+    // const dueDate = new Date(formData.dueDate);
+    console.log("Date object:", dueDate);
+    console.log("ISO string:", dueDate.toISOString());
 
     if (isEditing && editingFollowUpId) {
       dataToSubmit.updatedBy = { id: userId };
@@ -179,6 +191,8 @@ const FollowUpTable = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
+        console.log(dataToSubmit);
+
         response = await axios.post("https://nicoindustrial.com/api/generalFollowUp/save", dataToSubmit, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -188,8 +202,6 @@ const FollowUpTable = () => {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
-        className: "toast-success",
-        style: { backgroundColor: "green" },
       });
 
       fetchFollowUps();
@@ -228,6 +240,11 @@ const FollowUpTable = () => {
         await axios.delete(`https://nicoindustrial.com/api/generalFollowUp/delete/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        toast.success("Follow-up deleted successfully!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+        });
         fetchFollowUps();
       } catch (error) {
         console.error("Failed to delete follow-up", error);
@@ -248,7 +265,8 @@ const FollowUpTable = () => {
 
   return (
     <div className="p-4 dark:text-white">
-      <div className="flex justify-between items-center mb-4">
+      <ToastContainer />
+      <div data-aos="fade-up" className="flex justify-between items-center mb-4">
         <input
           type="text"
           placeholder="Search General FollowUps..."
@@ -270,7 +288,7 @@ const FollowUpTable = () => {
         </button>
       </div>
 
-      <table className="w-full">
+      <table data-aos="fade-up" className="w-full">
         <thead className="bg-[#38487c] border border-gray-500 text-white dark:text-white dark:bg-black">
           <tr className="text-center">
             <th className="px-3 py-2">Sr No</th>
@@ -289,7 +307,17 @@ const FollowUpTable = () => {
                 <td className="px-3 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td className="px-3 py-2">{item.generalFollowUpName}</td>
                 <td className="px-3 py-2">{item.createdBy?.name}</td>
-                <td className="px-3 py-2">{new Date(item.dueDate).toISOString().replace("T", " ").slice(0, 19)}</td>
+                <td className="px-3 py-2">
+                  {new Date(item.dueDate).toLocaleString("en-IN", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                    timeZone: "Asia/Kolkata",
+                  })}
+                </td>
                 <td className="px-3 py-2">{item.description}</td>
                 <td className="px-3 py-2">{item.updatedBy?.name || "—"}</td>
                 <td className="px-3 py-2 space-x-2">
@@ -305,14 +333,17 @@ const FollowUpTable = () => {
                           const data = response.data.data;
                           if (data) {
                             const dueDate = new Date(data.dueDate);
-                            const formattedDate = dueDate.toISOString().slice(0, 16);
+
+                            // Convert UTC date to local time for the input
+                            const localDateTime = new Date(dueDate.getTime() - dueDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
                             setFormData({
                               followUpName: data.generalFollowUpName || "",
                               followUpPerson: data.followUpPerson?.id?.toString() || "",
                               description: data.description || "",
                               status: data.status || "",
                               statusNotes: data.statusNotes || "",
-                              dueDate: formattedDate,
+                              dueDate: localDateTime,
                               dueTime: "",
                             });
                             setIsEditing(true);
@@ -350,13 +381,14 @@ const FollowUpTable = () => {
       </table>
 
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-6">
+      <div data-aos="fade-up" className="flex justify-between items-center mt-6">
         <p className="text-sm text-gray-600">
           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, followUps.length)} of {followUps.length} results
         </p>
         <div className="flex gap-2">
           <button onClick={() => goToPage(currentPage - 1)} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black dark:border-white" disabled={currentPage === 1}>
-            <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
+            <MdOutlineNavigateNext className="text-2xl rotate-180" />
+            Previous
           </button>
           {[...Array(totalPages).keys()].slice(0, 3).map((_, i) => (
             <button key={i + 1} onClick={() => goToPage(i + 1)} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"}`}>
@@ -370,7 +402,8 @@ const FollowUpTable = () => {
             </button>
           )}
           <button onClick={() => goToPage(currentPage + 1)} className="flex px-3 py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black dark:border-white" disabled={currentPage === totalPages}>
-            Next<MdOutlineNavigateNext className="text-2xl" />
+            Next
+            <MdOutlineNavigateNext className="text-2xl" />
           </button>
         </div>
         <select
@@ -464,7 +497,7 @@ const FollowUpTable = () => {
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium">Due Date *</label>
-                <input type="datetime-local" name="dueDate" value={formData.dueDate} onChange={handleInputChange} className="border p-2 rounded-md w-full" required />
+                <input type="datetime-local" name="dueDate" value={formData.dueDate} onChange={handleInputChange} className="border p-2 rounded-md w-full" required />{" "}
               </div>
               <div className="flex justify-end gap-4">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded-md">

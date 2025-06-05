@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaPenAlt, FaPlus } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdDelete, MdOutlineNavigateNext } from "react-icons/md";
+import { useNavigate } from "react-router";
 
 const Consultant = () => {
   const [search, setSearch] = useState("");
@@ -12,6 +13,12 @@ const Consultant = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   // const consultantsPerPage = 5;
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/signin");
+    }
+  })
 
   const [showModal, setShowModal] = useState(false);
   const [newConsultant, setNewConsultant] = useState({
@@ -119,8 +126,6 @@ const Consultant = () => {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
-        className: "toast-success",
-        style: { backgroundColor: "green" },
       });
 
       handleModalClose();
@@ -192,8 +197,6 @@ const Consultant = () => {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
-          className: "toast-success",
-          style: { backgroundColor: "green" },
         });
         fetchConsultants(); // Refresh the data
       } catch (error) {
@@ -221,8 +224,9 @@ const Consultant = () => {
 
   return (
     <div className="p-4 dark:text-white">
+      <ToastContainer />
       {/* Top Controls */}
-      <div className="flex justify-between items-center mb-4">
+      <div data-aos="fade-up" className="flex justify-between items-center mb-4">
         <input
           type="text"
           placeholder="Search Consultant..."
@@ -240,7 +244,7 @@ const Consultant = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div data-aos="fade-up" className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 text-left">
           <thead className="bg-[#38487c] text-white dark:text-white dark:bg-black">
             <tr className="text-center">
@@ -286,7 +290,7 @@ const Consultant = () => {
         </table>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center mt-6">
+        <div data-aos="fade-up" className="flex justify-between items-center mt-6">
           <p className="text-sm text-gray-600">
             Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalRecords)} of {totalRecords} results
           </p>

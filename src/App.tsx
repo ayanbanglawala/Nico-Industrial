@@ -30,9 +30,22 @@ import Analytics from "./pages/Dashboard/Analytics";
 import { ToastContainer } from "react-toastify";
 import InquiryView from "./pages/Dashboard/InquiryView";
 import Notification from "./pages/Dashboard/Notification";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { useEffect } from "react";
+import ForgotPassword from "./components/auth/ForgotPassword";
 
 export default function App() {
   const token = localStorage.getItem("token");
+  useEffect(() => {
+    AOS.init({
+      offset: 0,
+      delay: 100,
+      duration: 1000,
+      once: true,
+    });
+  }, []);
+
   return (
     <>
       <ToastContainer autoClose={3000} position="top-right" limit={1} hideProgressBar theme="colored" closeOnClick pauseOnHover draggable pauseOnFocusLoss draggablePercent={60} />
@@ -41,16 +54,16 @@ export default function App() {
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={!token ? <Navigate to="/signin" /> : <Home />} />
-            <Route index path="/inquiry" element={!token ? <Navigate to="/signin" /> : <Inquiry />} />
-            <Route index path="/product" element={!token ? <Navigate to="/signin" /> : <Product />} />
-            <Route index path="/consumer" element={!token ? <Navigate to="/signin" /> : <Consumer />} />
-            <Route index path="/consultant" element={!token ? <Navigate to="/signin" /> : <Consultant />} />
-            <Route index path="/general-follow-up" element={!token ? <Navigate to="/signin" /> : <GeneralFollowUp />} />
-            <Route index path="/brand" element={!token ? <Navigate to="/signin" /> : <Brand />} />
-            <Route index path="/role" element={!token ? <Navigate to="/signin" /> : <Role />} />
-            <Route index path="/users" element={!token ? <Navigate to="/signin" /> : <Users />} />
-            <Route index path="/analytics" element={!token ? <Navigate to="/signin" /> : <Analytics />} />
+            <Route index path="/" element={<Home />} />
+            <Route index path="/inquiry" element={<Inquiry />} />
+            <Route index path="/product" element={<Product />} />
+            <Route index path="/consumer" element={<Consumer />} />
+            <Route index path="/consultant" element={<Consultant />} />
+            <Route index path="/general-follow-up" element={<GeneralFollowUp />} />
+            <Route index path="/brand" element={<Brand />} />
+            <Route index path="/role" element={<Role />} />
+            <Route index path="/users" element={<Users />} />
+            <Route index path="/analytics" element={<Analytics />} />
             <Route path="/inquiry/:inquiryId" element={<InquiryView />} />
             <Route path="/allnotification" element={<Notification />} />
 
@@ -81,6 +94,7 @@ export default function App() {
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/reset-password" element={<ForgotPassword />} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />

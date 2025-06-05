@@ -12,7 +12,7 @@ const AppHeader: React.FC = () => {
   const navigate = useNavigate();
 
   // Get user data from localStorage (replace with your actual user data)
-  const username = localStorage.getItem("userRole") || "User";
+  const username = localStorage.getItem("username") || "User";
   const userInitial = username.charAt(0).toUpperCase();
 
   const handleToggle = () => {
@@ -32,6 +32,7 @@ const AppHeader: React.FC = () => {
     localStorage.removeItem("userId");
     localStorage.removeItem("userRole");
     localStorage.removeItem("username");
+    localStorage.removeItem("theme");
     navigate("/signin");
   };
 

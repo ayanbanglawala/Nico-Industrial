@@ -70,6 +70,7 @@ interface Inquiry {
   updatedBy?: User;
   isWin?: boolean | null;
   estimatePrice?: number; // Added estimatePrice field
+  quotationGiven?: boolean;
 }
 
 interface FormData {
@@ -118,6 +119,11 @@ const Inquiry: React.FC = () => {
       fetchTableData(1, search);
     }
   }, [status]);
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/signin");
+    }
+  });
 
   const [showWinLossModal, setShowWinLossModal] = useState<boolean>(false);
   const [modalDescription, setModalDescription] = useState<string>("");
@@ -195,6 +201,119 @@ const Inquiry: React.FC = () => {
   const userRole = localStorage.getItem("userRole");
   const [quotationDescription, setQuotationDescription] = useState<string>("");
   const [followUpDescription, setFollowUpDescription] = useState<string>("");
+  const [showDescriptionModal, setShowDescriptionModal] = useState<boolean>(false);
+  const [descriptionText, setDescriptionText] = useState<string>("");
+  const [currentDescriptionInquiryId, setCurrentDescriptionInquiryId] = useState<string | number | null>(null);
+  const [descriptionInput, setDescriptionInput] = useState<string>("");
+
+  // Hook for adding comments/descriptions
+  const useGetCommentAdd = () => {
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+
+    const addComment = async (data: { description: string; inquiryId: string | number; createdBy: { id: string | number } }) => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(`https://nicoindustrial.com/api/inquiry/adddescription?isForFollowUpDescription=true`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        // Handle unauthorized responses
+        if (response.status === 401 || response.status === 403) {
+          localStorage.clear();
+          navigate("/signin");
+          return null;
+        }
+
+        if (response.ok) {
+          toast.success("Comment added successfully", {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+          });
+          return result?.data ?? null;
+        } else {
+          toast.error(result?.message || "Failed to add comment", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            style: { backgroundColor: "red" },
+          });
+          return null;
+        }
+      } catch (error) {
+        console.error("Error adding comment:", error);
+        toast.error("Something went wrong. Please try again later.", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          style: { backgroundColor: "red" },
+        });
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return { loading, addComment };
+  };
+
+  const { loading: addDescLoading, addComment } = useGetCommentAdd();
+
+  const handleDescriptionClick = (inquiryId: string | number, currentDescription: string = "") => {
+    setCurrentDescriptionInquiryId(inquiryId);
+    setDescriptionText(currentDescription);
+    setShowDescriptionModal(true);
+  };
+
+  const handleDescriptionSubmit = async () => {
+    try {
+      if (!descriptionText.trim() || !currentDescriptionInquiryId) {
+        toast.error("Please enter a description", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          style: { backgroundColor: "red" },
+        });
+        return;
+      }
+
+      const data = {
+        description: descriptionText,
+        inquiryId: currentDescriptionInquiryId,
+        createdBy: { id: userId },
+      };
+
+      await addComment(data);
+
+      setShowDescriptionModal(false);
+      setDescriptionText("");
+      fetchTableData(currentPage, search);
+
+      toast.success("Description added successfully", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+      });
+    } catch (error: any) {
+      console.error("Error adding description:", error);
+      toast.error("Failed to add description", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        style: { backgroundColor: "red" },
+      });
+    }
+  };
 
   // Function to handle marking quotation as done
   const handleQuotationDone = async (inquiryId: string | number, followUpUserId: string | number) => {
@@ -682,7 +801,7 @@ const Inquiry: React.FC = () => {
     fetchTableData(1, search);
   }, [selectedStatusFilter, selectedQuotationFilter, selectedFollowUpUserFilter, selectedConsumerFilter, selectedConsultantFilter, search]);
 
-  const fetchTableData = async (page: number, searchQuery = "", winloss = "", istotal = false) => {
+  const fetchTableData = async (page: number, searchQuery = "", winloss = "", istotal = true) => {
     try {
       const response = await axios.get(`https://nicoindustrial.com/api/inquiry/all`, {
         params: {
@@ -827,8 +946,6 @@ const Inquiry: React.FC = () => {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
-        className: "toast-success",
-        style: { backgroundColor: "green" },
       });
 
       fetchTableData(currentPage);
@@ -980,8 +1097,6 @@ const Inquiry: React.FC = () => {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
-          className: "toast-success",
-          style: { backgroundColor: "green" },
         });
 
         setTimeout(() => setSuccessMessage(""), 3000);
@@ -1377,7 +1492,7 @@ const Inquiry: React.FC = () => {
   const [selectedConsultant, setSelectedConsultant] = useState<SelectOption | null>(null);
   const [selectedFollowUpUser, setSelectedFollowUpUser] = useState<SelectOption | null>(null);
 
-  const isModalOpen = showViewModal || showCreateModal || showProductModal || showModalConsumer || showModalConsultant || showUserModal || showWinLossModal || showStatusQuartationChangeModal;
+  const isModalOpen = showViewModal || showCreateModal || showProductModal || showModalConsumer || showModalConsultant || showUserModal || showWinLossModal || showStatusQuartationChangeModal || showDescriptionModal;
 
   const [brandOptions, setBrandOptions] = useState<SelectOption[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<SelectOption | null>(null);
@@ -1568,10 +1683,10 @@ const Inquiry: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto p-3 rounded-lg dark:text-white">
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-3">
+      <div data-aos="fade-down" className="flex flex-wrap gap-4 mb-3">
         <div className="flex flex-col w-full sm:w-1/5">
           <label className="mb-1 font-medium">Filter by Status</label>
-          <select value={selectedStatusFilter} onChange={handleStatusFilterChange} className="p-2 border border-black dark:border-white rounded-lg">
+          <select value={selectedStatusFilter} onChange={handleStatusFilterChange} className="p-2 border border-black dark:border-white rounded">
             <option value="">All</option>
             <option value="TENDER">Tender</option>
             <option value="PURCHASE">Purchase</option>
@@ -1584,69 +1699,53 @@ const Inquiry: React.FC = () => {
             {/* Filter by Quotation */}
             <div className="flex flex-col w-full sm:w-1/4 dark:text-black">
               <label className="mb-1 font-medium dark:text-white">Filter by Quotation</label>
-              <Select
-                name="quotationFilter"
-                value={userOptions.find((option) => option.value === selectedQuotationFilter)}
-                onChange={(selectedOption) => handleQuotationFilterChange(selectedOption?.value || "")}
-                options={[{ value: "", label: "All" }, ...userOptions]}
-                placeholder="Search and Select Quotation"
-                isSearchable
-                isClearable
-                className="basic-select border border-black rounded"
-                classNamePrefix="select"
-              />
+              <select name="quotationFilter" value={selectedQuotationFilter} onChange={(e) => handleQuotationFilterChange(e.target.value)} className="border border-black rounded p-2 dark:text-black">
+                <option value="">All</option>
+                {userOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Filter by Follow Up */}
             <div className="flex flex-col w-full sm:w-[25.1%]">
               <label className="mb-1 font-medium">Filter by Follow Up</label>
-              <Select
-                name="followUpUserFilter"
-                value={userOptions.find((option) => option.value === selectedFollowUpUserFilter)}
-                onChange={(selectedOption) => handleFollowUpUserFilterChange(selectedOption?.value || "")}
-                options={[{ value: "", label: "All" }, ...userOptions]}
-                placeholder="Search and Select Follow-Up User"
-                isSearchable
-                isClearable
-                className="basic-select border border-black rounded"
-                classNamePrefix="select"
-              />
+              <select name="followUpUserFilter" value={selectedFollowUpUserFilter} onChange={(e) => handleFollowUpUserFilterChange(e.target.value)} className="border border-black rounded p-2 dark:text-black">
+                <option value="">All</option>
+                {userOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Filter by Consumer */}
             <div className="flex flex-col w-full sm:w-1/4 dark:text-black">
               <label className="mb-1 font-medium dark:text-white">Filter by Consumer</label>
-              <Select
-                name="consumerFilter"
-                value={consumerOptions.find((consumer) => consumer.consumerId === selectedConsumerFilter)}
-                onChange={(selectedOption) => handleConsumerFilterChange(selectedOption?.consumerId || "")}
-                getOptionValue={(option) => option.consumerId.toString()}
-                getOptionLabel={(option) => option.consumerName}
-                options={[{ consumerId: "", consumerName: "All" }, ...consumerOptions]}
-                placeholder="Search and Select Consumer"
-                isSearchable
-                isClearable
-                className="basic-select border border-black rounded"
-                classNamePrefix="select"
-              />
+              <select name="consumerFilter" value={selectedConsumerFilter} onChange={(e) => handleConsumerFilterChange(e.target.value)} className="border border-black rounded p-2 dark:text-black">
+                <option value="">All</option>
+                {consumerOptions.map((consumer) => (
+                  <option key={consumer.consumerId} value={consumer.consumerId}>
+                    {consumer.consumerName}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Filter by Consultant */}
             <div className="flex flex-col w-full sm:w-1/4">
               <label className="mb-1 font-medium dark:text-white">Filter by Consultant</label>
-              <Select
-                name="consultantFilter"
-                value={consultantOptions.find((consultant) => consultant.consultantId === selectedConsultantFilter)}
-                onChange={(selectedOption) => handleConsultantFilterChange(selectedOption?.consultantId || "")}
-                getOptionValue={(option) => option.consultantId.toString()}
-                getOptionLabel={(option) => option.consultantName}
-                options={[{ consultantId: "", consultantName: "All" }, ...consultantOptions]}
-                placeholder="Search and Select Consultant"
-                isSearchable
-                isClearable
-                className="basic-select border border-black rounded"
-                classNamePrefix="select"
-              />
+              <select name="consultantFilter" value={selectedConsultantFilter} onChange={(e) => handleConsultantFilterChange(e.target.value)} className="border border-black rounded p-2 dark:text-black">
+                <option value="">All</option>
+                {consultantOptions.map((consultant) => (
+                  <option key={consultant.consultantId} value={consultant.consultantId}>
+                    {consultant.consultantName}
+                  </option>
+                ))}
+              </select>
             </div>
           </>
         ) : (
@@ -1659,7 +1758,7 @@ const Inquiry: React.FC = () => {
       </div>
 
       {/* Month/Year + Buttons */}
-      <div className="flex flex-wrap sm:flex-nowrap items-end gap-4 mb-6">
+      <div data-aos="fade-down" className="flex flex-wrap sm:flex-nowrap items-end gap-4 mb-6">
         {role === "Admin" ? (
           <>
             <div className="flex flex-col w-full sm:w-1/6">
@@ -1709,7 +1808,7 @@ const Inquiry: React.FC = () => {
       {errorMessage && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{errorMessage}</div>}
 
       {/* Table */}
-      <div className="overflow-auto">
+      <div data-aos="fade-up" className="overflow-auto">
         <table className="min-w-full bg-white rounded-lg">
           <thead className="bg-[#38487c] text-white dark:bg-black">
             <tr className="border border-gray-500">
@@ -1781,47 +1880,54 @@ const Inquiry: React.FC = () => {
                     </button>
 
                     {inquiry.followUpQuotation?.id === userId && inquiry.isWin == null && inquiry.quotationGiven === false && (
-                      <button
-                        title="Mark Quotation"
-                        onClick={() => {
-                          setQuotationDescription("");
-                          setStatusChangeData({
-                            inquiryId: inquiry.inquiryId,
-                            followUpQuotationId: inquiry.followUpQuotation.id,
-                            followUpUserId: null,
-                          });
-                          setSelectedFollowUpUser({
-                            value: inquiry.followUpQuotation.id,
-                            label: inquiry.followUpQuotation.name,
-                          });
-                          setIsFollowUpUser(false);
-                          setshowStatusQuartationChangeModal(true);
-                        }}
-                        className="p-2 bg-purple-500 text-white rounded hover:bg-purple-600">
-                        <FaFileInvoice />
-                      </button>
+                      <>
+                        <button
+                          title="Quotation Done"
+                          onClick={() => {
+                            setQuotationDescription("");
+                            setStatusChangeData({
+                              inquiryId: inquiry.inquiryId,
+                              followUpQuotationId: inquiry.followUpQuotation.id,
+                              followUpUserId: null,
+                            });
+                            setSelectedFollowUpUser({
+                              value: inquiry.followUpQuotation.id,
+                              label: inquiry.followUpQuotation.name,
+                            });
+                            setIsFollowUpUser(false);
+                            setshowStatusQuartationChangeModal(true);
+                          }}
+                          className="p-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                          <FaFileInvoice />
+                        </button>
+                      </>
                     )}
 
                     {inquiry.followUpUser?.id === userId && inquiry.isWin == null && inquiry.quotationGiven === true && (
-                      <button
-                        title="Reaassign Follow Up"
-                        onClick={() => {
-                          setFollowUpDescription(inquiry.description || "");
-                          setStatusChangeData({
-                            inquiryId: inquiry.inquiryId,
-                            followUpQuotationId: null,
-                            followUpUserId: inquiry.followUpUser.id,
-                          });
-                          setSelectedFollowUpUser({
-                            value: inquiry.followUpUser.id,
-                            label: inquiry.followUpUser.name,
-                          });
-                          setIsFollowUpUser(true);
-                          setshowStatusQuartationChangeModal(true);
-                        }}
-                        className="p-2 bg-indigo-500 text-white rounded hover:bg-indigo-600">
-                        <FaUserCheck />
-                      </button>
+                      <>
+                        <button
+                          title="Reassign Quotation"
+                          onClick={() => {
+                            setFollowUpDescription(inquiry.description || "");
+                            setStatusChangeData({
+                              inquiryId: inquiry.inquiryId,
+                              followUpQuotationId: null,
+                              followUpUserId: inquiry.followUpUser.id,
+                            });
+                            setSelectedFollowUpUser({
+                              value: inquiry.followUpUser.id,
+                              label: inquiry.followUpUser.name,
+                            });
+                            setIsFollowUpUser(true);
+                            setshowStatusQuartationChangeModal(true);
+                          }}
+                          className="p-2 bg-indigo-500 text-white rounded hover:bg-indigo-600">
+                          <FaUserCheck />
+                        </button>
+                        <button title="Description" onClick={() => handleDescriptionClick(inquiry.inquiryId, inquiry.description)} className="p-2 bg-orange-500 text-white rounded hover:bg-orange-600" disabled={addDescLoading}>
+                          <FaPenAlt />
+                        </button>
+                      </>
                     )}
                   </td>
                 </tr>
@@ -2405,7 +2511,7 @@ const Inquiry: React.FC = () => {
       {showStatusQuartationChangeModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-[#00000071] backdrop-blur-xs">
           <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">{isFollowUpUser ? "Reassign Follow-up" : "Mark Quotation Done"}</h2>
+            <h2 className="text-xl font-semibold mb-4">{isFollowUpUser ? "Reassign Quotation" : "Mark Quotation Done"}</h2>
 
             <div className="space-y-4">
               <div className="flex flex-col">
@@ -2414,7 +2520,7 @@ const Inquiry: React.FC = () => {
               </div>
 
               <div className="flex flex-col">
-                <label className="mb-1 font-medium">{isFollowUpUser ? "Reassign Follow-up User" : "Select Follow-up Quotation User"}</label>
+                <label className="mb-1 font-medium">{isFollowUpUser ? "Follow-up User" : "Select Follow-up User"}</label>
                 <Select
                   name="followUpUser"
                   value={selectedFollowUpUser}
@@ -2473,6 +2579,31 @@ const Inquiry: React.FC = () => {
                 </button>
                 <button onClick={handleModalSubmit} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                   Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Description Modal */}
+      {showDescriptionModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-[#00000071] backdrop-blur-xs">
+          <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Add Description</h2>
+
+            <div className="space-y-4">
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Description</label>
+                <textarea rows={5} placeholder="Enter description" value={descriptionText} onChange={(e) => setDescriptionText(e.target.value)} className="p-3 border rounded w-full" />
+              </div>
+
+              <div className="flex justify-end gap-2 mt-4">
+                <button onClick={() => setShowDescriptionModal(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                  Cancel
+                </button>
+                <button onClick={handleDescriptionSubmit} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" disabled={addDescLoading}>
+                  {addDescLoading ? "Saving..." : "Save Description"}
                 </button>
               </div>
             </div>

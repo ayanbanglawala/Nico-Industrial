@@ -60,6 +60,11 @@ const InquiryView = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const token = localStorage.getItem("token");
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/signin");
+    }
+  })
 
   useEffect(() => {
     const fetchInquiry = async () => {
@@ -91,7 +96,7 @@ const InquiryView = () => {
 
   return (
     <div className="p-5 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+      <div data-aos="zoom-in" className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Inquiry Details</h2>
         <button onClick={() => navigate(-1)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
           Back to Inquiry List
@@ -99,7 +104,7 @@ const InquiryView = () => {
       </div>
 
       {/* Main Details Section */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div data-aos="zoom-in" className="bg-white rounded-lg shadow p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="flex items-center">
             <label className="font-medium text-gray-600 min-w-[120px]">Project Name:</label>
@@ -156,7 +161,7 @@ const InquiryView = () => {
       </div>
 
       {/* Follow-Up Section */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div data-aos="zoom-in" className="bg-white rounded-lg shadow p-6 mb-6">
         <h3 className="text-lg font-semibold mb-4">Follow-Up Details</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-center">
@@ -172,7 +177,7 @@ const InquiryView = () => {
       </div>
 
       {/* Timeline Section */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div data-aos="zoom-in" className="bg-white rounded-lg shadow p-6 mb-6">
         <h3 className="text-lg font-semibold mb-4">Timeline</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-center">
@@ -218,7 +223,7 @@ const InquiryView = () => {
           <p className="bg-gray-100 rounded p-4 text-gray-500">No description history available</p>
         )}
       </div> */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div data-aos="zoom-in" className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold mb-4">Description History</h3>
         {inquiry.description && inquiry.description.length > 0 ? (
           <div className="space-y-4">

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaPenAlt, FaPlus } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdDelete, MdOutlineNavigateNext } from "react-icons/md";
+import { useNavigate } from "react-router";
 
 interface CreatedByType {
   id: number;
@@ -42,6 +43,12 @@ const Consumer = () => {
     contact: "",
   });
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/signin");
+    }
+  });
 
   // const consumersPerPage = 10;
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -180,8 +187,6 @@ const Consumer = () => {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
-          className: "toast-success",
-          style: { backgroundColor: "green" },
         });
       } else {
         // Create new consumer
@@ -199,8 +204,6 @@ const Consumer = () => {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
-          className: "toast-success",
-          style: { backgroundColor: "green" },
         });
       }
 
@@ -259,8 +262,6 @@ const Consumer = () => {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
-        className: "toast-success",
-        style: { backgroundColor: "green" },
       });
       fetchConsumers();
     } catch (error) {
@@ -287,8 +288,9 @@ const Consumer = () => {
 
   return (
     <div className="p-4 dark:text-white">
+      <ToastContainer />
       {/* Search + Add */}
-      <div className="flex justify-between items-center mb-4">
+      <div data-aos="fade-up" className="flex justify-between items-center mb-4">
         <input
           type="text"
           placeholder="Search Consumer..."
@@ -306,7 +308,7 @@ const Consumer = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div data-aos="fade-up" className="overflow-x-auto">
         <table className="min-w-full text-left">
           <thead className="bg-[#38487c] text-white dark:text-white dark:bg-black">
             <tr className="text-center border border-gray-400">
@@ -350,13 +352,14 @@ const Consumer = () => {
         </table>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center mt-6 flex-wrap gap-2">
+        <div data-aos="fade-up" className="flex justify-between items-center mt-6 flex-wrap gap-2">
           <p className="text-sm text-gray-600">
             Showing {startIndex + 1} to {endIndex} of {filteredConsumers.length} results
           </p>
           <div className="flex gap-2">
             <button onClick={handlePrev} disabled={currentPage === 1} className={`flex px-3 border-black py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white rounded ${currentPage === 1 ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
-              <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
+              <MdOutlineNavigateNext className="text-2xl rotate-180" />
+              Previous
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
               <button key={pageNum} onClick={() => handlePageClick(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
@@ -364,7 +367,8 @@ const Consumer = () => {
               </button>
             ))}
             <button onClick={handleNext} disabled={currentPage === totalPages} className={`flex px-3 py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white border-black rounded ${currentPage === totalPages ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
-              Next<MdOutlineNavigateNext className="text-2xl" />
+              Next
+              <MdOutlineNavigateNext className="text-2xl" />
             </button>
           </div>
           <select
@@ -373,12 +377,12 @@ const Consumer = () => {
               setItemsPerPage(Number(e.target.value));
               handlePageClick(1);
             }}
-           className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
-          <option value={10}>10 per page</option>
-          <option value={25}>25 per page</option>
-          <option value={50}>50 per page</option>
-          <option value={100}>100 per page</option>
-        </select>
+            className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+            <option value={10}>10 per page</option>
+            <option value={25}>25 per page</option>
+            <option value={50}>50 per page</option>
+            <option value={100}>100 per page</option>
+          </select>
         </div>
       </div>
 

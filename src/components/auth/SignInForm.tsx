@@ -24,11 +24,12 @@ export default function SignInForm() {
       const response = await axios.post(`https://nicoindustrial.com/api/user/login`, formData);
 
       if (response.data.statusCode === 200) {
-        const { token, Role, userId, message } = response.data.data;
+        const { token, Role, userId, name, message } = response.data.data;
 
         localStorage.setItem("token", token);
         localStorage.setItem("userRole", Role);
         localStorage.setItem("userId", userId);
+        localStorage.setItem("username", name);
 
         await updateFirebaseToken();
 
@@ -87,7 +88,7 @@ export default function SignInForm() {
   return (
     <div className="flex flex-col flex-1 bg-[#38487c] border-r border-black dark:bg-transparent">
       <ToastContainer />
-      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
+      <div data-aos="fade-up" className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div className="border border-black p-5 rounded-lg">
           <div className="mb-5 text-center sm:mb-8">
             <h1 className="mb-2 font-semibold text-white text-title-sm dark:text-white/90 sm:text-title-md">Sign In</h1>
