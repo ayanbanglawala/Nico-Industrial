@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Mail, Lock, ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 const ForgotPassword = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -12,7 +12,7 @@ const ForgotPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const sendOTP = async () => {
     setIsLoading(true);
@@ -70,7 +70,7 @@ const ForgotPassword = () => {
       const response = await axios.post("https://nicoindustrial.com/api/user/updatePasswordAfterOtpValidation", { email, password: newPassword });
 
       toast.success("Password updated successfully! Redirecting to sign in...");
-      navigate('/signin');
+      navigate("/signin");
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Failed to update password";
       setError(errorMessage);
@@ -274,6 +274,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <ToastContainer />
       <div data-aos="fade-up" className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           {renderProgressBar()}
