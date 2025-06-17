@@ -106,6 +106,7 @@ const Inquiry: React.FC = () => {
   const [selectedFollowUpUserFilter, setSelectedFollowUpUserFilter] = useState<string | number>("");
   const [selectedConsumerFilter, setSelectedConsumerFilter] = useState<string | number>("");
   const [selectedConsultantFilter, setSelectedConsultantFilter] = useState<string | number>("");
+  const [selectedBrandFilter, setSelectedBrandFilter] = useState<string | number>("");
   const [totalData, setTotalData] = useState<number>(0);
   const [followUpUserData, setFollowUpUserData] = useState<Array<{ id: string | number; active: boolean }>>([]);
   const [followUpQuotationData, setFollowUpQuotationData] = useState<Array<{ id: string | number; active: boolean }>>([]);
@@ -797,9 +798,14 @@ const Inquiry: React.FC = () => {
     // fetchTableData(1, search)
   };
 
+  const handleBrandFilterChange = (value: string | number) => {
+    setSelectedBrandFilter(value);
+    setCurrentPage(1);
+  };
+
   useEffect(() => {
     fetchTableData(1, search);
-  }, [selectedStatusFilter, selectedQuotationFilter, selectedFollowUpUserFilter, selectedConsumerFilter, selectedConsultantFilter, search]);
+  }, [selectedStatusFilter, selectedQuotationFilter, selectedFollowUpUserFilter, selectedConsumerFilter, selectedConsultantFilter, selectedBrandFilter, search]);
 
   const fetchTableData = async (page: number, searchQuery = "", winloss = "", istotal = true) => {
     try {
@@ -814,6 +820,7 @@ const Inquiry: React.FC = () => {
           followUpUserId: selectedFollowUpUserFilter || "", // Changed parameter name to match backend expectation
           consumerId: selectedConsumerFilter || "",
           consultantId: selectedConsultantFilter || "",
+          brandId: selectedBrandFilter || "", // Add this line
           winorloss: winloss,
           isfortotal: istotal,
         },
@@ -1512,7 +1519,7 @@ const Inquiry: React.FC = () => {
         },
       });
 
-      const brands = response.data.data.map((brand: Brand) => ({
+      const brands = response.data.data.brands.map((brand: Brand) => ({
         value: brand.brandId,
         label: brand.brandName,
       }));
@@ -1743,6 +1750,18 @@ const Inquiry: React.FC = () => {
                 {consultantOptions.map((consultant) => (
                   <option key={consultant.consultantId} value={consultant.consultantId}>
                     {consultant.consultantName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* Filter by Brand */}
+            <div className="flex flex-col w-full sm:w-1/4">
+              <label className="mb-1 font-medium dark:text-white">Filter by Brand</label>
+              <select name="brandFilter" value={selectedBrandFilter} onChange={(e) => handleBrandFilterChange(e.target.value)} className="border border-black rounded p-2 dark:text-black">
+                <option value="">All</option>
+                {brandOptions.map((brand) => (
+                  <option key={brand.value} value={brand.value}>
+                    {brand.label}
                   </option>
                 ))}
               </select>

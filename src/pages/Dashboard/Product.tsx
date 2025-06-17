@@ -40,29 +40,61 @@ const Product = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  const [productsPerPage, setProductsPerPage] = useState(10);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
+
+  const token = localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
+
+  const [brandSearch, setBrandSearch] = useState("");
+  const [showBrandDropdown, setShowBrandDropdown] = useState(false);
+  const [filteredBrands, setFilteredBrands] = useState<Brand[]>([]);
+
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       navigate("/signin");
     }
-  })
+  }, [navigate]);
 
-  // const productsPerPage = 10;
-  const [productsPerPage, setProductsPerPage] = useState(10);
-  const [search, setSearch] = useState("");
-  const token = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId");
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1); // Reset to first page when search changes
+    }, 500); // 500ms delay
 
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Fetch products when debounced search, page, or page size changes
   useEffect(() => {
     fetchProducts();
-    fetchBrands();
-  }, [currentPage, search]);
+  }, [currentPage, debouncedSearch, productsPerPage]);
+
+  // Fetch brands on component mount
+  useEffect(() => {
+    fetchBrands(brandSearch);
+  }, [brandSearch]);
+
+  // Filter brands based on search
+  useEffect(() => {
+    if (brandSearch.trim() === "") {
+      setFilteredBrands(brands);
+    } else {
+      const filtered = brands.filter((brand) => brand.brandName.toLowerCase().includes(brandSearch.toLowerCase()));
+      setFilteredBrands(filtered);
+    }
+  }, [brands, brandSearch]);
 
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
       const res = await axios.get("https://nicoindustrial.com/api/product/list", {
         params: {
-          search: search,
+          search: debouncedSearch,
           page: currentPage,
           size: productsPerPage,
           userId: userId,
@@ -71,6 +103,7 @@ const Product = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+
       const apiProducts = res.data.data.productList.map((p: any) => ({
         id: p.productId,
         name: p.productName,
@@ -80,6 +113,8 @@ const Product = () => {
         createdBy: p.createdBy?.name || "Unknown",
         createdAt: new Date(p.createdAt).toLocaleDateString(),
       }));
+
+      setTotalPages(res.data.data.totalPages);
       setProducts(apiProducts);
     } catch (error) {
       console.error("Failed to fetch products", error);
@@ -88,20 +123,22 @@ const Product = () => {
         autoClose: 3000,
         hideProgressBar: false,
       });
+      // Set empty array on error to show "no products" message
+      setProducts([]);
+      setTotalPages(1);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fetchBrands = async () => {
+  const fetchBrands = async (search) => {
     try {
-      const res = await axios.get("https://nicoindustrial.com/api/brand/list", {
+      const res = await axios.get(`https://nicoindustrial.com/api/brand/list?search=${search}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      // Map the brands correctly to match the API structure
-      const brandsData = res.data.data || [];
+      const brandsData = res.data.data.brands || [];
       setBrands(brandsData);
     } catch (error) {
       console.error("Failed to fetch brands", error);
@@ -120,13 +157,14 @@ const Product = () => {
       createdAt: "",
     });
     setSelectedBrandId(null);
+    setBrandSearch("");
+    setShowBrandDropdown(false);
     setErrorMessage("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Enhanced validation
     if (!newProduct.name.trim()) {
       setErrorMessage("Product Name is required");
       return;
@@ -165,7 +203,6 @@ const Product = () => {
       let response;
 
       if (editingProduct) {
-        // Update existing product
         response = await axios.put(
           `https://nicoindustrial.com/api/product/update/${editingProduct.id}`,
           {
@@ -180,7 +217,6 @@ const Product = () => {
           hideProgressBar: false,
         });
       } else {
-        // Create new product
         response = await axios.post(`https://nicoindustrial.com/api/product/create`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -192,8 +228,8 @@ const Product = () => {
       }
 
       setIsModalOpen(false);
-      resetForm(); // Reset the form
-      fetchProducts(); // Refresh the list
+      resetForm();
+      fetchProducts();
     } catch (error) {
       const errorMessage = (error as any).response?.data?.message || (editingProduct ? "Error updating product. Please try again." : "Error creating product. Please try again.");
       toast.error(errorMessage, {
@@ -206,11 +242,7 @@ const Product = () => {
     }
   };
 
-  const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(search.toLowerCase()));
-
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   const startIndex = (currentPage - 1) * productsPerPage;
-  const currentProducts = filteredProducts.slice(startIndex, startIndex + productsPerPage);
 
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
@@ -229,24 +261,22 @@ const Product = () => {
         });
 
         const successMessage = "Product deleted successfully!" || response.data.message;
-        // Show success toast with green color and red progress bar
         toast.success(successMessage, {
           position: "top-right",
           autoClose: 2000,
-          hideProgressBar: false, // Show progress bar
-          className: "toast-success", // Custom class for green background
-          style: { backgroundColor: "green" }, // Green progress bar
+          hideProgressBar: false,
+          className: "toast-success",
+          style: { backgroundColor: "green" },
         });
 
-        fetchProducts(); // Refresh the product list
+        fetchProducts();
       } catch (error) {
         const errorMessage = (error as any).response?.data?.message || "Error deleting product. Please try again.";
-        // Show error toast if deletion fails with red progress bar
         toast.error(errorMessage, {
           position: "top-right",
           autoClose: 3000,
-          hideProgressBar: false, // Show progress bar
-          style: { backgroundColor: "red" }, // Red progress bar
+          hideProgressBar: false,
+          style: { backgroundColor: "red" },
         });
       } finally {
         setIsLoading(false);
@@ -263,6 +293,13 @@ const Product = () => {
       createdAt: product.createdAt,
     });
     setSelectedBrandId(product.brandId || null);
+
+    // Set brand search to the selected brand name
+    if (product.brandId) {
+      const selectedBrand = brands.find((b) => b.brandId === product.brandId);
+      setBrandSearch(selectedBrand?.brandName || "");
+    }
+
     setIsModalOpen(true);
   };
 
@@ -277,24 +314,37 @@ const Product = () => {
     };
   }, [isModalOpen]);
 
+  // Close brand dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest(".relative")) {
+        setShowBrandDropdown(false);
+      }
+    };
+
+    if (showBrandDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showBrandDropdown]);
+
   return (
     <div className="p-4 dark:text-white">
       {/* Top Controls */}
       <div data-aos="fade-up" className="flex justify-between items-center mb-4">
-        <input
-          type="text"
-          placeholder="Search Product..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="border border-black p-2 rounded-md w-full max-w-xs"
-        />
+        <div className="relative">
+          <input type="text" placeholder="Search Product..." value={search} onChange={(e) => setSearch(e.target.value)} className="border border-black p-2 rounded-md w-full max-w-xs" />
+          {search !== debouncedSearch && (
+            <div className="absolute right-2 top-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+            </div>
+          )}
+        </div>
         <button
           onClick={() => {
             setEditingProduct(null);
-            resetForm(); // Use the reset function here
+            resetForm();
             setIsModalOpen(true);
           }}
           className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
@@ -321,11 +371,14 @@ const Product = () => {
             {isLoading ? (
               <tr>
                 <td colSpan={7} className="text-center p-4">
-                  Loading products...
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-2"></div>
+                    Loading products...
+                  </div>
                 </td>
               </tr>
-            ) : currentProducts.length ? (
-              currentProducts.map((product, index) => (
+            ) : products.length ? (
+              products.map((product, index) => (
                 <tr className="text-center bg-white transform duration-200 hover:bg-gray-200 dark:text-white dark:bg-black" key={product.id}>
                   <td className="p-2">{startIndex + index + 1}</td>
                   <td className="p-2">{product.name}</td>
@@ -346,7 +399,7 @@ const Product = () => {
             ) : (
               <tr>
                 <td colSpan={7} className="text-center p-4">
-                  {search ? "No matching products found" : "No products available"}
+                  {debouncedSearch ? `No products found matching "${debouncedSearch}"` : "No products available"}
                 </td>
               </tr>
             )}
@@ -354,22 +407,31 @@ const Product = () => {
         </table>
 
         {/* Pagination */}
-        {filteredProducts.length > 0 && (
+        {products.length > 0 && (
           <div className="flex justify-between items-center mt-6">
             <p className="text-sm text-gray-600">
-              Showing {startIndex + 1} to {Math.min(startIndex + productsPerPage, filteredProducts.length)} of {filteredProducts.length} results
+              Showing {startIndex + 1} to {Math.min(startIndex + productsPerPage, startIndex + products.length)} of {totalPages * productsPerPage} results
+              {debouncedSearch && ` for "${debouncedSearch}"`}
             </p>
             <div className="flex gap-2">
-              <button onClick={handlePrev} disabled={currentPage === 1 || isLoading} className={`flex dark:hover:bg-white dark:hover:!text-black px-3 py-1 border border-black rounded ${currentPage === 1 ? "bg-gray-200 hover:bg-gray-100 dark:border-white dark:bg-black dark:hover:text-white" : "hover:bg-gray-100"}`}>
-                <MdOutlineNavigateNext className="text-2xl rotate-180" />Previous
+              <button
+                onClick={handlePrev}
+                disabled={currentPage === 1 || isLoading}
+                className={`flex dark:hover:bg-white dark:hover:!text-black px-3 py-1 border border-black rounded ${currentPage === 1 ? "bg-gray-200 hover:bg-gray-100 dark:border-white dark:bg-black dark:hover:text-white" : "hover:bg-gray-100"}`}>
+                <MdOutlineNavigateNext className="text-2xl rotate-180" />
+                Previous
               </button>
               {Array.from({ length: totalPages }, (_, i) => (
                 <button key={i + 1} onClick={() => setCurrentPage(i + 1)} disabled={isLoading} className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
                   {i + 1}
                 </button>
               ))}
-              <button onClick={handleNext} disabled={currentPage === totalPages || isLoading} className={`flex dark:hover:bg-white dark:hover:!text-black px-3 py-1 border border-black rounded ${currentPage === totalPages ? "bg-gray-200 hover:bg-gray-100 dark:hover:text-white dark:border-white dark:bg-black dark:hover:text-black" : "hover:bg-gray-100"}`}>
-                Next<MdOutlineNavigateNext className="text-2xl" />
+              <button
+                onClick={handleNext}
+                disabled={currentPage === totalPages || isLoading}
+                className={`flex dark:hover:bg-white dark:hover:!text-black px-3 py-1 border border-black rounded ${currentPage === totalPages ? "bg-gray-200 hover:bg-gray-100 dark:hover:text-white dark:border-white dark:bg-black dark:hover:text-black" : "hover:bg-gray-100"}`}>
+                Next
+                <MdOutlineNavigateNext className="text-2xl" />
               </button>
             </div>
             <select
@@ -378,12 +440,12 @@ const Product = () => {
                 setProductsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-             className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
-          <option value={10}>10 per page</option>
-          <option value={25}>25 per page</option>
-          <option value={50}>50 per page</option>
-          <option value={100}>100 per page</option>
-        </select>
+              className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+              <option value={10}>10 per page</option>
+              <option value={25}>25 per page</option>
+              <option value={50}>50 per page</option>
+              <option value={100}>100 per page</option>
+            </select>
           </div>
         )}
       </div>
@@ -429,23 +491,64 @@ const Product = () => {
                 <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
                   Brand*
                 </label>
-                <select
-                  id="brand"
-                  value={selectedBrandId || ""}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setSelectedBrandId(value ? Number(value) : null);
-                    setErrorMessage(""); // Clear error when selection changes
-                  }}
-                  required
-                  className="mt-1 block w-full border p-2 rounded">
-                  <option value="">Select Brand</option>
-                  {brands.map((brand) => (
-                    <option key={brand.brandId} value={brand.brandId} className="text-black">
-                      {brand.brandName}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search and select brand..."
+                    value={brandSearch}
+                    onChange={(e) => {
+                      setBrandSearch(e.target.value);
+                      setShowBrandDropdown(true);
+                    }}
+                    onFocus={() => setShowBrandDropdown(true)}
+                    className="mt-1 block w-full border p-2 rounded pr-8"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+
+                  {/* Selected brand display */}
+                  {selectedBrandId && !showBrandDropdown && (
+                    <div className="mt-1 p-2 bg-blue-50 border border-blue-200 rounded flex justify-between items-center">
+                      <span className="text-blue-800">{brands.find((b) => b.brandId === selectedBrandId)?.brandName}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedBrandId(null);
+                          setBrandSearch("");
+                          setErrorMessage("");
+                        }}
+                        className="text-blue-600 hover:text-blue-800">
+                        ×
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Dropdown list */}
+                  {showBrandDropdown && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                      {filteredBrands.length > 0 ? (
+                        filteredBrands.map((brand) => (
+                          <div
+                            key={brand.brandId}
+                            onClick={() => {
+                              setSelectedBrandId(brand.brandId);
+                              setBrandSearch(brand.brandName);
+                              setShowBrandDropdown(false);
+                              setErrorMessage("");
+                            }}
+                            className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${selectedBrandId === brand.brandId ? "bg-blue-50 text-blue-800" : "text-gray-900"}`}>
+                            {brand.brandName}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-3 py-2 text-gray-500">No brands found matching "{brandSearch}"</div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex justify-end">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="mr-4 px-4 py-2 border rounded" disabled={isLoading}>
