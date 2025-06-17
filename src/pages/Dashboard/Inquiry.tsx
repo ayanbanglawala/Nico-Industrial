@@ -14,6 +14,7 @@ import { MdOutlineNavigateNext } from "react-icons/md";
 import { FaEye } from "react-icons/fa";
 import { FaPenAlt } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
+import { CiFlag1 } from "react-icons/ci";
 
 // Define TypeScript interfaces
 interface Consumer {
@@ -137,6 +138,59 @@ const Inquiry: React.FC = () => {
     setShowWinLossModal(true);
   };
 
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [reminderMessage, setReminderMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSendReminder = async () => {
+    if (!reminderMessage.trim()) {
+      setError("Reminder note cannot be empty");
+      return;
+    }
+
+    setIsSending(true);
+    setError(null);
+
+    try {
+      const requestBody = {
+        inquiryId: selectedInquiry.inquiryId,
+        userId: selectedInquiry.quotationGiven ? selectedInquiry.followUpQuotation.id : selectedInquiry.followUpUser.id,
+        reminderQuestion: reminderMessage.trim(),
+        createdBy: Number(userId),
+      };
+
+      const response = await fetch("https://nicoindustrial.com/api/reminder/alert", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send reminder");
+      }
+
+      // Handle successful response
+      const data = await response.json();
+      console.log("Reminder sent successfully:", data);
+
+      // Close modal and reset states
+      setShowReminderModal(false);
+      setReminderMessage("");
+
+      // Optional: Show success message or refresh data
+      alert("Reminder sent successfully!");
+    } catch (err) {
+      console.error("Error sending reminder:", err);
+      setError(err.message || "Failed to send reminder");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const handleModalSubmit = () => {
     if (!currentInquiryId) return;
 
@@ -206,6 +260,7 @@ const Inquiry: React.FC = () => {
   const [descriptionText, setDescriptionText] = useState<string>("");
   const [currentDescriptionInquiryId, setCurrentDescriptionInquiryId] = useState<string | number | null>(null);
   const [descriptionInput, setDescriptionInput] = useState<string>("");
+  const [selectedReminderInquiry, setSelectedReminderInquiry] = useState(null);
 
   // Hook for adding comments/descriptions
   const useGetCommentAdd = () => {
@@ -1690,7 +1745,7 @@ const Inquiry: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto p-3 rounded-lg dark:text-white">
       {/* Filters */}
-      <div data-aos="fade-down" className="flex flex-wrap gap-4 mb-3">
+      <div data-aos="fade-down" className="max-w-6xl flex flex-wrap gap-4 mb-3">
         <div className="flex flex-col w-full sm:w-1/5">
           <label className="mb-1 font-medium">Filter by Status</label>
           <select value={selectedStatusFilter} onChange={handleStatusFilterChange} className="p-2 border border-black dark:border-white rounded">
@@ -1777,7 +1832,7 @@ const Inquiry: React.FC = () => {
       </div>
 
       {/* Month/Year + Buttons */}
-      <div data-aos="fade-down" className="flex flex-wrap sm:flex-nowrap items-end gap-4 mb-6">
+      <div data-aos="fade-down" className="max-w-6xl flex flex-wrap sm:flex-nowrap items-end gap-4 mb-6">
         {role === "Admin" ? (
           <>
             <div className="flex flex-col w-full sm:w-1/6">
@@ -1831,14 +1886,14 @@ const Inquiry: React.FC = () => {
         <table className="min-w-full bg-white rounded-lg">
           <thead className="bg-[#38487c] text-white dark:bg-black">
             <tr className="border border-gray-500">
-              <th className="px-4 py-2">Sr No</th>
-              <th className="px-4 py-2">Project Name</th>
-              <th className="px-4 py-2">Consumer</th>
-              <th className="px-4 py-2">Product</th>
-              <th className="px-4 py-2">Consultant</th>
-              <th className="px-4 py-2">Inquiry Status</th>
-              <th className="px-4 py-2">Win/Loss</th>
-              <th className="px-4 py-2">Actions</th>
+              <th className="px-4 py-2 min-w-[80px]">Sr No</th>
+              <th className="px-4 py-2 min-w-[200px]">Project Name</th>
+              <th className="px-4 py-2 min-w-[300px]">Consumer</th>
+              <th className="px-4 py-2 min-w-[400px]">Product</th>
+              <th className="px-4 py-2 min-w-[130px]">Consultant</th>
+              <th className="px-4 py-2 min-w-[170px]">Inquiry Status</th>
+              <th className="px-4 py-2 min-w-[150px]">Win/Loss</th>
+              <th className="px-4 py-2 min-w-[200px]">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -1897,6 +1952,17 @@ const Inquiry: React.FC = () => {
                     <button title="Delete" onClick={() => handleDelete(inquiry.inquiryId)} className="p-2 bg-red-500 text-white rounded hover:bg-red-600">
                       <MdDelete />
                     </button>
+                    {role === "Admin" && (
+                      <button
+                        title="Reminder"
+                        onClick={() => {
+                          setSelectedInquiry(inquiry);
+                          setShowReminderModal(true);
+                        }}
+                        className="p-2 bg-[#7B5D52] shadow-lg text-white rounded hover:bg-[#7B5D52]">
+                        <CiFlag1 />
+                      </button>
+                    )}
 
                     {inquiry.followUpQuotation?.id === userId && inquiry.isWin == null && inquiry.quotationGiven === false && (
                       <>
@@ -1960,45 +2026,44 @@ const Inquiry: React.FC = () => {
             )}
           </tbody>
         </table>
-
-        {/* Pagination */}
-        <div className="flex justify-between items-center mt-6">
-          <p className="text-sm text-gray-600">
-            Showing {tableData.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} to {(currentPage - 1) * pageSize + tableData.length} of {totalData} results
-          </p>
-          <div className="flex gap-2">
-            <button onClick={handlePrev} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black" disabled={currentPage === 1}>
-              <MdOutlineNavigateNext className="text-2xl rotate-180" />
-              Previous
-            </button>
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              const pageNum = currentPage > 3 ? currentPage - 3 + i + 1 : i + 1;
-              if (pageNum <= totalPages) {
-                return (
-                  <button key={i} onClick={() => setCurrentPage(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
-                    {pageNum}
-                  </button>
-                );
-              }
-              return null;
-            })}
-            <button onClick={handleNext} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black" disabled={currentPage === totalPages}>
-              Next <MdOutlineNavigateNext className="text-2xl" />
-            </button>
-          </div>
-          <select
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-            className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
-            <option value={10}>10 per page</option>
-            <option value={25}>25 per page</option>
-            <option value={50}>50 per page</option>
-            <option value={100}>100 per page</option>
-          </select>
+      </div>
+      {/* Pagination */}
+      <div className="max-w-6xl flex justify-between items-center mt-6">
+        <p className="text-sm text-gray-600">
+          Showing {tableData.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} to {(currentPage - 1) * pageSize + tableData.length} of {totalData} results
+        </p>
+        <div className="flex gap-2">
+          <button onClick={handlePrev} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black" disabled={currentPage === 1}>
+            <MdOutlineNavigateNext className="text-2xl rotate-180" />
+            Previous
+          </button>
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            const pageNum = currentPage > 3 ? currentPage - 3 + i + 1 : i + 1;
+            if (pageNum <= totalPages) {
+              return (
+                <button key={i} onClick={() => setCurrentPage(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
+                  {pageNum}
+                </button>
+              );
+            }
+            return null;
+          })}
+          <button onClick={handleNext} className="px-3 flex py-1 border border-black rounded hover:bg-gray-100 dark:hover:text-black" disabled={currentPage === totalPages}>
+            Next <MdOutlineNavigateNext className="text-2xl" />
+          </button>
         </div>
+        <select
+          value={pageSize}
+          onChange={(e) => {
+            setPageSize(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+          className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
+        </select>
       </div>
 
       {/* Create/Edit Modal */}
@@ -2598,6 +2663,41 @@ const Inquiry: React.FC = () => {
                 </button>
                 <button onClick={handleModalSubmit} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                   Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reminder Modal */}
+      {showReminderModal && selectedInquiry && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-[#00000071] backdrop-blur-xs">
+          <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Set Reminder</h2>
+
+            {error && <div className="text-red-500 mb-4">{error}</div>}
+
+            <div className="space-y-4">
+              <div className="flex flex-col">
+                <label className="mb-1 font-medium">Reminder To: {selectedInquiry.quotationGiven ? `${selectedInquiry.followUpQuotation.name} (ID: ${selectedInquiry.followUpQuotation.id})` : `${selectedInquiry.followUpUser.name} (ID: ${selectedInquiry.followUpUser.id})`}</label>
+                <label className="mb-1 font-medium">Reminder Note</label>
+                <textarea rows={3} placeholder="Enter reminder note" value={reminderMessage} onChange={(e) => setReminderMessage(e.target.value)} className="p-3 border rounded" required />
+              </div>
+
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  onClick={() => {
+                    setShowReminderModal(false);
+                    setReminderMessage("");
+                    setError(null);
+                  }}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                  disabled={isSending}>
+                  Cancel
+                </button>
+                <button onClick={handleSendReminder} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" disabled={isSending}>
+                  {isSending ? "Sending..." : "Set Reminder"}
                 </button>
               </div>
             </div>
