@@ -57,7 +57,7 @@ export default function Home() {
       console.error("Error fetching pending reminders:", error);
       if (error.response && error.response.status === 403) {
         localStorage.clear();
-        navigate("/login");
+        navigate("/signin");
       }
     }
   };

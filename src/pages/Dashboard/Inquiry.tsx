@@ -1222,7 +1222,7 @@ const Inquiry: React.FC = () => {
 
   useEffect(() => {
     fetchConsumers();
-    fetchConsultants();
+    fetchConsultants(consultantSearch);
     fetchUsers(); // Also fetch users since they're used in filters
     fetchBrands(); // And brands if needed
   }, []);
@@ -1254,6 +1254,9 @@ const Inquiry: React.FC = () => {
     debounceSearch(fetchConsumers, inputValue, setIsLoadingConsumers);
   };
 
+  const [consumerSearch, setConsumerSearch] = useState("");
+  const [showConsumerDropdown, setShowConsumerDropdown] = useState(false);
+
   const fetchConsumers = async (inputValue = "") => {
     setIsLoadingConsumers(true);
     try {
@@ -1276,6 +1279,10 @@ const Inquiry: React.FC = () => {
       setIsLoadingConsumers(false);
     }
   };
+
+  useEffect(() => {
+    fetchConsumers(consumerSearch);
+  }, [consumerSearch]);
 
   const handleSearch = (fetchFunc: (inputValue: string) => void, inputValue: string) => {
     fetchFunc(inputValue);
@@ -1440,6 +1447,8 @@ const Inquiry: React.FC = () => {
   //     fetchConsultants();
   //   }
   // };
+  const [consultantSearch, setConsultantSearch] = useState("");
+  const [showConsultantDropdown, setShowConsultantDropdown] = useState(false);
 
   // Fetch consultants
   const fetchConsultants = async (inputValue = "") => {
@@ -1464,6 +1473,14 @@ const Inquiry: React.FC = () => {
       setIsLoadingConsultants(false);
     }
   };
+  useEffect(() => {
+    fetchConsultants(consultantSearch);
+  }, [consultantSearch]);
+
+  const [followUpSearch, setFollowUpSearch] = useState("");
+  const [showFollowUpDropdown, setShowFollowUpDropdown] = useState(false);
+  const [quotationSearch, setQuotationSearch] = useState("");
+const [showQuotationDropdown, setShowQuotationDropdown] = useState(false);
 
   // Handling search for Follow-up User and Quotation
   const fetchUsers = async (inputValue = "") => {
@@ -1493,12 +1510,15 @@ const Inquiry: React.FC = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-
+    
     timeoutRef.current = setTimeout(() => {
       fetchFollowUpQuotations(inputValue);
     }, 500);
   };
-
+  useEffect(() => {
+    fetchUsers(followUpSearch);
+  }, [followUpSearch]);
+  
   const fetchFollowUpQuotations = async (inputValue = "") => {
     setIsLoadingQuotations(true);
     try {
@@ -1523,7 +1543,7 @@ const Inquiry: React.FC = () => {
       setIsLoadingQuotations(false);
     }
   };
-
+  
   const [quotationOptions, setQuotationOptions] = useState<SelectOption[]>([]);
   const [isLoadingQuotations, setIsLoadingQuotations] = useState<boolean>(false);
   const [selectedFollowUpQuotation, setSelectedFollowUpQuotation] = useState<SelectOption | null>(null);
@@ -1531,10 +1551,13 @@ const Inquiry: React.FC = () => {
   const handleProductSearch = (inputValue: string) => {
     debounceSearch(fetchProducts, inputValue, setIsLoadingProducts);
   };
-
+  
   const handleConsultantSearch = (inputValue: string) => {
     debounceSearch(fetchConsultants, inputValue, setIsLoadingConsultants);
   };
+  useEffect(() => {
+    fetchUsers(quotationSearch);
+  }, [quotationSearch]);
 
   const handleUserSearch = (inputValue: string) => {
     if (timeoutRef.current) {
@@ -1545,6 +1568,7 @@ const Inquiry: React.FC = () => {
       fetchUsers(inputValue);
     }, 500);
   };
+
 
   const [isLoadingProducts, setIsLoadingProducts] = useState<boolean>(false);
   const [isLoadingConsultants, setIsLoadingConsultants] = useState<boolean>(false);
@@ -1559,6 +1583,8 @@ const Inquiry: React.FC = () => {
   const [brandOptions, setBrandOptions] = useState<SelectOption[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<SelectOption | null>(null);
   const [isLoadingBrands, setIsLoadingBrands] = useState<boolean>(false);
+  const [brandSearch, setBrandSearch] = useState("");
+  const [showBrandDropdown, setShowBrandDropdown] = useState(false);
 
   const fetchBrands = async (searchQuery = "") => {
     setIsLoadingBrands(true);
@@ -1697,8 +1723,8 @@ const Inquiry: React.FC = () => {
 
   // Initial load of brands
   useEffect(() => {
-    fetchBrands();
-  }, []);
+    fetchBrands(brandSearch);
+  }, [brandSearch]);
 
   const [month, setMonth] = useState<string>("");
   const [year, setYear] = useState<string>("");
@@ -1758,68 +1784,397 @@ const Inquiry: React.FC = () => {
         </div>
         {role === "Admin" ? (
           <>
-            {/* Filter by Quotation */}
-            <div className="flex flex-col w-full sm:w-1/4 dark:text-black">
-              <label className="mb-1 font-medium dark:text-white">Filter by Quotation</label>
-              <select name="quotationFilter" value={selectedQuotationFilter} onChange={(e) => handleQuotationFilterChange(e.target.value)} className="border border-black rounded p-2 dark:text-black">
-                <option value="">All</option>
-                {userOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+            {/* Filter by Quotation - Searchable Dropdown */}
+<div className="mb-4 w-full sm:w-1/4">
+  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
+    Filter by Quotation
+  </label>
+  <div className="relative">
+    <input
+      type="text"
+      placeholder="Search quotations..."
+      value={quotationSearch}
+      onChange={(e) => {
+        setQuotationSearch(e.target.value);
+        setShowQuotationDropdown(true);
+      }}
+      onFocus={() => setShowQuotationDropdown(true)}
+      className="mt-1 block w-full border border-gray-300 dark:border-gray-600 p-2 rounded pr-8 dark:bg-gray-700 dark:text-white"
+    />
+    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+
+    {/* Selected quotation display */}
+    {selectedQuotationFilter && !showQuotationDropdown && (
+      <div className="mt-1 p-2 bg-blue-50 border border-blue-200 rounded flex justify-between items-center dark:bg-blue-900 dark:border-blue-700">
+        <span className="text-blue-800 dark:text-blue-100">
+          {userOptions.find((u) => u.value === selectedQuotationFilter)?.label}
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            handleQuotationFilterChange("");
+            setQuotationSearch("");
+          }}
+          className="text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100"
+        >
+          ×
+        </button>
+      </div>
+    )}
+
+    {/* Dropdown list */}
+    {showQuotationDropdown && (
+      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto dark:bg-gray-700 dark:border-gray-600">
+        {userOptions
+          .filter((option) => 
+            option.label.toLowerCase().includes(quotationSearch.toLowerCase())
+          )
+          .length > 0 ? (
+          [
+            <div
+              key="all"
+              onClick={() => {
+                handleQuotationFilterChange("");
+                setQuotationSearch("");
+                setShowQuotationDropdown(false);
+              }}
+              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${
+                selectedQuotationFilter === "" ? "bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"
+              }`}
+            >
+              All
+            </div>,
+            ...userOptions
+              .filter((option) =>
+                option.label.toLowerCase().includes(quotationSearch.toLowerCase())
+              )
+              .map((option) => (
+                <div
+                  key={option.value}
+                  onClick={() => {
+                    handleQuotationFilterChange(option.value);
+                    setQuotationSearch(option.label);
+                    setShowQuotationDropdown(false);
+                  }}
+                  className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${
+                    selectedQuotationFilter === option.value ? "bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"
+                  }`}
+                >
+                  {option.label}
+                </div>
+              ))
+          ]
+        ) : (
+          <div className="px-3 py-2 text-gray-500 dark:text-gray-400">
+            No quotations found matching "{quotationSearch}"
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+</div>
+
+            {/* Filter by Follow Up - Searchable Dropdown */}
+            <div className="mb-4 w-full sm:w-[25.1%]">
+              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">Filter by Follow Up</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search follow ups..."
+                  value={followUpSearch}
+                  onChange={(e) => {
+                    setFollowUpSearch(e.target.value);
+                    setShowFollowUpDropdown(true);
+                  }}
+                  onFocus={() => setShowFollowUpDropdown(true)}
+                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 p-2 rounded pr-8 dark:bg-gray-700 dark:text-white"
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+
+                {/* Selected follow up display */}
+                {selectedFollowUpUserFilter && !showFollowUpDropdown && (
+                  <div className="mt-1 p-2 bg-blue-50 border border-blue-200 rounded flex justify-between items-center dark:bg-blue-900 dark:border-blue-700">
+                    <span className="text-blue-800 dark:text-blue-100">{userOptions.find((u) => u.value === selectedFollowUpUserFilter)?.label}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleFollowUpUserFilterChange("");
+                        setFollowUpSearch("");
+                      }}
+                      className="text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100">
+                      ×
+                    </button>
+                  </div>
+                )}
+
+                {/* Dropdown list */}
+                {showFollowUpDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto dark:bg-gray-700 dark:border-gray-600">
+                    {userOptions.filter((option) => option.label.toLowerCase().includes(followUpSearch.toLowerCase())).length > 0 ? (
+                      [
+                        <div
+                          key="all"
+                          onClick={() => {
+                            handleFollowUpUserFilterChange("");
+                            setFollowUpSearch("");
+                            setShowFollowUpDropdown(false);
+                          }}
+                          className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${selectedFollowUpUserFilter === "" ? "bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"}`}>
+                          All
+                        </div>,
+                        ...userOptions
+                          .filter((option) => option.label.toLowerCase().includes(followUpSearch.toLowerCase()))
+                          .map((option) => (
+                            <div
+                              key={option.value}
+                              onClick={() => {
+                                handleFollowUpUserFilterChange(option.value);
+                                setFollowUpSearch(option.label);
+                                setShowFollowUpDropdown(false);
+                              }}
+                              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${selectedFollowUpUserFilter === option.value ? "bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"}`}>
+                              {option.label}
+                            </div>
+                          )),
+                      ]
+                    ) : (
+                      <div className="px-3 py-2 text-gray-500 dark:text-gray-400">No options found matching "{followUpSearch}"</div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Filter by Follow Up */}
-            <div className="flex flex-col w-full sm:w-[25.1%]">
-              <label className="mb-1 font-medium">Filter by Follow Up</label>
-              <select name="followUpUserFilter" value={selectedFollowUpUserFilter} onChange={(e) => handleFollowUpUserFilterChange(e.target.value)} className="border border-black rounded p-2 dark:text-black">
-                <option value="">All</option>
-                {userOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+            {/* Filter by Consumer - Searchable Dropdown */}
+            <div className="mb-4 w-full sm:w-1/4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">Filter by Consumer</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search consumers..."
+                  value={consumerSearch}
+                  onChange={(e) => {
+                    setConsumerSearch(e.target.value);
+                    setShowConsumerDropdown(true);
+                  }}
+                  onFocus={() => setShowConsumerDropdown(true)}
+                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 p-2 rounded pr-8 dark:bg-gray-700 dark:text-white"
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+
+                {/* Selected consumer display */}
+                {selectedConsumerFilter && !showConsumerDropdown && (
+                  <div className="mt-1 p-2 bg-blue-50 border border-blue-200 rounded flex justify-between items-center dark:bg-blue-900 dark:border-blue-700">
+                    <span className="text-blue-800 dark:text-blue-100">{consumerOptions.find((c) => c.consumerId === selectedConsumerFilter)?.consumerName}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleConsumerFilterChange("");
+                        setConsumerSearch("");
+                      }}
+                      className="text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100">
+                      ×
+                    </button>
+                  </div>
+                )}
+
+                {/* Dropdown list */}
+                {showConsumerDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto dark:bg-gray-700 dark:border-gray-600">
+                    {consumerOptions.filter((consumer) => consumer.consumerName.toLowerCase().includes(consumerSearch.toLowerCase())).length > 0 ? (
+                      [
+                        <div
+                          key="all"
+                          onClick={() => {
+                            handleConsumerFilterChange("");
+                            setConsumerSearch("");
+                            setShowConsumerDropdown(false);
+                          }}
+                          className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${selectedConsumerFilter === "" ? "bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"}`}>
+                          All
+                        </div>,
+                        ...consumerOptions
+                          .filter((consumer) => consumer.consumerName.toLowerCase().includes(consumerSearch.toLowerCase()))
+                          .map((consumer) => (
+                            <div
+                              key={consumer.consumerId}
+                              onClick={() => {
+                                handleConsumerFilterChange(consumer.consumerId);
+                                setConsumerSearch(consumer.consumerName);
+                                setShowConsumerDropdown(false);
+                              }}
+                              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${selectedConsumerFilter === consumer.consumerId ? "bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"}`}>
+                              {consumer.consumerName}
+                            </div>
+                          )),
+                      ]
+                    ) : (
+                      <div className="px-3 py-2 text-gray-500 dark:text-gray-400">No consumers found matching "{consumerSearch}"</div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Filter by Consumer */}
-            <div className="flex flex-col w-full sm:w-1/4 dark:text-black">
-              <label className="mb-1 font-medium dark:text-white">Filter by Consumer</label>
-              <select name="consumerFilter" value={selectedConsumerFilter} onChange={(e) => handleConsumerFilterChange(e.target.value)} className="border border-black rounded p-2 dark:text-black">
-                <option value="">All</option>
-                {consumerOptions.map((consumer) => (
-                  <option key={consumer.consumerId} value={consumer.consumerId}>
-                    {consumer.consumerName}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Filter by Consultant - Searchable Dropdown */}
+            <div className="mb-4 w-full sm:w-1/4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">Filter by Consultant</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search consultants..."
+                  value={consultantSearch}
+                  onChange={(e) => {
+                    setConsultantSearch(e.target.value);
+                    setShowConsultantDropdown(true);
+                  }}
+                  onFocus={() => setShowConsultantDropdown(true)}
+                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 p-2 rounded pr-8 dark:bg-gray-700 dark:text-white"
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
 
-            {/* Filter by Consultant */}
-            <div className="flex flex-col w-full sm:w-1/4">
-              <label className="mb-1 font-medium dark:text-white">Filter by Consultant</label>
-              <select name="consultantFilter" value={selectedConsultantFilter} onChange={(e) => handleConsultantFilterChange(e.target.value)} className="border border-black rounded p-2 dark:text-black">
-                <option value="">All</option>
-                {consultantOptions.map((consultant) => (
-                  <option key={consultant.consultantId} value={consultant.consultantId}>
-                    {consultant.consultantName}
-                  </option>
-                ))}
-              </select>
+                {/* Selected consultant display */}
+                {selectedConsultantFilter && !showConsultantDropdown && (
+                  <div className="mt-1 p-2 bg-blue-50 border border-blue-200 rounded flex justify-between items-center dark:bg-blue-900 dark:border-blue-700">
+                    <span className="text-blue-800 dark:text-blue-100">{consultantOptions.find((c) => c.consultantId === selectedConsultantFilter)?.consultantName}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleConsultantFilterChange("");
+                        setConsultantSearch("");
+                      }}
+                      className="text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100">
+                      ×
+                    </button>
+                  </div>
+                )}
+
+                {/* Dropdown list */}
+                {showConsultantDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto dark:bg-gray-700 dark:border-gray-600">
+                    {consultantOptions.filter((consultant) => consultant.consultantName.toLowerCase().includes(consultantSearch.toLowerCase())).length > 0 ? (
+                      [
+                        <div
+                          key="all"
+                          onClick={() => {
+                            handleConsultantFilterChange("");
+                            setConsultantSearch("");
+                            setShowConsultantDropdown(false);
+                          }}
+                          className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${selectedConsultantFilter === "" ? "bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"}`}>
+                          All
+                        </div>,
+                        ...consultantOptions
+                          .filter((consultant) => consultant.consultantName.toLowerCase().includes(consultantSearch.toLowerCase()))
+                          .map((consultant) => (
+                            <div
+                              key={consultant.consultantId}
+                              onClick={() => {
+                                handleConsultantFilterChange(consultant.consultantId);
+                                setConsultantSearch(consultant.consultantName);
+                                setShowConsultantDropdown(false);
+                              }}
+                              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${selectedConsultantFilter === consultant.consultantId ? "bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"}`}>
+                              {consultant.consultantName}
+                            </div>
+                          )),
+                      ]
+                    ) : (
+                      <div className="px-3 py-2 text-gray-500 dark:text-gray-400">No consultants found matching "{consultantSearch}"</div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-            {/* Filter by Brand */}
-            <div className="flex flex-col w-full sm:w-1/4">
-              <label className="mb-1 font-medium dark:text-white">Filter by Brand</label>
-              <select name="brandFilter" value={selectedBrandFilter} onChange={(e) => handleBrandFilterChange(e.target.value)} className="border border-black rounded p-2 dark:text-black">
-                <option value="">All</option>
-                {brandOptions.map((brand) => (
-                  <option key={brand.value} value={brand.value}>
-                    {brand.label}
-                  </option>
-                ))}
-              </select>
+            {/* Filter by Brand - Searchable Dropdown */}
+            <div className="mb-4 w-full sm:w-1/4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">Filter by Brand</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search brands..."
+                  value={brandSearch}
+                  onChange={(e) => {
+                    setBrandSearch(e.target.value);
+                    setShowBrandDropdown(true);
+                  }}
+                  onFocus={() => setShowBrandDropdown(true)}
+                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 p-2 rounded pr-8 dark:bg-gray-700 dark:text-white"
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+
+                {/* Selected brand display */}
+                {selectedBrandFilter && !showBrandDropdown && (
+                  <div className="mt-1 p-2 bg-blue-50 border border-blue-200 rounded flex justify-between items-center dark:bg-blue-900 dark:border-blue-700">
+                    <span className="text-blue-800 dark:text-blue-100">{brandOptions.find((b) => b.value === selectedBrandFilter)?.label}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleBrandFilterChange("");
+                        setBrandSearch("");
+                      }}
+                      className="text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100">
+                      ×
+                    </button>
+                  </div>
+                )}
+
+                {/* Dropdown list */}
+                {showBrandDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto dark:bg-gray-700 dark:border-gray-600">
+                    {brandOptions.filter((brand) => brand.label.toLowerCase().includes(brandSearch.toLowerCase())).length > 0 ? (
+                      [
+                        <div
+                          key="all"
+                          onClick={() => {
+                            handleBrandFilterChange("");
+                            setBrandSearch("");
+                            setShowBrandDropdown(false);
+                          }}
+                          className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${selectedBrandFilter === "" ? "bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"}`}>
+                          All
+                        </div>,
+                        ...brandOptions
+                          .filter((brand) => brand.label.toLowerCase().includes(brandSearch.toLowerCase()))
+                          .map((brand) => (
+                            <div
+                              key={brand.value}
+                              onClick={() => {
+                                handleBrandFilterChange(brand.value);
+                                setBrandSearch(brand.label);
+                                setShowBrandDropdown(false);
+                              }}
+                              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${selectedBrandFilter === brand.value ? "bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"}`}>
+                              {brand.label}
+                            </div>
+                          )),
+                      ]
+                    ) : (
+                      <div className="px-3 py-2 text-gray-500 dark:text-gray-400">No brands found matching "{brandSearch}"</div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </>
         ) : (
@@ -1882,7 +2237,7 @@ const Inquiry: React.FC = () => {
       {errorMessage && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{errorMessage}</div>}
 
       {/* Table */}
-      <div data-aos="fade-up" className="overflow-auto">
+      <div data-aos="fade-up" className="overflow-auto custom-scroll">
         <table className="min-w-full bg-white rounded-lg">
           <thead className="bg-[#38487c] text-white dark:bg-black">
             <tr className="border border-gray-500">

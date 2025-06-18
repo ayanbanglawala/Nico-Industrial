@@ -175,7 +175,7 @@ const Consumer = () => {
         // Update consumer
         response = await axios.put(
           `https://nicoindustrial.com/api/consumer/update/${editConsumerId}`,
-          { ...newConsumer, createdBy: { id: parseInt(userId, 10) } },
+          { ...newConsumer, updatedBy: { id: userId } },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -192,7 +192,7 @@ const Consumer = () => {
         // Create new consumer
         response = await axios.post(
           `https://nicoindustrial.com/api/consumer/save`,
-          { ...newConsumer, createdBy: { id: parseInt(userId, 10) } },
+          { ...newConsumer, createdBy: { id: userId } },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -308,17 +308,17 @@ const Consumer = () => {
       </div>
 
       {/* Table */}
-      <div data-aos="fade-up" className="overflow-x-auto">
+      <div data-aos="fade-up" className="overflow-x-auto custom-scroll">
         <table className="min-w-full text-left">
           <thead className="bg-[#38487c] text-white dark:text-white dark:bg-black">
             <tr className="text-center border border-gray-400">
-              <th className="p-2">Sr No</th>
-              <th className="p-2">Name</th>
-              <th className="p-2">Email</th>
-              <th className="p-2">Address</th>
-              <th className="p-2">Contact</th>
-              <th className="p-2">Created By</th>
-              <th className="p-2">Actions</th>
+              <th className="p-2 min-w-[80px]">Sr No</th>
+              <th className="p-2 min-w-[200px]">Name</th>
+              <th className="p-2 min-w-[300px]">Email</th>
+              <th className="p-2 min-w-[350px]">Address</th>
+              <th className="p-2 min-w-[150px]">Contact</th>
+              <th className="p-2 min-w-[150px]">Created By</th>
+              <th className="p-2 min-w-[150px]">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -350,40 +350,39 @@ const Consumer = () => {
             )}
           </tbody>
         </table>
-
-        {/* Pagination */}
-        <div data-aos="fade-up" className="flex justify-between items-center mt-6 flex-wrap gap-2">
-          <p className="text-sm text-gray-600">
-            Showing {startIndex + 1} to {endIndex} of {filteredConsumers.length} results
-          </p>
-          <div className="flex gap-2">
-            <button onClick={handlePrev} disabled={currentPage === 1} className={`flex px-3 border-black py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white rounded ${currentPage === 1 ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
-              <MdOutlineNavigateNext className="text-2xl rotate-180" />
-              Previous
+      </div>
+      {/* Pagination */}
+      <div data-aos="fade-up" className="flex justify-between items-center mt-6 flex-wrap gap-2">
+        <p className="text-sm text-gray-600">
+          Showing {startIndex + 1} to {endIndex} of {filteredConsumers.length} results
+        </p>
+        <div className="flex gap-2">
+          <button onClick={handlePrev} disabled={currentPage === 1} className={`flex px-3 border-black py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white rounded ${currentPage === 1 ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
+            <MdOutlineNavigateNext className="text-2xl rotate-180" />
+            Previous
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+            <button key={pageNum} onClick={() => handlePageClick(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
+              {pageNum}
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-              <button key={pageNum} onClick={() => handlePageClick(pageNum)} className={`px-3 py-1 border rounded ${currentPage === pageNum ? "bg-blue-500 text-white" : "hover:bg-gray-100"}`}>
-                {pageNum}
-              </button>
-            ))}
-            <button onClick={handleNext} disabled={currentPage === totalPages} className={`flex px-3 py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white border-black rounded ${currentPage === totalPages ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
-              Next
-              <MdOutlineNavigateNext className="text-2xl" />
-            </button>
-          </div>
-          <select
-            value={itemsPerPage}
-            onChange={(e) => {
-              setItemsPerPage(Number(e.target.value));
-              handlePageClick(1);
-            }}
-            className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
-            <option value={10}>10 per page</option>
-            <option value={25}>25 per page</option>
-            <option value={50}>50 per page</option>
-            <option value={100}>100 per page</option>
-          </select>
+          ))}
+          <button onClick={handleNext} disabled={currentPage === totalPages} className={`flex px-3 py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white border-black rounded ${currentPage === totalPages ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
+            Next
+            <MdOutlineNavigateNext className="text-2xl" />
+          </button>
         </div>
+        <select
+          value={itemsPerPage}
+          onChange={(e) => {
+            setItemsPerPage(Number(e.target.value));
+            handlePageClick(1);
+          }}
+          className="border border-black p-1 rounded dark:border-white dark:bg-black dark:text-white">
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
+          <option value={100}>100 per page</option>
+        </select>
       </div>
 
       {/* Modal */}
