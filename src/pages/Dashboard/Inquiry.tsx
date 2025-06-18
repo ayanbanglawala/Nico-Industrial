@@ -14,7 +14,8 @@ import { MdOutlineNavigateNext } from "react-icons/md";
 import { FaEye } from "react-icons/fa";
 import { FaPenAlt } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
-import { CiFlag1 } from "react-icons/ci";
+import { CiClock2 } from "react-icons/ci";
+import { FaRegBell } from "react-icons/fa";
 
 // Define TypeScript interfaces
 interface Consumer {
@@ -902,6 +903,8 @@ const Inquiry: React.FC = () => {
       setTotalData(response.data.data.totalItems);
       setTableData(inquiryContent);
       setTotalPages(response.data.data.totalPages);
+     console.log("tebledata",tableData);
+     console.log("totalData", totalData);
     } catch (error) {
       console.error("Error fetching table data:", error);
     }
@@ -1771,7 +1774,7 @@ const [showQuotationDropdown, setShowQuotationDropdown] = useState(false);
   return (
     <div className="max-w-7xl mx-auto p-3 rounded-lg dark:text-white">
       {/* Filters */}
-      <div data-aos="fade-down" className="max-w-6xl flex flex-wrap gap-4 mb-3">
+      <div  className="max-w-6xl flex flex-wrap gap-4 mb-3">
         <div className="flex flex-col w-full sm:w-1/5">
           <label className="mb-1 font-medium">Filter by Status</label>
           <select value={selectedStatusFilter} onChange={handleStatusFilterChange} className="p-2 border border-black dark:border-white rounded">
@@ -1828,7 +1831,7 @@ const [showQuotationDropdown, setShowQuotationDropdown] = useState(false);
 
     {/* Dropdown list */}
     {showQuotationDropdown && (
-      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto dark:bg-gray-700 dark:border-gray-600">
+      <div  className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto dark:bg-gray-700 dark:border-gray-600">
         {userOptions
           .filter((option) => 
             option.label.toLowerCase().includes(quotationSearch.toLowerCase())
@@ -1837,6 +1840,7 @@ const [showQuotationDropdown, setShowQuotationDropdown] = useState(false);
           [
             <div
               key="all"
+              
               onClick={() => {
                 handleQuotationFilterChange("");
                 setQuotationSearch("");
@@ -1901,7 +1905,7 @@ const [showQuotationDropdown, setShowQuotationDropdown] = useState(false);
 
                 {/* Selected follow up display */}
                 {selectedFollowUpUserFilter && !showFollowUpDropdown && (
-                  <div className="mt-1 p-2 bg-blue-50 border border-blue-200 rounded flex justify-between items-center dark:bg-blue-900 dark:border-blue-700">
+                  <div  className="mt-1 p-2 bg-blue-50 border border-blue-200 rounded flex justify-between items-center dark:bg-blue-900 dark:border-blue-700">
                     <span className="text-blue-800 dark:text-blue-100">{userOptions.find((u) => u.value === selectedFollowUpUserFilter)?.label}</span>
                     <button
                       type="button"
@@ -2187,7 +2191,7 @@ const [showQuotationDropdown, setShowQuotationDropdown] = useState(false);
       </div>
 
       {/* Month/Year + Buttons */}
-      <div data-aos="fade-down" className="max-w-6xl flex flex-wrap sm:flex-nowrap items-end gap-4 mb-6">
+      <div  className="max-w-6xl flex flex-wrap sm:flex-nowrap items-end gap-4 mb-6">
         {role === "Admin" ? (
           <>
             <div className="flex flex-col w-full sm:w-1/6">
@@ -2254,8 +2258,8 @@ const [showQuotationDropdown, setShowQuotationDropdown] = useState(false);
           <tbody>
             {tableData.length > 0 ? (
               tableData.map((inquiry, index) => (
-                <tr key={inquiry.inquiryId} className="hover:bg-gray-200 bg-white text-center dark:bg-black dark:hover:bg-gray-800 transform duration-200">
-                  <td className="px-3 py-2 text-center">{(currentPage - 1) * pageSize + (index + 1)}</td>
+                <tr key={inquiry.inquiryId} className={`hover:bg-gray-200 bg-white text-center dark:bg-black dark:hover:bg-gray-800 transform duration-200 ${inquiry.reminder === false && inquiry.reminderData === null ? "" : "border-2 border-red-500"}`}>
+                  <td className="px-3 py-2 text-center">{inquiry.reminder === false && inquiry.reminderData === null ? "" : <FaRegBell />}{(currentPage - 1) * pageSize + (index + 1)}</td>
                   <td className="px-3 py-2" title={inquiry.projectName}>
                     {inquiry.projectName.length > 25 ? `${inquiry.projectName.slice(0, 25)}...` : inquiry.projectName}
                   </td>
@@ -2315,7 +2319,7 @@ const [showQuotationDropdown, setShowQuotationDropdown] = useState(false);
                           setShowReminderModal(true);
                         }}
                         className="p-2 bg-[#7B5D52] shadow-lg text-white rounded hover:bg-[#7B5D52]">
-                        <CiFlag1 />
+                   <CiClock2 />
                       </button>
                     )}
 
