@@ -52,6 +52,7 @@ const Consumer = () => {
 
   // const consumersPerPage = 10;
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   const fetchConsumers = async () => {
     setLoading(true);
@@ -68,8 +69,11 @@ const Consumer = () => {
           filter2: filter2,
         },
       });
+      console.log(response);
+
       if (response.data?.statusCode === 200) {
         setConsumers(response.data.data.consumers);
+        setTotalRecords(response.data.data.totalRecords);
       }
     } catch (error) {
       console.error("Error fetching consumers:", error);
@@ -119,12 +123,13 @@ const Consumer = () => {
     return true;
   };
 
-  const filteredConsumers = consumers.filter((consumer) => consumer.consumerName && consumer.consumerName.toLowerCase().includes(search.toLowerCase()));
+  // const filteredConsumers = consumers.filter((consumer) => consumer.consumerName && consumer.consumerName.toLowerCase().includes(search.toLowerCase()));
+  const currentConsumers = consumers;
 
-  const totalPages = Math.ceil(filteredConsumers.length / itemsPerPage);
+  const totalPages = Math.ceil(totalRecords / itemsPerPage); // Use totalRecords instead of filteredConsumers.length
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredConsumers.length);
-  const currentConsumers = filteredConsumers.slice(startIndex, endIndex);
+  const endIndex = Math.min(currentPage * itemsPerPage, totalRecords);
+  // const currentConsumers = filteredConsumers.slice(startIndex, endIndex);
 
   const handlePrev = () => currentPage > 1 && setCurrentPage(currentPage - 1);
   const handleNext = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
@@ -354,10 +359,10 @@ const Consumer = () => {
       {/* Pagination */}
       <div data-aos="fade-up" className="flex justify-between items-center mt-6 flex-wrap gap-2">
         <p className="text-sm text-gray-600">
-          Showing {startIndex + 1} to {endIndex} of {filteredConsumers.length} results
+          Showing {startIndex + 1} to {endIndex} of {totalRecords} results
         </p>
         <div className="flex gap-2">
-          <button onClick={handlePrev} disabled={currentPage === 1} className={`flex px-3 border-black py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white rounded ${currentPage === 1 ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
+          <button onClick={handlePrev} className={`flex px-3 border-black py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white rounded ${currentPage === 1 ? "" : "hover:bg-gray-100"}`}>
             <MdOutlineNavigateNext className="text-2xl rotate-180" />
             Previous
           </button>
@@ -366,7 +371,7 @@ const Consumer = () => {
               {pageNum}
             </button>
           ))}
-          <button onClick={handleNext} disabled={currentPage === totalPages} className={`flex px-3 py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white border-black rounded ${currentPage === totalPages ? "cursor-not-allowed" : "hover:bg-gray-100"}`}>
+          <button onClick={handleNext} className={`flex px-3 py-1 border hover:bg-gray-100 dark:hover:text-black dark:border-white border-black rounded ${currentPage === totalPages ? "" : "hover:bg-gray-100"}`}>
             Next
             <MdOutlineNavigateNext className="text-2xl" />
           </button>

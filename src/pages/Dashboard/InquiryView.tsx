@@ -228,7 +228,7 @@ const InquiryView = () => {
         {inquiry.description && inquiry.description.length > 0 ? (
           <div className="space-y-4">
             {/* Reverse the array before mapping */}
-            {[...inquiry.description].reverse().map((desc, index) => (
+            {[...inquiry.description].map((desc, index) => (
               <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
                 <p className="mb-2 text-gray-800">{desc.description}</p>
                 <div className="text-sm text-gray-500 space-y-1">
